@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import ParticlesBackground from '@/components/ParticlesBackground';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ export default function AuthLayout({ children }: LayoutProps) {
 
   return (
     <div className="relative min-h-screen w-full">
+      <ParticlesBackground />
       {children}
     </div>
   );

@@ -20,11 +20,33 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // This effect runs only on the client after mounting
   useEffect(() => {
     setMounted(true);
-    // Get user preference from localStorage or default to false (light mode)
+    
+    // Check if there's a theme stored in localStorage
     const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
+    
+    // If theme is stored in localStorage, use that
+    if (storedTheme) {
+      const shouldBeDark = storedTheme === 'dark';
+      setIsDarkMode(shouldBeDark);
+      
+      if (shouldBeDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } 
+    // Otherwise, check system preference
+    else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(prefersDark);
+      
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
     }
   }, []);
 

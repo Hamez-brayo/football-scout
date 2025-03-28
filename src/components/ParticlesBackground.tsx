@@ -3,7 +3,6 @@
 import { useCallback, useState, useEffect } from "react";
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
-import type { Engine, Container } from "tsparticles-engine";
 
 export default function ParticlesBackground() {
   const [mounted, setMounted] = useState(false);
@@ -43,12 +42,12 @@ export default function ParticlesBackground() {
     };
   }, []);
 
-  const particlesInit = useCallback(async (engine: Engine) => {
+  const particlesInit = useCallback(async (engine: any) => {
     await loadFull(engine);
   }, []);
 
-  const particlesLoaded = useCallback(async (container: Container | undefined) => {
-    // Container is loaded
+  const particlesLoaded = useCallback(async (container: any) => {
+    // Optional: You can access container parameters here
   }, []);
 
   // Don't render particles until after client-side hydration
@@ -63,7 +62,7 @@ export default function ParticlesBackground() {
       init={particlesInit}
       loaded={particlesLoaded}
       options={{
-        fpsLimit: 120,
+        fpsLimit: 60,
         fullScreen: false,
         background: {
           color: {
@@ -72,7 +71,7 @@ export default function ParticlesBackground() {
         },
         particles: {
           number: {
-            value: 80,
+            value: 40,
             density: {
               enable: true,
               area: 800,
@@ -80,29 +79,29 @@ export default function ParticlesBackground() {
           },
           color: {
             value: isDarkMode 
-              ? ["#6366f1", "#8b5cf6", "#d946ef", "#ec4899"] 
-              : ["#4f46e5", "#7c3aed", "#a855f7", "#e879f9"],
+              ? ["#6366f1", "#8b5cf6", "#d946ef"] 
+              : ["#4f46e5", "#7c3aed", "#a855f7"],
           },
           opacity: {
-            value: isDarkMode ? 0.7 : 0.6,
-            random: true,
+            value: isDarkMode ? 0.5 : 0.4,
+            random: false,
             anim: {
               enable: true,
-              speed: 0.8,
-              minimumValue: 0.3,
+              speed: 0.5,
+              minimumValue: 0.1,
               sync: false,
             },
           },
           size: {
             value: {
               min: 1,
-              max: 4,
+              max: 3,
             },
             random: true,
             anim: {
               enable: true,
-              speed: 2,
-              minimumValue: 0.5,
+              speed: 1,
+              minimumValue: 0.1,
               sync: false,
             },
           },
@@ -110,18 +109,18 @@ export default function ParticlesBackground() {
             enable: true,
             distance: 150,
             color: isDarkMode ? "#94a3b8" : "#64748b",
-            opacity: isDarkMode ? 0.35 : 0.45,
-            width: 1.2,
+            opacity: isDarkMode ? 0.2 : 0.3,
+            width: 1,
           },
           move: {
             enable: true,
-            speed: 1.5,
+            speed: 1,
             direction: "none",
-            random: true,
+            random: false,
             straight: false,
-            outMode: "bounce",
+            outMode: "out",
             attract: {
-              enable: true,
+              enable: false,
               rotateX: 600,
               rotateY: 1200,
             },
@@ -134,21 +133,14 @@ export default function ParticlesBackground() {
               enable: true,
               mode: "grab",
             },
-            onClick: {
-              enable: true,
-              mode: "push",
-            },
             resize: true,
           },
           modes: {
             grab: {
-              distance: 180,
+              distance: 140,
               links: {
-                opacity: 0.8,
+                opacity: 0.5,
               },
-            },
-            push: {
-              quantity: 4,
             },
           },
         },

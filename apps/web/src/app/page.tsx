@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ParticlesBackground from '@/components/ParticlesBackground';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import TypingText from '@/components/TypingText';
 import HoverCard from '@/components/HoverCard';
@@ -38,8 +37,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <ParticlesBackground />
-      
       {/* Hero Section */}
       <div className="relative isolate overflow-hidden">
         <div className="mx-auto max-w-7xl px-6 pb-16 pt-8 sm:pb-24 lg:flex lg:px-8 lg:py-28">
