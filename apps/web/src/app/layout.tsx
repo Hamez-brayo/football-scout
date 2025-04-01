@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Football Scout",
-  description: "Your AI-powered football scouting assistant",
+  description: "AI-powered football scouting platform",
 };
 
 export default function RootLayout({
@@ -21,17 +21,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} transition-colors duration-200`}>
-        <ThemeProvider>
-          <Suspense fallback={<Loading />}>
-            <div className="relative min-h-screen">
-              <ClientParticles />
+    <html lang="en" className="h-full">
+      <body className={`${inter.className} min-h-full relative`}>
+        <div className="fixed inset-0 -z-10">
+          <ClientParticles />
+        </div>
+        <div className="relative z-10">
+          <ThemeProvider>
+            <Suspense fallback={<Loading />}>
               <AuthProvider>{children}</AuthProvider>
-            </div>
-          </Suspense>
-          <ThemeToggle />
-        </ThemeProvider>
+            </Suspense>
+            <ThemeToggle />
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );

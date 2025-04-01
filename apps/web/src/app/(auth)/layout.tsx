@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import ClientParticles from '@/components/ClientParticles';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -29,7 +30,10 @@ export default function AuthLayout({ children }: LayoutProps) {
 
   return (
     <div className="relative min-h-screen w-full">
-      {children}
+      <ClientParticles className="fixed inset-0 z-0" key="auth-particles" />
+      <div key="auth-content" className="relative z-10">
+        {children}
+      </div>
     </div>
   );
 } 

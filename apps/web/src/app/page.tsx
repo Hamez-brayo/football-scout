@@ -8,6 +8,7 @@ import HoverCard from '@/components/HoverCard';
 import ScrollReveal from '@/components/ScrollReveal';
 import ImageParallax from '@/components/ImageParallax';
 import FloatingIcons from '@/components/FloatingIcons';
+import ClientParticles from '@/components/ClientParticles';
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -52,7 +53,7 @@ export default function HomePage() {
                 typingSpeed={70} 
                 onComplete={() => setCompletedTyping(true)}
               />
-            </h1>
+        </h1>
             <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300">
               Scout, analyze, and track player performance with advanced AI-powered tools. 
               Make informed decisions with comprehensive data analysis and visualization.
@@ -127,23 +128,26 @@ export default function HomePage() {
           <img 
             src="https://images.unsplash.com/photo-1508098682722-e99c643e7f0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
             alt="Football stadium background" 
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-5"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-white/90 to-white/70 dark:from-gray-900/90 dark:to-gray-800/70 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-white/30 dark:from-gray-900/50 dark:to-gray-800/30"></div>
+          <ClientParticles className="absolute inset-0 opacity-70" />
         </div>
         
-        <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
           <ScrollReveal animation="fade-up">
             <div className="mx-auto max-w-2xl lg:text-center">
-              <h2 className="text-base font-semibold leading-7 tracking-tight text-indigo-600 dark:text-indigo-400">
-                Advanced Scouting
-              </h2>
-              <p className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-                Everything you need to evaluate talent
-              </p>
-              <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
-                Our platform combines cutting-edge AI with comprehensive data analysis to give you a complete picture of player performance and potential.
-              </p>
+              <div className="relative z-10">
+                <h2 className="text-base font-semibold leading-7 tracking-tight text-indigo-600 dark:text-indigo-400">
+                  Advanced Scouting
+                </h2>
+                <p className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                  Everything you need to evaluate talent
+                </p>
+                <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
+                  Our platform combines cutting-edge AI with comprehensive data analysis to give you a complete picture of player performance and potential.
+                </p>
+              </div>
             </div>
           </ScrollReveal>
           
@@ -198,40 +202,63 @@ export default function HomePage() {
       </div>
 
       {/* Testimonial */}
-      <div className="relative py-16 sm:py-24 overflow-hidden bg-gradient-to-br from-indigo-600/5 via-indigo-900/20 to-purple-900/30 dark:from-indigo-950 dark:via-gray-900 dark:to-gray-950">
-        <div className="absolute inset-0 -z-10">
-          <svg className="absolute inset-0 h-full w-full stroke-indigo-300/10 dark:stroke-indigo-600/10 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true">
-            <defs>
-              <pattern id="testimonial-pattern" width="40" height="40" x="50%" y="50%" patternUnits="userSpaceOnUse" patternTransform="translate(-100 0)">
-                <path d="M.5 40V.5H40" fill="none" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" strokeWidth="0" fill="url(#testimonial-pattern)" />
-          </svg>
+      <div className="relative py-24 sm:py-32 overflow-hidden bg-gradient-to-br from-indigo-600/5 via-indigo-900/20 to-purple-900/30 dark:from-indigo-950 dark:via-gray-900 dark:to-gray-950">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-indigo-500/5 dark:from-gray-900/50 dark:to-indigo-900/20"></div>
+          <ClientParticles className="absolute inset-0 opacity-80" />
         </div>
         
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-4xl">
-            <ScrollReveal animation="fade-in" threshold={0.2}>
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-indigo-50 dark:border-indigo-950">
-                <div className="relative p-8 sm:p-10">
-                  <div className="flex flex-col items-center">
-                    <img className="mx-auto h-12" src="https://tailwindui.com/img/logos/workcation-logo-indigo-600.svg" alt="Testimonial logo" />
-                    
-                    <div className="mt-8 text-center">
-                      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
-                        <path d="M14.828 9H7.172L0 21.9V36h12v-12H6l6-9.9V9zm30 0h-7.656L30 21.9V36h12v-12h-6l6-9.9V9z" fill="currentColor"/>
+            <ScrollReveal animation="fade-up" threshold={0.2}>
+              <div className="relative">
+                {/* Decorative elements */}
+                <div className="absolute -top-4 -left-4 w-72 h-72 bg-indigo-500/30 dark:bg-indigo-500/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-4 -right-4 w-72 h-72 bg-purple-500/30 dark:bg-purple-500/10 rounded-full blur-3xl"></div>
+                
+                <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden border border-indigo-100/80 dark:border-indigo-500/20">
+                  <div className="relative p-10">
+                    {/* Quote marks decoration */}
+                    <div className="absolute top-6 left-6 text-indigo-500/20 dark:text-indigo-400/20">
+                      <svg width="80" height="80" viewBox="0 0 48 48" fill="currentColor">
+                        <path d="M14.828 9H7.172L0 21.9V36h12v-12H6l6-9.9V9zm30 0h-7.656L30 21.9V36h12v-12h-6l6-9.9V9z"/>
                       </svg>
+                    </div>
+                    
+                    <div className="flex flex-col items-center relative z-10">
+                      {/* Company logo */}
+                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-0.5">
+                        <div className="w-full h-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center p-4">
+                          <img 
+                            className="w-full h-full object-contain" 
+                            src="https://tailwindui.com/img/logos/workcation-logo-indigo-600.svg" 
+                            alt="Testimonial logo" 
+                          />
+                        </div>
+                      </div>
                       
-                      <blockquote className="mt-4 text-xl font-medium text-gray-900 dark:text-white leading-8 sm:text-2xl sm:leading-9">
-                        <p>This platform has revolutionized our scouting process. We've discovered talent that would have gone unnoticed with traditional methods, and our recruitment efficiency has improved by 70%.</p>
-                      </blockquote>
+                      {/* Testimonial text */}
+                      <div className="mt-8 text-center">
+                        <blockquote>
+                          <p className="text-xl font-medium text-gray-900 dark:text-white leading-relaxed sm:text-2xl sm:leading-relaxed">
+                            This platform has revolutionized our scouting process. We've discovered talent that would have gone unnoticed with traditional methods, and our recruitment efficiency has improved by <span className="text-indigo-600 dark:text-indigo-400 font-semibold">70%</span>.
+                          </p>
+                        </blockquote>
+                      </div>
                       
-                      <div className="mt-8 flex items-center justify-center">
-                        <img className="h-12 w-12 rounded-full ring-2 ring-indigo-600 dark:ring-indigo-500" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Daniel Martinez" />
+                      {/* Author info */}
+                      <div className="mt-10 flex items-center justify-center">
+                        <div className="relative">
+                          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur"></div>
+                          <img 
+                            className="relative h-14 w-14 rounded-full object-cover border-2 border-white dark:border-gray-800" 
+                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
+                            alt="Daniel Martinez" 
+                          />
+                        </div>
                         <div className="ml-4 text-left">
-                          <div className="font-semibold text-gray-900 dark:text-white">Daniel Martinez</div>
-                          <div className="text-gray-600 dark:text-gray-300">Head Scout, Madrid FC</div>
+                          <div className="font-semibold text-gray-900 dark:text-white text-lg">Daniel Martinez</div>
+                          <div className="text-indigo-600 dark:text-indigo-400 font-medium">Head Scout, Madrid FC</div>
                         </div>
                       </div>
                     </div>
@@ -287,70 +314,85 @@ export default function HomePage() {
             {/* Football Animation */}
             <div className="hidden lg:flex lg:items-center lg:justify-center relative mt-16 h-56 sm:h-64 lg:mt-0 lg:h-full">
               <div className="relative w-full h-full flex items-center justify-center">
-                {/* Replace embedded video with football animation */}
-                <div className="w-full h-full relative overflow-hidden rounded-xl border border-indigo-500/50 bg-gradient-to-br from-indigo-900/40 to-purple-900/40">
-                  {/* Container for the football */}
+                {/* Interactive football scene */}
+                <div className="w-full h-full relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-900/40 to-purple-900/40">
+                  {/* Particles background */}
+                  <ClientParticles className="absolute inset-0 opacity-60" />
+                  
+                  {/* Stadium silhouette */}
+                  <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/40 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 h-24">
+                      <svg className="w-full h-full" viewBox="0 0 400 100" preserveAspectRatio="none">
+                        <path
+                          d="M0,50 Q100,20 200,50 T400,50 L400,100 L0,100 Z"
+                          fill="rgba(0,0,0,0.5)"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Container for the football and effects */}
                   <div className="absolute inset-0 flex items-center justify-center z-10">
-                    {/* Football with bounce effect */}
-                    <div className="relative w-32 h-32 animate-bounce-football">
-                      <div className="absolute inset-0 w-full h-full rounded-full bg-white shadow-xl border-2 border-gray-200">
-                        {/* Football pentagon pattern */}
-                        <div className="absolute inset-0 w-full h-full">
-                          <svg viewBox="0 0 100 100" className="w-full h-full">
-                            <defs>
-                              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                                <feMerge>
-                                  <feMergeNode in="coloredBlur"/>
-                                  <feMergeNode in="SourceGraphic"/>
-                                </feMerge>
-                              </filter>
-                            </defs>
-                            <path d="M50,10 L90,40 L75,85 L25,85 L10,40 Z" fill="none" stroke="black" strokeWidth="1.5"></path>
-                            <circle cx="50" cy="50" r="40" fill="none" stroke="black" strokeWidth="1" strokeDasharray="4 4"></circle>
-                            <circle cx="50" cy="50" r="25" fill="none" stroke="black" strokeWidth="1"></circle>
-                            <path d="M50,25 L65,45 L58,65 H42 L35,45 Z" fill="black"></path>
-                            <path d="M10,40 L35,45" stroke="black" strokeWidth="1"></path>
-                            <path d="M90,40 L65,45" stroke="black" strokeWidth="1"></path>
-                            <path d="M25,85 L42,65" stroke="black" strokeWidth="1"></path>
-                            <path d="M75,85 L58,65" stroke="black" strokeWidth="1"></path>
-                          </svg>
+                    {/* Animated rings */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-48 h-48 rounded-full border-2 border-indigo-500/20 animate-ping-slow"></div>
+                      <div className="absolute w-64 h-64 rounded-full border border-purple-500/20 animate-spin-slow"></div>
+                      <div className="absolute w-80 h-80 rounded-full border border-indigo-500/10 animate-reverse-spin-slow"></div>
+                    </div>
+
+                    {/* Football with enhanced effects */}
+                    <div className="relative w-32 h-32 animate-bounce-football group">
+                      {/* Glow effects */}
+                      <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-30 blur-xl group-hover:opacity-40 transition-opacity duration-500"></div>
+                      
+                      {/* The ball */}
+                      <div className="relative">
+                        <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-white to-gray-100 shadow-xl border-2 border-gray-200/50">
+                          {/* Enhanced football pattern */}
+                          <div className="absolute inset-0 w-full h-full animate-spin-slow">
+                            <svg viewBox="0 0 100 100" className="w-full h-full">
+                              <defs>
+                                <linearGradient id="ballGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                  <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
+                                  <stop offset="100%" stopColor="rgba(255,255,255,0.1)" />
+                                </linearGradient>
+                              </defs>
+                              <path d="M50,10 L90,40 L75,85 L25,85 L10,40 Z" fill="url(#ballGradient)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"></path>
+                              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 4"></circle>
+                              <circle cx="50" cy="50" r="25" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"></circle>
+                              <path d="M50,25 L65,45 L58,65 H42 L35,45 Z" fill="rgba(0,0,0,0.1)"></path>
+                            </svg>
+                          </div>
                         </div>
                       </div>
-                      
-                      {/* Add glow effect around the ball */}
-                      <div className="absolute inset-0 w-full h-full rounded-full bg-white/30 blur-md -z-10 scale-110"></div>
                     </div>
-                    
-                    {/* Shadow effect that grows and shrinks with the bounce */}
-                    <div className="absolute bottom-16 w-16 h-2 bg-black/40 rounded-full blur-sm animate-shadow-scale"></div>
+
+                    {/* Enhanced shadow effect */}
+                    <div className="absolute bottom-16 flex justify-center w-full">
+                      <div className="w-24 h-3 bg-black/30 rounded-full blur-md animate-shadow-scale"></div>
+                    </div>
                   </div>
 
-                  {/* Light rays and decorative elements */}
-                  <div className="absolute inset-0 z-0">
-                    {/* Light beams */}
-                    <div className="absolute top-0 left-1/4 w-1 h-full bg-indigo-500/30 rotate-[20deg] blur-sm"></div>
-                    <div className="absolute top-0 right-1/3 w-1 h-full bg-purple-500/30 -rotate-[15deg] blur-sm"></div>
-                    <div className="absolute top-0 right-1/4 w-1 h-full bg-indigo-500/30 rotate-[30deg] blur-sm"></div>
-                    <div className="absolute top-0 left-1/3 w-1 h-full bg-purple-500/30 -rotate-[25deg] blur-sm"></div>
+                  {/* Dynamic background effects */}
+                  <div className="absolute inset-0">
+                    {/* Animated light beams */}
+                    <div className="absolute inset-0 opacity-70">
+                      <div className="absolute top-0 left-1/4 w-1 h-full bg-gradient-to-b from-indigo-500/40 to-transparent rotate-[20deg] blur-sm animate-pulse-slow"></div>
+                      <div className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-purple-500/40 to-transparent -rotate-[15deg] blur-sm animate-pulse-slow delay-150"></div>
+                      <div className="absolute top-0 right-1/4 w-1 h-full bg-gradient-to-b from-indigo-500/40 to-transparent rotate-[30deg] blur-sm animate-pulse-slow delay-300"></div>
+                      <div className="absolute top-0 left-1/3 w-1 h-full bg-gradient-to-b from-purple-500/40 to-transparent -rotate-[25deg] blur-sm animate-pulse-slow delay-500"></div>
+                    </div>
 
-                    {/* Glowing spheres */}
-                    <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-indigo-600/30 blur-2xl"></div>
-                    <div className="absolute bottom-10 right-10 w-60 h-60 rounded-full bg-purple-600/30 blur-3xl"></div>
-                    
-                    {/* Floating circles */}
-                    <div className="absolute top-1/4 right-1/4 w-6 h-6 rounded-full bg-indigo-400/60 animate-float-slow-1"></div>
-                    <div className="absolute bottom-1/3 left-1/3 w-4 h-4 rounded-full bg-purple-400/60 animate-float-slow-2"></div>
-                    <div className="absolute top-1/3 left-1/4 w-3 h-3 rounded-full bg-blue-400/60 animate-float-slow-3"></div>
-
-                    {/* Trail effect for the football */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full border border-indigo-400/40 animate-pulse-expand"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border border-indigo-400/30 animate-pulse-expand delay-100"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-indigo-400/20 animate-pulse-expand delay-200"></div>
+                    {/* Floating elements */}
+                    <div className="absolute inset-0">
+                      <div className="absolute top-1/4 right-1/4 w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400/40 to-purple-400/40 blur-sm animate-float-slow-1"></div>
+                      <div className="absolute bottom-1/3 left-1/3 w-6 h-6 rounded-full bg-gradient-to-br from-purple-400/40 to-indigo-400/40 blur-sm animate-float-slow-2"></div>
+                      <div className="absolute top-1/3 left-1/4 w-4 h-4 rounded-full bg-gradient-to-br from-indigo-400/40 to-purple-400/40 blur-sm animate-float-slow-3"></div>
+                    </div>
                   </div>
 
-                  {/* Overlay gradient - lighter than before */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 to-transparent mix-blend-overlay pointer-events-none z-20"></div>
+                  {/* Interactive hover effect overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-purple-600/5 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
               </div>
             </div>
@@ -513,6 +555,38 @@ export default function HomePage() {
         
         .delay-200 {
           animation-delay: 1s;
+        }
+
+        @keyframes ping-slow {
+          75%, 100% {
+            transform: scale(1.5);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes reverse-spin-slow {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+
+        .animate-ping-slow {
+          animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .animate-reverse-spin-slow {
+          animation: reverse-spin-slow 30s linear infinite;
+        }
+
+        .delay-150 {
+          animation-delay: 0.15s;
+        }
+
+        .delay-300 {
+          animation-delay: 0.3s;
+        }
+
+        .delay-500 {
+          animation-delay: 0.5s;
         }
       `}</style>
     </div>
