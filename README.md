@@ -90,7 +90,7 @@ Installation
 
 Clone the repository:
 
-git clone git@github.com:Hamez-brayo/football-scout.git
+git clone 'git@github.com:Hamez-brayo/football-scout.git'
 cd football-scout
 
 Install dependencies:
