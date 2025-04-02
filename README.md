@@ -85,7 +85,6 @@ Our platform provides:
 We welcome contributions! Please submit a pull request or reach out to discuss ideas.
 
 ## 📞 Contact
-For inquiries, partnerships, or collaborations, please reach out via email at jamesbrian.kariuki@hotmail.com or connect on LinkedIn.
-
+For inquiries, partnerships, or collaborations, please reach out via email at jamesbrian.kariuki@hotmail.com. 
 ---
 **Let's revolutionize football scouting together! ⚽🚀**
