@@ -90,8 +90,8 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/your-repo/football-scouting-platform.git
-cd football-scouting-platform
+git clone git@github.com:Hamez-brayo/football-scout.git
+cd football-scout
 
 Install dependencies:
 
