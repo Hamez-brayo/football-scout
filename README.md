@@ -1,10 +1,10 @@
 Football Talent Scouting Platform
 
-📌 Overview
+##📌 Overview
 
 The Football Talent Scouting Platform is a digital ecosystem designed to bridge the gap between undiscovered football talent and professional scouts, clubs, and agents. It provides players with a standardized profile, video analysis, and verification methods to increase their visibility and credibility in the football industry.
 
-🎯 Problem Statement
+##🎯 Problem Statement
 
 Football scouting is often:
 
@@ -14,7 +14,7 @@ Lacking Exposure – Talented players, especially in underrepresented regions, s
 
 Unstandardized – No universal evaluation system exists for young or amateur players.
 
-💡 Solution
+##💡 Solution
 
 Our platform offers:
 
@@ -26,7 +26,7 @@ Verification System – Multi-layered verification using club validation, coach 
 
 Club & Agent Portal – A database for clubs and scouts to discover talent efficiently.
 
-⚙️ Features
+##⚙️ Features
 
 1. Player Profiles
 
@@ -66,7 +66,7 @@ Leaderboards for top-performing players
 
 User reporting system for profile credibility
 
-🏗️ Tech Stack
+##🏗️ Tech Stack
 
 Frontend: Next.js, React, Tailwind CSS
 
@@ -80,11 +80,9 @@ File Storage: Firebase Storage / AWS S3
 
 AI Analysis: Computer Vision for video verification (Future Integration)
 
-🚀 Roadmap
 
 
-
-📌 Getting Started
+##📌 Getting Started
 
 Installation
 
@@ -106,11 +104,11 @@ Run the development server:
 
 npm run dev
 
-🤝 Contributing
+##🤝 Contributing
 
 We welcome contributions! Please submit a pull request or reach out to discuss ideas.
 
-📞 Contact
+##📞 Contact
 
 For inquiries, partnerships, or collaborations, please reach out via email at jamesbrian.kariuki@hotmail.com or connect on LinkedIn.
 
