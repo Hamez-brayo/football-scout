@@ -10,26 +10,109 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Player {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  name        String
-  position    String
-  age         Int
-  nationality String
-  club        String?
-  stats       Stats?
+// Enum for user types
+enum UserType {
+  TALENT
+  AGENT
+  CLUB
 }
 
-model Stats {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  player      Player   @relation(fields: [playerId], references: [id])
-  playerId    Int      @unique
-  goals       Int      @default(0)
-  assists     Int      @default(0)
-  appearances Int      @default(0)
-  rating      Float    @default(0.0)
+// Base user model (connects with Firebase Auth)
+model User {
+  id                String    @id // Firebase UID
+  email            String    @unique
+  userType         UserType
+  registrationStatus String   // e.g., "PENDING", "COMPLETE", "VERIFIED"
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  talent           Talent?
+  agent            Agent?
+  club             Club?
+}
+
+// Talent/Player Profile
+model Talent {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // Basic Info
+  fullName        String
+  dateOfBirth     DateTime
+  nationality     String
+
+  // Player Specifics
+  positions       String[]  // Array of positions
+  currentClub     String?
+  height          Float?    // in cm
+  weight          Float?    // in kg
+  preferredFoot   String?
+
+  // Experience
+  playingHistory  Json?     // Structured JSON for history
+  achievements    Json?     // Structured JSON for achievements
+
+  // Media
+  profilePhoto    String?   // URL to photo
+  mediaLinks      Json?     // URLs to media (for future)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Agent Profile
+model Agent {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+
+  // Basic Info
+  fullName        String
+  companyName     String?
+  licenseNumber   String?   @unique
+
+  // Professional Details
+  yearsExperience Int?
+  operationAreas  String[]  // Array of areas
+  languages       String[]  // Array of languages
+
+  // Verification
+  licenseDoc      String?   // URL to license document
+  references      Json?     // Structured JSON for references
+  businessRegDoc  String?   // URL to business registration
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Club Profile
+model Club {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+
+  // Basic Info
+  clubName        String
+  location        String
+  league          String
+  country         String
+
+  // Official Details
+  registrationNumber String? @unique
+  yearFounded     Int?
+  website         String?
+
+  // Representative Info
+  contactName     String
+  position        String
+  contactDetails  Json      // Structured JSON for contact details
+
+  // Verification
+  officialDocs    String?   // URL to official documents
+  leagueAffiliation String? // URL to league affiliation proof
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 } 
