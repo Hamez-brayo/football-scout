@@ -1,59 +1,24 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-type UserType = 'TALENT' | 'AGENT' | 'CLUB';
-
-interface RegistrationStep {
-  id: string;
-  title: string;
-  description: string;
-  isComplete: boolean;
-  isVisible: boolean;
-  component?: React.ComponentType;
-}
-
-interface RegistrationData {
-  userType?: UserType;
-  basicInfo?: {
-    fullName?: string;
-    dateOfBirth?: string;
-    nationality?: string;
-    [key: string]: any;
-  };
-  contactInfo?: {
-    email?: string;
-    phone?: string;
-    [key: string]: any;
-  };
-  professionalInfo?: {
-    [key: string]: any;
-  };
-  documents?: {
-    [key: string]: any;
-  };
-  preferences?: {
-    [key: string]: any;
-  };
-}
-
-interface RegistrationContextType {
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
-  registrationData: RegistrationData;
-  updateRegistrationData: (data: Partial<RegistrationData>) => void;
-  visibleSteps: RegistrationStep[];
-  userType: UserType | undefined;
-  setUserType: (type: UserType) => void;
-  goToNextStep: () => void;
-  goToPreviousStep: () => void;
-  isStepComplete: (stepId: string) => boolean;
-  markStepComplete: (stepId: string) => void;
-  currentStepData: RegistrationStep | undefined;
-  totalSteps: number;
-  progress: number;
-}
+import {
+  UserType,
+  RegistrationStep,
+  TalentRegistrationData,
+  RegistrationContextType,
+  FormErrors
+} from '../types/registration';
+import { validateStep } from '@/app/(auth)/register/talent/validation/schemas';
+import {
+  saveRegistrationData,
+  loadRegistrationData,
+  clearRegistrationData,
+  isRegistrationComplete,
+  getCompletedSteps,
+  getNextIncompleteStep,
+  formatRegistrationData
+} from '@/utils/registration';
 
 const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined);
 
@@ -61,7 +26,25 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [userType, setUserType] = useState<UserType>();
-  const [registrationData, setRegistrationData] = useState<RegistrationData>({});
+  const [registrationData, setRegistrationData] = useState<Partial<TalentRegistrationData>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  // Load saved registration data on mount
+  useEffect(() => {
+    const savedData = loadRegistrationData();
+    if (savedData) {
+      setUserType(savedData.userType);
+      setCurrentStep(savedData.currentStep);
+      setRegistrationData(savedData.data);
+    }
+  }, []);
+
+  // Save registration data when it changes
+  useEffect(() => {
+    if (userType) {
+      saveRegistrationData(userType, currentStep, registrationData);
+    }
+  }, [userType, currentStep, registrationData]);
 
   // Define steps based on user type
   const getTalentSteps = (): RegistrationStep[] => [
@@ -168,7 +151,10 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
   const getSteps = () => {
     switch (userType) {
       case 'TALENT':
-        return getTalentSteps();
+        return getTalentSteps().map(step => ({
+          ...step,
+          isComplete: getCompletedSteps(registrationData).includes(step.id)
+        }));
       case 'AGENT':
         return getAgentSteps();
       case 'CLUB':
@@ -183,37 +169,82 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
   const progress = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0;
   const currentStepData = visibleSteps[currentStep];
 
-  const updateRegistrationData = (data: Partial<RegistrationData>) => {
-    setRegistrationData(prev => ({ ...prev, ...data }));
+  const updateRegistrationData = (data: Partial<TalentRegistrationData>) => {
+    const formattedData = formatRegistrationData({
+      ...registrationData,
+      ...data
+    });
+    setRegistrationData(formattedData);
   };
 
-  const goToNextStep = () => {
+  const goToNextStep = async () => {
+    // Validate current step before proceeding
+    const currentStepId = currentStepData?.id;
+    if (currentStepId) {
+      let stepData;
+      switch (currentStepId) {
+        case 'basic-info':
+          stepData = registrationData.basicInfo;
+          break;
+        case 'playing-info':
+          stepData = registrationData.footballProfile;
+          break;
+        case 'achievements':
+          stepData = registrationData.achievements;
+          break;
+        case 'media':
+          stepData = registrationData.media;
+          break;
+      }
+
+      const validationResult = await validateStep(currentStepId, stepData);
+      if (!validationResult.success) {
+        setErrors(validationResult.errors || {});
+        return;
+      }
+    }
+
     if (currentStep < visibleSteps.length - 1) {
       setCurrentStep(currentStep + 1);
+      clearErrors();
     } else {
-      // Registration complete
-      router.push('/dashboard');
+      // Check if registration is complete
+      if (isRegistrationComplete(registrationData)) {
+        clearRegistrationData();
+        router.push('/dashboard');
+      } else {
+        const nextStep = getNextIncompleteStep(registrationData);
+        const nextStepIndex = visibleSteps.findIndex(step => step.id === nextStep);
+        if (nextStepIndex !== -1) {
+          setCurrentStep(nextStepIndex);
+        }
+      }
     }
   };
 
   const goToPreviousStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      clearErrors();
     }
   };
 
   const isStepComplete = (stepId: string) => {
-    return visibleSteps.find(step => step.id === stepId)?.isComplete || false;
+    return getCompletedSteps(registrationData).includes(stepId);
   };
 
   const markStepComplete = (stepId: string) => {
     const updatedSteps = visibleSteps.map(step =>
       step.id === stepId ? { ...step, isComplete: true } : step
     );
-    // We'll use this to track completion in the UI
+    // Update step completion status is now handled by getCompletedSteps
   };
 
-  const value = {
+  const clearErrors = () => {
+    setErrors({});
+  };
+
+  const value: RegistrationContextType = {
     currentStep,
     setCurrentStep,
     registrationData,
@@ -227,7 +258,33 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
     markStepComplete,
     currentStepData,
     totalSteps,
-    progress
+    progress,
+    errors,
+    setErrors,
+    clearErrors,
+    validateStep: async (stepId: string) => {
+      let stepData;
+      switch (stepId) {
+        case 'basic-info':
+          stepData = registrationData.basicInfo;
+          break;
+        case 'playing-info':
+          stepData = registrationData.footballProfile;
+          break;
+        case 'achievements':
+          stepData = registrationData.achievements;
+          break;
+        case 'media':
+          stepData = registrationData.media;
+          break;
+      }
+
+      const validationResult = await validateStep(stepId, stepData);
+      if (!validationResult.success) {
+        setErrors(validationResult.errors || {});
+      }
+      return validationResult.success;
+    }
   };
 
   return (

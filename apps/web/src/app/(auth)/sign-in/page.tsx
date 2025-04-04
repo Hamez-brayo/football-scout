@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SignIn() {
@@ -12,6 +12,8 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signInWithGoogle, signInWithApple } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ export default function SignIn() {
 
     try {
       await signIn(email, password);
-      router.push('/dashboard');
+      router.push(callbackUrl);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to sign in');
     } finally {
@@ -34,7 +36,7 @@ export default function SignIn() {
 
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
+      router.push(callbackUrl);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to sign in with Google');
     } finally {
@@ -48,7 +50,7 @@ export default function SignIn() {
 
     try {
       await signInWithApple();
-      router.push('/dashboard');
+      router.push(callbackUrl);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to sign in with Apple');
     } finally {

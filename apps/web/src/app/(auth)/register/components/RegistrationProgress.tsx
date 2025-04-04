@@ -36,6 +36,7 @@ export default function RegistrationProgress() {
             >
               {index !== visibleSteps.length - 1 && (
                 <div
+                  data-testid="step-line"
                   className={`absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 ${
                     index < currentStep 
                       ? 'bg-indigo-600' 

@@ -1,28 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { UserType } from '@/types/user';
+import React, { useState } from 'react';
+import { UserType } from '@/types';
 import { motion } from 'framer-motion';
 import { FaFutbol, FaUserTie, FaBuilding } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
 const userTypeOptions = [
   {
-    type: UserType.TALENT,
+    type: 'TALENT' as const,
     title: 'Player/Talent',
     description: 'Create your player profile and showcase your skills',
     icon: FaFutbol,
     color: 'from-indigo-500 to-indigo-600',
   },
   {
-    type: UserType.AGENT,
+    type: 'AGENT' as const,
     title: 'Agent',
     description: 'Connect with talents and clubs as a licensed agent',
     icon: FaUserTie,
     color: 'from-indigo-500 to-indigo-600',
   },
   {
-    type: UserType.CLUB,
+    type: 'CLUB' as const,
     title: 'Club',
     description: 'Represent your club and discover new talents',
     icon: FaBuilding,
@@ -30,8 +30,10 @@ const userTypeOptions = [
   },
 ];
 
+type UserTypeOption = typeof userTypeOptions[number]['type'];
+
 export function UserTypeSelection() {
-  const [selectedType, setSelectedType] = useState<UserType | null>(null);
+  const [selectedType, setSelectedType] = useState<UserTypeOption | null>(null);
   const router = useRouter();
 
   return (

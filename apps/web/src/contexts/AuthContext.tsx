@@ -14,6 +14,7 @@ import {
   AuthError,
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   user: User | null;
@@ -56,9 +57,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       setLoading(false);
+
+      if (user) {
+        // Get the session token and set it as a cookie
+        const token = await user.getIdToken();
+        Cookies.set('session', token, { 
+          expires: 1, // 1 day
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict'
+        });
+      } else {
+        // Remove the session cookie when user signs out
+        Cookies.remove('session');
+      }
     });
 
     return () => unsubscribe();
@@ -66,7 +80,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken();
+      Cookies.set('session', token, { 
+        expires: 1,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -76,6 +96,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName });
+      const token = await userCredential.user.getIdToken();
+      Cookies.set('session', token, { 
+        expires: 1,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -84,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await signOut(auth);
+      Cookies.remove('session');
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -102,17 +129,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      // Add scopes if needed
       provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
       provider.addScope('https://www.googleapis.com/auth/userinfo.email');
       
-      // Set custom parameters
+      // Always force account selection
       provider.setCustomParameters({
         prompt: 'select_account'
       });
 
-      await signInWithPopup(auth, provider);
-    } catch (error) {
+      // If user is already signed in, sign them out first
+      if (auth.currentUser) {
+        await signOut(auth);
+      }
+
+      const userCredential = await signInWithPopup(auth, provider);
+      const token = await userCredential.user.getIdToken();
+      Cookies.set('session', token, { 
+        expires: 1,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+
+      return userCredential.user;
+    } catch (error: any) {
+      // Don't throw for cancelled popup requests
+      if (error.code === 'auth/cancelled-popup-request' || 
+          error.code === 'auth/popup-closed-by-user') {
+        console.log('Sign-in popup was closed');
+        return null;
+      }
       console.error('Google Sign-in Error:', error);
       throw new Error(getErrorMessage(error));
     }
@@ -123,7 +168,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const provider = new OAuthProvider('apple.com');
       provider.addScope('email');
       provider.addScope('name');
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      const token = await userCredential.user.getIdToken();
+      Cookies.set('session', token, { 
+        expires: 1,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
     } catch (error) {
       console.error('Apple Sign-in Error:', error);
       throw new Error(getErrorMessage(error));
