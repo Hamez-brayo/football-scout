@@ -10,15 +10,12 @@ export default function Register() {
   const { user } = useAuth();
   const router = useRouter();
 
+  // Only redirect if user is already registered
   useEffect(() => {
-    if (!user) {
-      router.push('/login');
+    if (user?.registrationCompleted) {
+      router.push('/dashboard');
     }
   }, [user, router]);
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <RegistrationProvider>

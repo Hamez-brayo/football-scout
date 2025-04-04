@@ -31,14 +31,14 @@ export default function SignIn() {
   };
 
   const handleGoogleSignIn = async () => {
-    setError('');
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
+      setError('');
       await signInWithGoogle();
-      router.push(callbackUrl);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to sign in with Google');
+      router.push('/register');
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      setError(error.message || 'Failed to sign in');
     } finally {
       setIsLoading(false);
     }

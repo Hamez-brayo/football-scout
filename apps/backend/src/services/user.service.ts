@@ -16,6 +16,57 @@ export class UserService {
     });
   }
 
+  async saveInitialRegistration(userId: string, basicInfo: any) {
+    // First, get the user to determine their type
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Save the initial registration data based on user type
+    switch (user.userType) {
+      case UserType.TALENT:
+        return prisma.talent.create({
+          data: {
+            userId,
+            fullName: basicInfo.fullName,
+            dateOfBirth: new Date(basicInfo.dateOfBirth),
+            nationality: basicInfo.nationality,
+            email: basicInfo.email,
+            phone: basicInfo.phone,
+            address: basicInfo.address,
+          },
+        });
+      case UserType.AGENT:
+        return prisma.agent.create({
+          data: {
+            userId,
+            fullName: basicInfo.fullName,
+            email: basicInfo.email,
+            phone: basicInfo.phone,
+            address: basicInfo.address,
+          },
+        });
+      case UserType.CLUB:
+        return prisma.club.create({
+          data: {
+            userId,
+            contactName: basicInfo.fullName,
+            contactDetails: {
+              email: basicInfo.email,
+              phone: basicInfo.phone,
+              address: basicInfo.address,
+            },
+          },
+        });
+      default:
+        throw new Error('Invalid user type');
+    }
+  }
+
   async createTalentProfile(userId: string, data: TalentRegistrationData) {
     return prisma.talent.create({
       data: {

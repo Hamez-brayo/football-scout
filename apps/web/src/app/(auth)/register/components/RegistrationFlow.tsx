@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PersonalInformationForm from './PersonalInformationForm';
 import FootballJourneyForm from './FootballJourneyForm';
 import PathSpecificForm from './PathSpecificForm';
 import MediaUpload from './MediaUpload';
 import { UserPath } from '@/types/registration';
+import { useRegistration } from '@/contexts/RegistrationContext';
 
 const steps = [
   {
@@ -32,15 +33,22 @@ const steps = [
 
 export default function RegistrationFlow() {
   const [currentStep, setCurrentStep] = useState(0);
+  const { registrationData, updateRegistrationData } = useRegistration();
   const [selectedPath, setSelectedPath] = useState<UserPath | null>(null);
+
+  // Update selectedPath when registrationData.path changes
+  useEffect(() => {
+    if (registrationData.path) {
+      setSelectedPath(registrationData.path);
+    }
+  }, [registrationData.path]);
 
   const handleStepComplete = () => {
     setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   };
 
   const handleJourneyComplete = (data: any) => {
-    // The path will be set inside FootballJourneyForm
-    // We just need to move to the next step if we're not redirecting to dashboard
+    // The path is already set in the registration context
     handleStepComplete();
   };
 

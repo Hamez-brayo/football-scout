@@ -11,6 +11,7 @@ interface PersonalInformationFormProps {
 export default function PersonalInformationForm({ onComplete }: PersonalInformationFormProps) {
   const { user } = useAuth();
   const { updateRegistrationData } = useRegistration();
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -40,12 +41,70 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
       ...prev,
       [name]: value
     }));
+    setError(''); // Clear any previous errors
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateRegistrationData({ personalInfo: formData });
-    onComplete();
+    
+    if (!user?.uid) {
+      setError('User ID not found. Please try signing in again.');
+      return;
+    }
+
+    try {
+      // First, ensure the user exists in the database
+      const registerResponse = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firebaseUid: user.uid,
+          email: user.email,
+          userType: 'TALENT' // Default to TALENT, will be updated later
+        }),
+      });
+
+      if (!registerResponse.ok && registerResponse.status !== 409) { // 409 means user already exists
+        const errorData = await registerResponse.json();
+        throw new Error(errorData.error || 'Failed to register user');
+      }
+
+      // Save to registration context
+      updateRegistrationData({ personalInfo: formData });
+
+      // Save initial registration data
+      const response = await fetch('/api/users/register/initial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          basicInfo: {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phoneNumber,
+            dateOfBirth: formData.dateOfBirth,
+            nationality: formData.nationality,
+            address: {
+              country: formData.currentLocation
+            }
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save registration data');
+      }
+
+      onComplete();
+    } catch (error) {
+      console.error('Error saving personal information:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save registration data');
+    }
   };
 
   const inputClasses = "mt-1 block w-full px-4 py-3 rounded-xl border-0 text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800/50 backdrop-blur-xl shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 transition-all duration-200 ease-in-out";
@@ -57,6 +116,12 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Personal Details</h2>
         <p className="text-gray-500 dark:text-gray-400">Tell us about yourself to personalize your experience</p>
       </div>
+
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/50 text-red-800 dark:text-red-200 p-4 rounded-lg text-sm mb-6">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-2">

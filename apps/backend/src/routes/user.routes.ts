@@ -6,6 +6,7 @@ const userController = new UserController();
 
 // User registration routes
 router.post('/register', userController.registerUser);
+router.post('/register/initial', userController.saveInitialRegistration);
 router.post('/profile', userController.createProfile);
 router.get('/:userId', userController.getUserProfile);
 
