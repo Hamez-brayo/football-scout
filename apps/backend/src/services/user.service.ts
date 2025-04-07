@@ -5,7 +5,7 @@ import { AgentRegistrationData } from '../models/agent/types';
 import { ClubRegistrationData } from '../models/club/types';
 
 export class UserService {
-  async createUser(firebaseUid: string, email: string, userType: UserType) {
+  async createUser(firebaseUid: string, email: string, userType?: UserType, phone?: string, bio?: string, address?: any) {
     return prisma.user.upsert({
       where: {
         id: firebaseUid
@@ -13,13 +13,19 @@ export class UserService {
       create: {
         id: firebaseUid,
         email,
-        userType,
+        userType: userType || null,
         registrationStatus: RegistrationStatus.PENDING,
+        phone,
+        bio,
+        address
       },
       update: {
         email,
-        userType,
+        userType: userType || undefined,
         registrationStatus: RegistrationStatus.PENDING,
+        phone,
+        bio,
+        address
       }
     });
   }
@@ -47,7 +53,24 @@ export class UserService {
 
     try {
       let result;
-      // Save the initial registration data based on user type
+      // If userType is not set, just update the user table with basic info
+      if (!user.userType) {
+        result = await prisma.user.update({
+          where: { id: userId },
+          data: {
+            fullName: basicInfo.fullName,
+            email: basicInfo.email,
+            phone: basicInfo.phone,
+            bio: basicInfo.bio,
+            address: basicInfo.address,
+            dateOfBirth: new Date(basicInfo.dateOfBirth),
+            nationality: basicInfo.nationality
+          }
+        });
+        return result;
+      }
+
+      // If userType is set, proceed with type-specific registration
       switch (user.userType) {
         case UserType.TALENT:
           console.log('Creating/updating talent profile with:', {
@@ -183,50 +206,115 @@ export class UserService {
       return result;
       
     } catch (error) {
-      console.error('Error in saveInitialRegistration switch statement:', error);
+      console.error('Error in saveInitialRegistration:', error);
       throw error;
     }
   }
 
   async saveJourneyData(userId: string, journeyData: any) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    try {
+      // Get existing user data
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          fullName: true,
+          dateOfBirth: true,
+          nationality: true
+        }
+      });
 
-    if (!user) {
-      throw new Error('User not found');
-    }
+      if (!user) {
+        throw new Error('User not found');
+      }
 
-    switch (user.userType) {
-      case UserType.TALENT:
-        return prisma.talent.update({
-          where: { userId },
-          data: {
-            footballProfile: {
-              ...journeyData,
+      // First update the user type based on the selected path
+      const userType = journeyData.path?.toUpperCase();
+      if (!userType || !Object.values(UserType).includes(userType)) {
+        throw new Error('Invalid user type selected');
+      }
+
+      // Update user with the selected type
+      await prisma.user.update({
+        where: { id: userId },
+        data: { userType }
+      });
+
+      // Now save the journey data based on the user type
+      switch (userType) {
+        case UserType.TALENT:
+          return prisma.talent.upsert({
+            where: { userId },
+            create: {
+              userId,
+              fullName: user.fullName || '',
+              dateOfBirth: user.dateOfBirth || new Date(),
+              nationality: user.nationality || '',
+              positions: [],
+              playingHistory: {
+                ...journeyData,
+                currentStatus: journeyData.currentStatus || 'PLAYING',
+                level: journeyData.level || 'AMATEUR'
+              },
             },
-          },
-        });
-      case UserType.AGENT:
-        return prisma.agent.update({
-          where: { userId },
-          data: {
-            professionalInfo: {
-              ...journeyData,
+            update: {
+              playingHistory: {
+                ...journeyData,
+                currentStatus: journeyData.currentStatus || 'PLAYING',
+                level: journeyData.level || 'AMATEUR'
+              },
             },
-          },
-        });
-      case UserType.CLUB:
-        return prisma.club.update({
-          where: { userId },
-          data: {
-            clubInfo: {
-              ...journeyData,
+          });
+        case UserType.AGENT:
+          return prisma.agent.upsert({
+            where: { userId },
+            create: {
+              userId,
+              fullName: user.fullName || '',
+              operationAreas: [],
+              languages: [],
+              references: {
+                ...journeyData,
+                status: journeyData.currentStatus || 'ACTIVE',
+                experience: journeyData.experience || '0'
+              },
             },
-          },
-        });
-      default:
-        throw new Error('Invalid user type');
+            update: {
+              references: {
+                ...journeyData,
+                status: journeyData.currentStatus || 'ACTIVE',
+                experience: journeyData.experience || '0'
+              },
+            },
+          });
+        case UserType.CLUB:
+          return prisma.club.upsert({
+            where: { userId },
+            create: {
+              userId,
+              clubName: user.fullName || '',
+              location: 'TBD',
+              league: 'TBD',
+              country: user.nationality || 'TBD',
+              contactName: user.fullName || '',
+              position: 'Representative',
+              contactDetails: {
+                ...journeyData,
+                status: journeyData.currentStatus || 'ACTIVE'
+              },
+            },
+            update: {
+              contactDetails: {
+                ...journeyData,
+                status: journeyData.currentStatus || 'ACTIVE'
+              },
+            },
+          });
+        default:
+          throw new Error('Invalid user type');
+      }
+    } catch (error) {
+      console.error('Error in saveJourneyData:', error);
+      throw error;
     }
   }
 

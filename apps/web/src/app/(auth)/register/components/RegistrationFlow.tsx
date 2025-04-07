@@ -119,8 +119,35 @@ export default function RegistrationFlow() {
   };
 
   const handleJourneyComplete = async (data: any) => {
-    setSelectedPath(data.path);
-    await handleStepComplete(data);
+    try {
+      setError(null);
+      
+      if (!user?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update registration context with journey data
+      updateRegistrationData(data);
+
+      // Set the selected path from the journey data
+      setSelectedPath(data.journey.path.toLowerCase() as UserPath);
+
+      // Submit journey data to backend
+      await fetch('/api/users/journey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          journeyData: data.journey
+        })
+      });
+
+      // Move to next step
+      setCurrentStep(prev => prev + 1);
+    } catch (error) {
+      console.error('Error in journey step:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save journey data');
+    }
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;

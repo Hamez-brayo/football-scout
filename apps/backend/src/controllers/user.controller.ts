@@ -8,15 +8,15 @@ const userService = new UserService();
 export class UserController {
   async registerUser(req: Request, res: Response) {
     try {
-      const { firebaseUid, email, userType } = req.body;
-      console.log('Registering user:', { firebaseUid, email, userType });
+      const { firebaseUid, email, userType, phone, bio, address } = req.body;
+      console.log('Registering user:', { firebaseUid, email, userType, phone, bio, address });
 
-      if (!firebaseUid || !email || !userType) {
-        console.error('Missing required fields:', { firebaseUid, email, userType });
+      if (!firebaseUid || !email) {
+        console.error('Missing required fields:', { firebaseUid, email });
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      const user = await userService.createUser(firebaseUid, email, userType as UserType);
+      const user = await userService.createUser(firebaseUid, email, userType as UserType | undefined, phone, bio, address);
       console.log('User registration successful:', user);
       return res.status(200).json(user);
     } catch (error) {
@@ -81,19 +81,32 @@ export class UserController {
   async saveJourneyData(req: Request, res: Response) {
     try {
       const { userId, journeyData } = req.body;
-      console.log('Saving journey data:', { userId, journeyData });
+      console.log('Controller: Saving journey data:', { userId, journeyData });
 
       if (!userId || !journeyData) {
-        console.error('Missing required fields:', { userId, journeyData });
+        console.error('Controller: Missing required fields:', { userId, journeyData });
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      const result = await userService.saveJourneyData(userId, journeyData);
-      console.log('Journey data saved:', result);
-      return res.status(200).json(result);
+      try {
+        const result = await userService.saveJourneyData(userId, journeyData);
+        console.log('Controller: Journey data saved:', result);
+        return res.status(200).json(result);
+      } catch (serviceError) {
+        console.error('Controller: Service error:', serviceError);
+        return res.status(500).json({ 
+          error: 'Failed to save journey data',
+          details: serviceError.message,
+          stack: serviceError.stack
+        });
+      }
     } catch (error) {
-      console.error('Error saving journey data:', error);
-      return res.status(500).json({ error: 'Failed to save journey data' });
+      console.error('Controller: Unexpected error:', error);
+      return res.status(500).json({ 
+        error: 'Failed to save journey data',
+        details: error.message,
+        stack: error.stack
+      });
     }
   }
 

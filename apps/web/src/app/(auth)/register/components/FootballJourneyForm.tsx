@@ -1,25 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { PlayingStatus, PlayingLevel, ProfessionalFocus } from '@/types/registration';
 import { useRegistration } from '@/contexts/RegistrationContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 interface FootballJourneyFormProps {
-  onComplete: (data: any) => void;
+  onComplete: (journeyData: any) => void;
 }
 
 export default function FootballJourneyForm({ onComplete }: FootballJourneyFormProps) {
-  const router = useRouter();
   const { updateRegistrationData } = useRegistration();
   const { user } = useAuth();
   const [status, setStatus] = useState<PlayingStatus | null>(null);
   const [level, setLevel] = useState<PlayingLevel | null>(null);
   const [selectedFocuses, setSelectedFocuses] = useState<ProfessionalFocus[]>([]);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFocusToggle = (focus: ProfessionalFocus) => {
     setSelectedFocuses(prev => {
@@ -49,57 +46,57 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
     return 'club'; // Default to club path
   };
 
-  const saveCheckpoint = async (path: 'player' | 'agent' | 'club', data: any) => {
-    if (!user) return;
-    
-    try {
-      await setDoc(doc(db, 'users', user.uid), {
-        registration: {
-          path,
-          journey: data,
-          completed: false,
-          lastUpdated: new Date().toISOString()
-        }
-      }, { merge: true });
-    } catch (error) {
-      console.error('Error saving registration checkpoint:', error);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (status === 'currently_playing') {
-      const journeyData = {
-        status,
-        level
-      };
-      
-      updateRegistrationData({ 
-        journey: journeyData,
-        path: 'player'
+    if (!user?.uid) {
+      setError('User not found. Please try signing in again.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      let journeyData;
+      let path;
+
+      if (status === 'currently_playing') {
+        path = 'TALENT';
+        journeyData = {
+          path,
+          currentStatus: 'PLAYING',
+          level: level?.toUpperCase() || 'AMATEUR',
+          experience: '5' // Default experience value
+        };
+      } else {
+        if (selectedFocuses.length === 0) {
+          setError('Please select at least one focus area');
+          return;
+        }
+        
+        // Convert path to uppercase for backend
+        path = determinePath(selectedFocuses).toUpperCase();
+        journeyData = {
+          path,
+          currentStatus: 'PROFESSIONAL',
+          level: 'PROFESSIONAL',
+          experience: '5', // Default experience value
+          focuses: selectedFocuses
+        };
+      }
+
+      console.log('Sending journey data:', { userId: user.uid, journeyData });
+
+      // Call onComplete with the journey data
+      onComplete({
+        journey: journeyData
       });
-      
-      // Save checkpoint and redirect
-      await saveCheckpoint('player', journeyData);
-      router.push('/dashboard/player');
-    } else {
-      if (selectedFocuses.length === 0) return;
-      
-      const journeyData = {
-        status,
-        focuses: selectedFocuses
-      };
-      
-      const path = determinePath(selectedFocuses);
-      updateRegistrationData({ 
-        journey: journeyData,
-        path
-      });
-      
-      // Save checkpoint and redirect
-      await saveCheckpoint(path, journeyData);
-      router.push(`/dashboard/${path}`);
+    } catch (error) {
+      console.error('Error saving journey data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save journey data');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,6 +106,12 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your Football Journey</h2>
         <p className="text-gray-500 dark:text-gray-400">Tell us about your involvement in football</p>
       </div>
+
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/50 text-red-800 dark:text-red-200 p-4 rounded-lg text-sm mb-6">
+          {error}
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -210,12 +213,13 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
         <button
           type="submit"
           disabled={
+            isSubmitting ||
             !status || 
             (status === 'currently_playing' ? !level : selectedFocuses.length === 0)
           }
           className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 ease-in-out shadow-lg hover:shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continue
+          {isSubmitting ? 'Saving...' : 'Continue'}
         </button>
       </div>
     </form>

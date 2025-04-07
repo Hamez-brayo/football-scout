@@ -12,6 +12,7 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
   const { user } = useAuth();
   const { updateRegistrationData } = useRegistration();
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -19,7 +20,8 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
     phoneNumber: '',
     dateOfBirth: '',
     nationality: '',
-    currentLocation: '',
+    city: '',
+    country: '',
     bio: ''
   });
 
@@ -48,13 +50,12 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
     e.preventDefault();
     
     if (!user?.uid) {
-      setError('User ID not found. Please try signing in again.');
+      setError('Please sign in to continue with registration.');
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      console.log('Starting registration process for user:', user.uid);
-      
       // First, ensure the user exists in the database
       const registerResponse = await fetch('/api/users/register', {
         method: 'POST',
@@ -64,19 +65,19 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
         body: JSON.stringify({
           firebaseUid: user.uid,
           email: user.email,
-          userType: 'TALENT' // Default to TALENT, will be updated later
+          phone: formData.phoneNumber,
+          bio: formData.bio,
+          address: {
+            city: formData.city,
+            country: formData.country
+          }
         }),
       });
-
-      console.log('Register response status:', registerResponse.status);
       
-      if (!registerResponse.ok && registerResponse.status !== 409) { // 409 means user already exists
+      if (!registerResponse.ok && registerResponse.status !== 409) {
         const errorData = await registerResponse.json();
-        console.error('Registration error:', errorData);
         throw new Error(errorData.error || 'Failed to register user');
       }
-
-      console.log('User registered successfully, saving initial data...');
 
       // Save to registration context
       updateRegistrationData({ personalInfo: formData });
@@ -92,29 +93,22 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
           basicInfo: {
             fullName: formData.fullName,
             email: formData.email,
-            phone: formData.phoneNumber,
             dateOfBirth: formData.dateOfBirth,
-            nationality: formData.nationality,
-            address: {
-              country: formData.currentLocation
-            }
+            nationality: formData.nationality
           }
         }),
       });
 
-      console.log('Initial registration response status:', response.status);
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Initial registration error:', errorData);
         throw new Error(errorData.error || 'Failed to save registration data');
       }
 
-      console.log('Registration completed successfully');
       onComplete();
     } catch (error) {
-      console.error('Error in registration process:', error);
-      setError(error instanceof Error ? error.message : 'Failed to save registration data');
+      setError(error instanceof Error ? error.message : 'An error occurred during registration');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -124,7 +118,7 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
   return (
     <form onSubmit={handleSubmit} className="space-y-8 backdrop-blur-xl bg-white/5 dark:bg-gray-900/20 rounded-2xl p-8 shadow-xl border border-gray-100 dark:border-gray-800">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Personal Details</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Personal Information</h2>
         <p className="text-gray-500 dark:text-gray-400">Tell us about yourself to personalize your experience</p>
       </div>
 
@@ -164,6 +158,7 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
             required
             className={inputClasses}
             placeholder="your@email.com"
+            disabled={!!user?.email} // Disable if we have email from auth
           />
         </div>
 
@@ -213,19 +208,35 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
           />
         </div>
 
-        <div className="col-span-2">
-          <label htmlFor="currentLocation" className={labelClasses}>
-            Current Location
+        <div>
+          <label htmlFor="city" className={labelClasses}>
+            City
           </label>
           <input
             type="text"
-            id="currentLocation"
-            name="currentLocation"
-            value={formData.currentLocation}
+            id="city"
+            name="city"
+            value={formData.city}
             onChange={handleChange}
             required
             className={inputClasses}
-            placeholder="City, Country"
+            placeholder="Enter your city"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="country" className={labelClasses}>
+            Country
+          </label>
+          <input
+            type="text"
+            id="country"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            required
+            className={inputClasses}
+            placeholder="Enter your country"
           />
         </div>
 
@@ -248,9 +259,20 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
       <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-800">
         <button
           type="submit"
-          className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 ease-in-out shadow-lg hover:shadow-indigo-500/25"
+          disabled={isSubmitting}
+          className={`px-6 py-3 text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 transition-all duration-200 ease-in-out ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Continue
+          {isSubmitting ? (
+            <div className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Processing...
+            </div>
+          ) : (
+            'Continue'
+          )}
         </button>
       </div>
     </form>

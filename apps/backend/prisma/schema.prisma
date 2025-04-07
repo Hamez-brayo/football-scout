@@ -21,8 +21,17 @@ enum UserType {
 model User {
   id                String    @id // Firebase UID
   email            String    @unique
-  userType         UserType
+  userType         UserType?
   registrationStatus String   // e.g., "PENDING", "COMPLETE", "VERIFIED"
+  
+  // Basic Info (stored before user type selection)
+  fullName         String?
+  dateOfBirth      DateTime?
+  nationality      String?
+  phone            String?
+  bio              String?   @db.Text
+  address          Json?     // Structured JSON for address details
+  
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
