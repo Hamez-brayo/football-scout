@@ -63,12 +63,17 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
 
       if (status === 'currently_playing') {
         path = 'TALENT';
+        // Convert level to uppercase and remove spaces
+        const formattedLevel = level?.replace(/\s+/g, '_').toUpperCase() || 'AMATEUR';
+        
         journeyData = {
           path,
           currentStatus: 'PLAYING',
-          level: level?.toUpperCase() || 'AMATEUR',
+          level: formattedLevel,
           experience: '5' // Default experience value
         };
+
+        console.log('Formatted journey data:', journeyData);
       } else {
         if (selectedFocuses.length === 0) {
           setError('Please select at least one focus area');
@@ -86,11 +91,10 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
         };
       }
 
-      console.log('Sending journey data:', { userId: user.uid, journeyData });
-
       // Call onComplete with the journey data
       onComplete({
-        journey: journeyData
+        journey: journeyData,
+        path: journeyData.path // Add path here to ensure it's available
       });
     } catch (error) {
       console.error('Error saving journey data:', error);
