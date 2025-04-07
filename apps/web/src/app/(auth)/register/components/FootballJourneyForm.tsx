@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlayingStatus, PlayingLevel, ProfessionalFocus } from '@/types/registration';
 import { useRegistration } from '@/contexts/RegistrationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -13,10 +14,12 @@ interface FootballJourneyFormProps {
 
 export default function FootballJourneyForm({ onComplete }: FootballJourneyFormProps) {
   const router = useRouter();
-  const { user, updateRegistrationData } = useRegistration();
+  const { updateRegistrationData } = useRegistration();
+  const { user } = useAuth();
   const [status, setStatus] = useState<PlayingStatus | null>(null);
   const [level, setLevel] = useState<PlayingLevel | null>(null);
   const [selectedFocuses, setSelectedFocuses] = useState<ProfessionalFocus[]>([]);
+  const [error, setError] = useState('');
 
   const handleFocusToggle = (focus: ProfessionalFocus) => {
     setSelectedFocuses(prev => {

@@ -53,6 +53,8 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
     }
 
     try {
+      console.log('Starting registration process for user:', user.uid);
+      
       // First, ensure the user exists in the database
       const registerResponse = await fetch('/api/users/register', {
         method: 'POST',
@@ -66,10 +68,15 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
         }),
       });
 
+      console.log('Register response status:', registerResponse.status);
+      
       if (!registerResponse.ok && registerResponse.status !== 409) { // 409 means user already exists
         const errorData = await registerResponse.json();
+        console.error('Registration error:', errorData);
         throw new Error(errorData.error || 'Failed to register user');
       }
+
+      console.log('User registered successfully, saving initial data...');
 
       // Save to registration context
       updateRegistrationData({ personalInfo: formData });
@@ -95,14 +102,18 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
         }),
       });
 
+      console.log('Initial registration response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Initial registration error:', errorData);
         throw new Error(errorData.error || 'Failed to save registration data');
       }
 
+      console.log('Registration completed successfully');
       onComplete();
     } catch (error) {
-      console.error('Error saving personal information:', error);
+      console.error('Error in registration process:', error);
       setError(error instanceof Error ? error.message : 'Failed to save registration data');
     }
   };

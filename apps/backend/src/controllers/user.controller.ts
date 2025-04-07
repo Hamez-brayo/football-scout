@@ -17,41 +17,140 @@ export class UserController {
       }
 
       const user = await userService.createUser(firebaseUid, email, userType as UserType);
-      console.log('User created successfully:', user);
-      return res.status(201).json(user);
+      console.log('User registration successful:', user);
+      return res.status(200).json(user);
     } catch (error) {
       console.error('Error registering user:', error);
-      return res.status(500).json({ error: 'Failed to register user' });
+      
+      // Handle specific Prisma errors
+      if (error.code === 'P2002') {
+        return res.status(200).json({ 
+          message: 'User already exists',
+          user: await userService.getUserById(req.body.firebaseUid)
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: 'Failed to register user',
+        details: error.message
+      });
     }
   }
 
   async saveInitialRegistration(req: Request, res: Response) {
     try {
       const { userId, basicInfo } = req.body;
-      console.log('Saving initial registration:', { userId, basicInfo });
+      console.log('Controller: Received initial registration request:', { userId, basicInfo });
 
       if (!userId || !basicInfo) {
-        console.error('Missing required fields:', { userId, basicInfo });
+        console.error('Controller: Missing required fields:', { userId, basicInfo });
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      // First check if the user exists
-      const existingUser = await userService.getUserById(userId);
-      if (!existingUser) {
-        console.error('User not found:', userId);
+      // First verify the user exists
+      const user = await userService.getUserById(userId);
+      if (!user) {
+        console.error('Controller: User not found:', userId);
         return res.status(404).json({ error: 'User not found' });
       }
 
-      // Save the initial registration data
-      const result = await userService.saveInitialRegistration(userId, basicInfo);
-      console.log('Initial registration saved:', result);
-      return res.status(200).json(result);
+      console.log('Controller: Found user:', user);
+
+      try {
+        const result = await userService.saveInitialRegistration(userId, basicInfo);
+        console.log('Controller: Initial registration saved:', result);
+        return res.status(200).json(result);
+      } catch (serviceError) {
+        console.error('Controller: Service error:', serviceError);
+        return res.status(500).json({ 
+          error: 'Failed to save initial registration',
+          details: serviceError.message,
+          stack: serviceError.stack
+        });
+      }
     } catch (error) {
-      console.error('Error saving initial registration:', error);
+      console.error('Controller: Unexpected error:', error);
       return res.status(500).json({ 
         error: 'Failed to save initial registration',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error.message,
+        stack: error.stack
       });
+    }
+  }
+
+  async saveJourneyData(req: Request, res: Response) {
+    try {
+      const { userId, journeyData } = req.body;
+      console.log('Saving journey data:', { userId, journeyData });
+
+      if (!userId || !journeyData) {
+        console.error('Missing required fields:', { userId, journeyData });
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const result = await userService.saveJourneyData(userId, journeyData);
+      console.log('Journey data saved:', result);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error saving journey data:', error);
+      return res.status(500).json({ error: 'Failed to save journey data' });
+    }
+  }
+
+  async savePathDetails(req: Request, res: Response) {
+    try {
+      const { userId, pathType, pathData } = req.body;
+      console.log('Saving path details:', { userId, pathType, pathData });
+
+      if (!userId || !pathType || !pathData) {
+        console.error('Missing required fields:', { userId, pathType, pathData });
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const result = await userService.savePathDetails(userId, pathType, pathData);
+      console.log('Path details saved:', result);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error saving path details:', error);
+      return res.status(500).json({ error: 'Failed to save path details' });
+    }
+  }
+
+  async saveMediaData(req: Request, res: Response) {
+    try {
+      const { userId, mediaData } = req.body;
+      console.log('Saving media data:', { userId, mediaData });
+
+      if (!userId || !mediaData) {
+        console.error('Missing required fields:', { userId, mediaData });
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const result = await userService.saveMediaData(userId, mediaData);
+      console.log('Media data saved:', result);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error saving media data:', error);
+      return res.status(500).json({ error: 'Failed to save media data' });
+    }
+  }
+
+  async completeRegistration(req: Request, res: Response) {
+    try {
+      const { userId } = req.body;
+      console.log('Completing registration for user:', userId);
+
+      if (!userId) {
+        console.error('Missing user ID');
+        return res.status(400).json({ error: 'Missing user ID' });
+      }
+
+      const result = await userService.updateRegistrationStatus(userId, RegistrationStatus.COMPLETE);
+      console.log('Registration completed:', result);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error('Error completing registration:', error);
+      return res.status(500).json({ error: 'Failed to complete registration' });
     }
   }
 

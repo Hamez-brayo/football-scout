@@ -1,37 +1,51 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
 
-// Define protected paths
-const protectedPaths = ['/dashboard', '/profile', '/settings'];
-const authPaths = ['/register', '/sign-in', '/sign-up'];
+// Define paths
+const PROTECTED_PATHS = ['/dashboard'];
+const AUTH_PATHS = ['/sign-in', '/login'];
+const PUBLIC_PATHS = ['/', '/about'];
+const REGISTRATION_PATH = '/register';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const sessionCookie = request.cookies.get('session');
+  const pathname = request.nextUrl.pathname;
 
-  // Skip middleware for api routes
-  if (pathname.startsWith('/api')) {
-    return NextResponse.next();
+  // Check if user is authenticated
+  const isAuthenticated = !!sessionCookie;
+
+  // Check if user has completed registration
+  const registrationComplete = request.cookies.get('registration_complete');
+
+  // Handle protected paths
+  if (PROTECTED_PATHS.some(path => pathname.startsWith(path))) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/sign-in', request.url));
+    }
+    if (!registrationComplete) {
+      return NextResponse.redirect(new URL('/register', request.url));
+    }
   }
 
-  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
-  const isAuthPath = authPaths.some(path => pathname === path);
-
-  // Get the token from cookies
-  const token = request.cookies.get('session')?.value;
-
-  // Allow registration page access regardless of token
-  if (pathname === '/register') {
-    return NextResponse.next();
+  // Handle authentication paths
+  if (AUTH_PATHS.some(path => pathname === path)) {
+    if (isAuthenticated) {
+      if (!registrationComplete) {
+        return NextResponse.redirect(new URL('/register', request.url));
+      }
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
-  // If there's no token and trying to access protected routes
-  if (!token && isProtectedPath) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
-  }
-
-  // If there's a token and trying to access auth routes
-  if (token && isAuthPath) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Handle registration path
+  if (pathname === REGISTRATION_PATH) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/sign-in', request.url));
+    }
+    if (registrationComplete) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   return NextResponse.next();
@@ -45,7 +59,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 }; 

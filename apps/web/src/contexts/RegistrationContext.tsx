@@ -249,7 +249,7 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
     setCurrentStep,
     registrationData,
     updateRegistrationData,
-    visibleSteps,
+    visibleSteps: getSteps(),
     userType,
     setUserType,
     goToNextStep,

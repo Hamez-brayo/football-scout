@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import PersonalInformationForm from './PersonalInformationForm';
 import FootballJourneyForm from './FootballJourneyForm';
 import PathSpecificForm from './PathSpecificForm';
@@ -33,41 +34,105 @@ const steps = [
 
 export default function RegistrationFlow() {
   const [currentStep, setCurrentStep] = useState(0);
-  const { registrationData, updateRegistrationData } = useRegistration();
   const [selectedPath, setSelectedPath] = useState<UserPath | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { updateRegistrationData, registrationData } = useRegistration();
 
-  // Update selectedPath when registrationData.path changes
-  useEffect(() => {
-    if (registrationData.path) {
-      setSelectedPath(registrationData.path);
+  const handleStepComplete = async (data: any) => {
+    try {
+      setError(null);
+      
+      if (!user?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update registration context
+      updateRegistrationData(data);
+
+      // Submit data to backend based on current step
+      switch (currentStep) {
+        case 0: // Personal Information
+          await fetch('/api/users/register/initial', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.uid,
+              basicInfo: data
+            })
+          });
+          break;
+
+        case 1: // Football Journey
+          setSelectedPath(data.path);
+          await fetch('/api/users/journey', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.uid,
+              journeyData: data
+            })
+          });
+          break;
+
+        case 2: // Path Specific
+          await fetch('/api/users/path-details', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.uid,
+              pathType: selectedPath,
+              pathData: data
+            })
+          });
+          break;
+
+        case 3: // Media Upload
+          await fetch('/api/users/media', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.uid,
+              mediaData: data
+            })
+          });
+          
+          // Final step - mark registration as complete
+          await fetch('/api/users/complete-registration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.uid
+            })
+          });
+          break;
+      }
+
+      // Move to next step if not the last one
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } catch (error) {
+      console.error('Error submitting step data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save data');
     }
-  }, [registrationData.path]);
-
-  const handleStepComplete = () => {
-    setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   };
 
-  const handleJourneyComplete = (data: any) => {
-    // The path is already set in the registration context
-    handleStepComplete();
+  const handleJourneyComplete = async (data: any) => {
+    setSelectedPath(data.path);
+    await handleStepComplete(data);
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Registration Progress
-        </h2>
-        <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-          <div
-            className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
         </div>
-      </div>
-
+      )}
+      
       <div className="space-y-8">
         {steps.map((step, index) => (
           <div

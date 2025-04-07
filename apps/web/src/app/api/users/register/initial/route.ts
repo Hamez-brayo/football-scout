@@ -14,21 +14,35 @@ export async function POST(request: Request) {
       body: JSON.stringify(data),
     });
 
+    console.log('Backend response status:', response.status);
+    const responseText = await response.text();
+    console.log('Backend raw response:', responseText);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Backend error:', JSON.stringify(errorData, null, 2));
-      console.error('Response status:', response.status);
+      console.error('Backend error status:', response.status);
+      console.error('Backend error response:', responseText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(responseText);
+      } catch (e) {
+        errorData = { error: responseText || 'Unknown error occurred' };
+      }
+      
       throw new Error(errorData.error || 'Failed to save registration data');
     }
 
-    const result = await response.json();
+    const result = JSON.parse(responseText);
     console.log('Backend response:', JSON.stringify(result, null, 2));
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error in initial registration:', error);
     console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
-      { error: 'Failed to process registration' },
+      { 
+        error: 'Failed to process registration',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

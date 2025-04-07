@@ -14,19 +14,37 @@ export async function POST(request: Request) {
       body: JSON.stringify(data),
     });
 
+    console.log('Backend response status:', response.status);
+    const responseText = await response.text();
+    console.log('Backend raw response:', responseText);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Backend error:', errorData);
+      console.error('Backend error status:', response.status);
+      console.error('Backend error response:', responseText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(responseText);
+      } catch (e) {
+        errorData = { error: responseText || 'Unknown error occurred' };
+      }
+      
       return NextResponse.json(errorData, { status: response.status });
     }
 
-    const result = await response.json();
+    const result = JSON.parse(responseText);
     console.log('Backend response:', result);
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error in user registration:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+    }
     return NextResponse.json(
-      { error: 'Failed to register user' },
+      { error: 'Failed to register user', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

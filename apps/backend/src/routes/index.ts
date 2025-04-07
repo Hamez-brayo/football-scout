@@ -1,11 +1,9 @@
 import { Router } from 'express';
-import { getPlayers, getPlayerById, createPlayer } from '../controllers/playerController';
+import userRoutes from './user.routes';
 
 const router = Router();
 
-// Player routes
-router.get('/api/players', getPlayers);
-router.get('/api/players/:id', getPlayerById);
-router.post('/api/players', createPlayer);
+// API routes
+router.use('/api/users', userRoutes);
 
 export default router; 
