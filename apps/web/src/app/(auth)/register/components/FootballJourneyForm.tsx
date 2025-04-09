@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { PlayingStatus, PlayingLevel, ProfessionalFocus } from '@/types/registration';
+import React, { useState } from 'react';
+import { PlayingStatus, PlayingLevel, ProfessionalFocus, UserPath } from '@/types/registration';
 import { useRegistration } from '@/contexts/RegistrationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface FootballJourneyFormProps {
-  onComplete: (journeyData: any) => void;
+  onComplete: (journeyData: {
+    status: PlayingStatus;
+    level?: PlayingLevel;
+    focus?: ProfessionalFocus;
+    path: UserPath;
+  }) => void;
 }
 
 export default function FootballJourneyForm({ onComplete }: FootballJourneyFormProps) {
@@ -48,57 +54,32 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user?.uid) {
-      setError('User not found. Please try signing in again.');
+    if (!status || (status === 'currently_playing' && !level) || (status === 'professional_role' && selectedFocuses.length === 0)) {
+      setError('Please complete all required fields');
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
-
     try {
-      let journeyData;
-      let path;
-
+      let path: UserPath;
       if (status === 'currently_playing') {
         path = 'TALENT';
-        // Convert level to uppercase and remove spaces
-        const formattedLevel = level?.replace(/\s+/g, '_').toUpperCase() || 'AMATEUR';
-        
-        journeyData = {
-          path,
-          currentStatus: 'PLAYING',
-          level: formattedLevel,
-          experience: '5' // Default experience value
-        };
-
-        console.log('Formatted journey data:', journeyData);
       } else {
-        if (selectedFocuses.length === 0) {
-          setError('Please select at least one focus area');
-          return;
-        }
-        
-        // Convert path to uppercase for backend
-        path = determinePath(selectedFocuses).toUpperCase();
-        journeyData = {
-          path,
-          currentStatus: 'PROFESSIONAL',
-          level: 'PROFESSIONAL',
-          experience: '5', // Default experience value
-          focuses: selectedFocuses
-        };
+        // For professional roles, determine path based on focuses
+        path = selectedFocuses.includes('talent_discovery') ? 'AGENT' : 'CLUB';
       }
 
-      // Call onComplete with the journey data
-      onComplete({
-        journey: journeyData,
-        path: journeyData.path // Add path here to ensure it's available
-      });
+      const journeyData = {
+        status,
+        level: status === 'currently_playing' ? level : undefined,
+        focus: selectedFocuses.length > 0 ? selectedFocuses[0] : undefined,
+        path
+      };
+
+      onComplete(journeyData);
     } catch (error) {
-      console.error('Error saving journey data:', error);
-      setError(error instanceof Error ? error.message : 'Failed to save journey data');
+      console.error('Error submitting journey data:', error);
+      setError('Failed to save journey data');
     } finally {
       setIsSubmitting(false);
     }
@@ -221,9 +202,18 @@ export default function FootballJourneyForm({ onComplete }: FootballJourneyFormP
             !status || 
             (status === 'currently_playing' ? !level : selectedFocuses.length === 0)
           }
-          className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 ease-in-out shadow-lg hover:shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 ease-in-out shadow-lg hover:shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          {isSubmitting ? 'Saving...' : 'Continue'}
+          {isSubmitting ? (
+            <>
+              <LoadingSpinner size="sm" className="mr-2" />
+              Processing...
+            </>
+          ) : (
+            'Continue'
+          )}
         </button>
       </div>
     </form>

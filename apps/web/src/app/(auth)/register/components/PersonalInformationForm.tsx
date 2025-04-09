@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRegistration } from '@/contexts/RegistrationContext';
 
 interface PersonalInformationFormProps {
-  onComplete: () => void;
+  onComplete: (data: any) => void;
 }
 
 export default function PersonalInformationForm({ onComplete }: PersonalInformationFormProps) {
@@ -56,55 +56,31 @@ export default function PersonalInformationForm({ onComplete }: PersonalInformat
 
     setIsSubmitting(true);
     try {
-      // First, ensure the user exists in the database
-      const registerResponse = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firebaseUid: user.uid,
-          email: user.email,
-          phone: formData.phoneNumber,
-          bio: formData.bio,
-          address: {
-            city: formData.city,
-            country: formData.country
-          }
-        }),
-      });
-      
-      if (!registerResponse.ok && registerResponse.status !== 409) {
-        const errorData = await registerResponse.json();
-        throw new Error(errorData.error || 'Failed to register user');
-      }
+      setError('');
 
-      // Save to registration context
-      updateRegistrationData({ personalInfo: formData });
-
-      // Save initial registration data
-      const response = await fetch('/api/users/register/initial', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Update registration context
+      updateRegistrationData({
+        userType: 'TALENT',
+        basicInfo: {
+          fullName: formData.fullName,
+          dateOfBirth: formData.dateOfBirth,
+          nationality: formData.nationality,
+          email: formData.email,
+          phone: formData.phoneNumber
         },
-        body: JSON.stringify({
-          userId: user.uid,
-          basicInfo: {
-            fullName: formData.fullName,
-            email: formData.email,
-            dateOfBirth: formData.dateOfBirth,
-            nationality: formData.nationality
-          }
-        }),
+        footballProfile: {
+          position: '',
+          height: 0,
+          weight: 0,
+          preferredFoot: 'right',
+          experienceLevel: 'amateur'
+        },
+        media: {
+          profilePhoto: ''
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save registration data');
-      }
-
-      onComplete();
+      onComplete(formData);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during registration');
     } finally {

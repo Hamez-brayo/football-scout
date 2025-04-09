@@ -12,12 +12,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^4.16.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "firebase-admin": "^11.11.1",
     "mongoose": "^7.0.0",
-    "pg": "^8.9.0"
+    "pg": "^8.9.0",
+    "prisma": "^4.16.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

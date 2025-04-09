@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Suspense } from 'react';
 import Loading from './loading';
-import ThemeToggle from '@/components/ThemeToggle';
 import ClientParticles from '@/components/ClientParticles';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -27,12 +25,9 @@ export default function RootLayout({
           <ClientParticles />
         </div>
         <div className="relative z-10">
-          <ThemeProvider>
-            <Suspense fallback={<Loading />}>
-              <AuthProvider>{children}</AuthProvider>
-            </Suspense>
-            <ThemeToggle />
-          </ThemeProvider>
+          <Suspense fallback={<Loading />}>
+            <AuthProvider>{children}</AuthProvider>
+          </Suspense>
         </div>
       </body>
     </html>

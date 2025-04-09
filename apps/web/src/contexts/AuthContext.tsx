@@ -19,12 +19,13 @@ import Cookies from 'js-cookie';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ registrationStatus: string }>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUserProfile: (displayName: string, photoURL?: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ registrationStatus: string }>;
+  signInWithApple: () => Promise<{ registrationStatus: string }>;
+  checkRegistrationStatus: (userId: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,11 +83,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const token = await userCredential.user.getIdToken();
-      Cookies.set('session', token, { 
-        expires: 1,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+      
+      // Call our backend to handle sign-in
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to sign in');
+      }
+
+      const data = await response.json();
+      return data.user;
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -144,19 +155,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userCredential = await signInWithPopup(auth, provider);
       const token = await userCredential.user.getIdToken();
-      Cookies.set('session', token, { 
-        expires: 1,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+      
+      // Call our backend to handle sign-in
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
       });
 
-      return userCredential.user;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to sign in with Google');
+      }
+
+      const data = await response.json();
+      return data.user;
     } catch (error: any) {
       // Don't throw for cancelled popup requests
       if (error.code === 'auth/cancelled-popup-request' || 
           error.code === 'auth/popup-closed-by-user') {
         console.log('Sign-in popup was closed');
-        return null;
+        return { registrationStatus: 'INCOMPLETE' };
       }
       console.error('Google Sign-in Error:', error);
       throw new Error(getErrorMessage(error));
@@ -170,14 +189,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider.addScope('name');
       const userCredential = await signInWithPopup(auth, provider);
       const token = await userCredential.user.getIdToken();
-      Cookies.set('session', token, { 
-        expires: 1,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+      
+      // Call our backend to handle sign-in
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to sign in with Apple');
+      }
+
+      const data = await response.json();
+      return data.user;
     } catch (error) {
       console.error('Apple Sign-in Error:', error);
       throw new Error(getErrorMessage(error));
+    }
+  };
+
+  const checkRegistrationStatus = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/registration-status`);
+      if (!response.ok) {
+        throw new Error('Failed to check registration status');
+      }
+      const data = await response.json();
+      return data.isRegistrationComplete;
+    } catch (error) {
+      console.error('Error checking registration status:', error);
+      return false;
     }
   };
 
@@ -190,6 +233,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUserProfile,
     signInWithGoogle,
     signInWithApple,
+    checkRegistrationStatus,
   };
 
   return (

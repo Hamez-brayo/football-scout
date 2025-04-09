@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { UserType, RegistrationStatus } from '../models/user/types';
 import { TalentRegistrationData } from '../models/talent/types';
+import { PrismaClient } from '@prisma/client';
 
 const userService = new UserService();
+const prisma = new PrismaClient();
 
 export class UserController {
   async registerUser(req: Request, res: Response) {
@@ -220,6 +222,37 @@ export class UserController {
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return res.status(500).json({ error: 'Failed to fetch user profile' });
+    }
+  }
+
+  async getUserStatus(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          registrationStatus: true,
+          userType: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      return res.status(200).json({
+        registrationCompleted: user.registrationStatus === 'COMPLETED',
+        userType: user.userType
+      });
+    } catch (error) {
+      console.error('Error getting user status:', error);
+      return res.status(500).json({ error: 'Failed to get user status' });
     }
   }
 } 

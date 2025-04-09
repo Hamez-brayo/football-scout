@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -13,6 +13,21 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp, signInWithGoogle, signInWithApple } = useAuth();
   const router = useRouter();
+
+  // Clear form fields on mount/refresh
+  useEffect(() => {
+    const clearFields = () => {
+      setEmail('');
+      setPassword('');
+      setDisplayName('');
+      setError('');
+    };
+
+    clearFields();
+    // Also clear when window gains focus
+    window.addEventListener('focus', clearFields);
+    return () => window.removeEventListener('focus', clearFields);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,7 +170,7 @@ export default function SignUp() {
                 name="display-name"
                 type="text"
                 required
-                className="appearance-none rounded-t-md relative block w-full px-3 py-2 bg-white/80 dark:bg-black/50 border border-gray-300 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 dark:focus:ring-white/30 focus:border-indigo-500 dark:focus:border-white/30 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-t-md relative block w-full px-3 py-2 bg-transparent border border-gray-300 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 dark:focus:ring-white/30 focus:border-indigo-500 dark:focus:border-white/30 focus:z-10 sm:text-sm"
                 placeholder="Display Name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -172,7 +187,7 @@ export default function SignUp() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none relative block w-full px-3 py-2 bg-white/80 dark:bg-black/50 border border-gray-300 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 dark:focus:ring-white/30 focus:border-indigo-500 dark:focus:border-white/30 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 bg-transparent border border-gray-300 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 dark:focus:ring-white/30 focus:border-indigo-500 dark:focus:border-white/30 focus:z-10 sm:text-sm"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -189,7 +204,7 @@ export default function SignUp() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-b-md relative block w-full px-3 py-2 bg-white/80 dark:bg-black/50 border border-gray-300 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 dark:focus:ring-white/30 focus:border-indigo-500 dark:focus:border-white/30 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-b-md relative block w-full px-3 py-2 bg-transparent border border-gray-300 dark:border-white/10 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-indigo-500 dark:focus:ring-white/30 focus:border-indigo-500 dark:focus:border-white/30 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

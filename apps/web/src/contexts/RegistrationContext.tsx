@@ -9,7 +9,7 @@ import {
   RegistrationContextType,
   FormErrors
 } from '../types/registration';
-import { validateStep } from '@/app/(auth)/register/talent/validation/schemas';
+import { validateStep } from '@/lib/validation/schemas';
 import {
   saveRegistrationData,
   loadRegistrationData,

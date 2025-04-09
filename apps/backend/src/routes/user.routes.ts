@@ -13,5 +13,6 @@ router.post('/media', userController.saveMediaData.bind(userController));
 router.post('/complete-registration', userController.completeRegistration.bind(userController));
 router.post('/profile', userController.createProfile.bind(userController));
 router.get('/:userId', userController.getUserProfile);
+router.get('/:userId/status', userController.getUserStatus);
 
 export default router; 

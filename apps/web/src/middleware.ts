@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 
 // Define paths
 const PROTECTED_PATHS = ['/dashboard'];
-const AUTH_PATHS = ['/sign-in', '/login'];
+const AUTH_PATHS = ['/sign-in', '/sign-up', '/login'];
 const PUBLIC_PATHS = ['/', '/about'];
 const REGISTRATION_PATH = '/register';
 
@@ -30,10 +30,8 @@ export async function middleware(request: NextRequest) {
 
   // Handle authentication paths
   if (AUTH_PATHS.some(path => pathname === path)) {
-    if (isAuthenticated) {
-      if (!registrationComplete) {
-        return NextResponse.redirect(new URL('/register', request.url));
-      }
+    if (isAuthenticated && registrationComplete) {
+      // Only redirect to dashboard if both authenticated and registration is complete
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
