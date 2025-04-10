@@ -123,7 +123,7 @@ export default function RegistrationFlow() {
       }
 
       // Get dashboard path based on user type
-      const dashboardPath = getDashboardPath(data.path);
+      const dashboardPath = getDashboardPath(data.status, data.focus ? [data.focus] : []);
       router.push(dashboardPath);
     } catch (error) {
       console.error('Error in journey step:', error);
@@ -134,17 +134,17 @@ export default function RegistrationFlow() {
   };
 
   // Helper function to get the correct dashboard path
-  const getDashboardPath = (userType: UserPath): string => {
-    switch (userType) {
-      case 'TALENT':
-        return '/dashboard/player';
-      case 'AGENT':
-        return '/dashboard/agent';
-      case 'CLUB':
-        return '/dashboard/club';
-      default:
-        return '/dashboard';
+  const getDashboardPath = (status: string, focuses: string[]) => {
+    if (status === 'CURRENTLY_PLAYING') {
+      return '/talent';
     }
+    if (focuses.includes('AGENT')) {
+      return '/agent';
+    }
+    if (focuses.includes('CLUB')) {
+      return '/club';
+    }
+    return '/talent';
   };
 
   return (

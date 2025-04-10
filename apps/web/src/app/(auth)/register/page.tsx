@@ -38,10 +38,10 @@ export default function Register() {
         if (data.registrationCompleted) {
           // Determine dashboard based on user type
           const dashboardPath = data.userType === 'TALENT' 
-            ? '/talent/dashboard'
+            ? '/talent'
             : data.userType === 'AGENT'
-            ? '/agent/dashboard'
-            : '/club/dashboard';
+            ? '/agent'
+            : '/club';
           
           router.push(dashboardPath);
         }

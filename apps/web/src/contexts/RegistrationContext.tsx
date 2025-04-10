@@ -211,7 +211,7 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
       // Check if registration is complete
       if (isRegistrationComplete(registrationData)) {
         clearRegistrationData();
-        router.push('/dashboard');
+        router.push('/talent');
       } else {
         const nextStep = getNextIncompleteStep(registrationData);
         const nextStepIndex = visibleSteps.findIndex(step => step.id === nextStep);

@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 
 // Define paths
-const PROTECTED_PATHS = ['/dashboard'];
+const PROTECTED_PATHS = ['/talent'];
 const AUTH_PATHS = ['/sign-in', '/sign-up', '/login'];
 const PUBLIC_PATHS = ['/', '/about'];
 const REGISTRATION_PATH = '/register';
@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   if (AUTH_PATHS.some(path => pathname === path)) {
     if (isAuthenticated && registrationComplete) {
       // Only redirect to dashboard if both authenticated and registration is complete
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/talent', request.url));
     }
   }
 
@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/sign-in', request.url));
     }
     if (registrationComplete) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/talent', request.url));
     }
   }
 

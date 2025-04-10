@@ -13,7 +13,7 @@ export default function SignIn() {
   const { signIn, signInWithGoogle, signInWithApple } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') || '/talent';
 
   // Clear form fields on mount/refresh
   useEffect(() => {
