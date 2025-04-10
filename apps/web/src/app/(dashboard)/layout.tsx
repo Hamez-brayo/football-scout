@@ -28,13 +28,13 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
+    <div className="min-h-screen bg-gray-900">
+      <nav className="bg-gray-900 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                <span className="text-xl font-bold text-white">
                   Football Scout
                 </span>
               </div>

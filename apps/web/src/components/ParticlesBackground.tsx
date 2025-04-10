@@ -89,8 +89,8 @@ export default function ParticlesBackground({ className = "fixed inset-0" }: Par
               grab: {
                 distance: 150,
                 links: {
-                  opacity: 0.7,
-                  color: isDarkMode ? "#a78bfa" : "#818cf8"
+                  opacity: 0.3,
+                  color: "#1f2937"
                 }
               },
               push: {
@@ -104,14 +104,14 @@ export default function ParticlesBackground({ className = "fixed inset-0" }: Par
           },
           particles: {
             color: {
-              value: isDarkMode ? "#a78bfa" : "#818cf8",
+              value: "#1f2937",
             },
             links: {
-              color: isDarkMode ? "#a78bfa" : "#818cf8",
+              color: "#1f2937",
               distance: 150,
               enable: true,
-              opacity: 0.6,
-              width: 1.5,
+              opacity: 0.2,
+              width: 1,
               triangles: {
                 enable: true,
                 opacity: 0.05

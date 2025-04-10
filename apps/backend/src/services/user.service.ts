@@ -233,10 +233,13 @@ export class UserService {
         throw new Error('Invalid user type selected');
       }
 
-      // Update user with the selected type
+      // Update user with the selected type and mark registration as complete
       await prisma.user.update({
         where: { id: userId },
-        data: { userType }
+        data: { 
+          userType,
+          registrationStatus: 'COMPLETE'
+        }
       });
 
       // Now save the journey data based on the user type

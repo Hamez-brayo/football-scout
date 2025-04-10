@@ -135,7 +135,7 @@ export default function RegistrationFlow() {
 
   // Helper function to get the correct dashboard path
   const getDashboardPath = (status: string, focuses: string[]) => {
-    if (status === 'CURRENTLY_PLAYING') {
+    if (status === 'currently_playing') {
       return '/talent';
     }
     if (focuses.includes('AGENT')) {

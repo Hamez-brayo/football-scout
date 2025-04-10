@@ -33,7 +33,19 @@ export async function POST(request: Request) {
 
     const result = JSON.parse(responseText);
     console.log('Journey data saved:', result);
-    return NextResponse.json(result);
+
+    // Create response with the result
+    const res = NextResponse.json(result);
+
+    // Set registration complete cookie
+    res.cookies.set('registration_complete', '1', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return res;
   } catch (error) {
     console.error('Error saving journey data:', error);
     return NextResponse.json(

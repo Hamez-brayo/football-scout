@@ -1,165 +1,283 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 import { 
+  ChartBarIcon, 
   UserIcon, 
   VideoCameraIcon, 
-  ChartBarIcon, 
   TrophyIcon,
-  ArrowRightIcon,
+  CalendarIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 
 const quickActions = [
   {
-    name: 'Complete Profile',
-    description: 'Add your personal information and career details',
+    name: 'Update Profile',
+    description: 'Keep your profile up to date to attract scouts.',
     href: '/talent/profile',
-    icon: UserIcon,
+    icon: UserIcon
   },
   {
-    name: 'Upload Highlights',
-    description: 'Share your best moments on the field',
+    name: 'Upload Media',
+    description: 'Share your best moments and highlights.',
     href: '/talent/media',
-    icon: VideoCameraIcon,
+    icon: VideoCameraIcon
   },
   {
-    name: 'Add Performance Stats',
-    description: 'Track your match statistics and progress',
+    name: 'Track Performance',
+    description: 'Track your progress and showcase your abilities.',
     href: '/talent/performance',
-    icon: ChartBarIcon,
+    icon: ChartBarIcon
   },
   {
-    name: 'Update Achievements',
-    description: 'Showcase your awards and recognition',
+    name: 'Add Achievements',
+    description: 'Share your awards, certifications and milestones.',
     href: '/talent/achievements',
-    icon: TrophyIcon,
-  },
-];
-
-const recentActivity = [
-  {
-    id: 1,
-    type: 'Profile Update',
-    description: 'Updated personal information',
-    date: '2 hours ago',
-  },
-  {
-    id: 2,
-    type: 'Media Upload',
-    description: 'Added new match highlights',
-    date: '1 day ago',
-  },
-  {
-    id: 3,
-    type: 'Performance',
-    description: 'Added stats from recent match',
-    date: '3 days ago',
-  },
+    icon: TrophyIcon
+  }
 ];
 
 export default function TalentDashboard() {
   const { user } = useAuth();
-  const profileCompletion = 35; // This would be calculated based on actual profile data
-
-  const profileSteps = [
-    { name: 'Personal Information', completed: true },
-    { name: 'Career History', completed: false },
-    { name: 'Performance Stats', completed: false },
-    { name: 'Media Gallery', completed: true },
-    { name: 'Achievements', completed: false },
-  ];
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {user?.email?.split('@')[0] || 'Player'}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Here's what's happening with your profile
-          </p>
-        </div>
+    <div className="py-6 bg-gray-900">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white">Welcome back, Alex</h1>
+        <p className="mt-1 text-sm text-gray-400">Here's what's happening with your football career</p>
       </div>
 
-      {/* Profile Completion */}
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Profile Completion</h2>
-          <div className="mt-3">
-            <div className="relative">
-              <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200 dark:bg-gray-700">
-                <div
-                  style={{ width: `${profileCompletion}%` }}
-                  className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-600"
-                />
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="overflow-hidden rounded-lg bg-gray-800 shadow">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <ChartBarIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
               </div>
-              <span className="mt-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                {profileCompletion}% Complete
-              </span>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-400 truncate">Performance Score</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-white">8.5</div>
+                    <div className="ml-2 flex items-baseline text-sm font-semibold text-green-400">
+                      +0.5
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </div>
-            <div className="mt-4 space-y-2">
-              {profileSteps.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <div className={`flex-shrink-0 h-5 w-5 rounded-full ${step.completed ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
-                  <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">{step.name}</span>
-                </div>
-              ))}
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-lg bg-gray-800 shadow">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <VideoCameraIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-400 truncate">Media Views</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-white">2.4K</div>
+                    <div className="ml-2 flex items-baseline text-sm font-semibold text-green-400">
+                      +12%
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-lg bg-gray-800 shadow">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <UserIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-400 truncate">Profile Views</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-white">156</div>
+                    <div className="ml-2 flex items-baseline text-sm font-semibold text-green-400">
+                      +25%
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-lg bg-gray-800 shadow">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <TrophyIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-400 truncate">Achievements</dt>
+                  <dd className="flex items-baseline">
+                    <div className="text-2xl font-semibold text-white">12</div>
+                    <div className="ml-2 flex items-baseline text-sm font-semibold text-green-400">
+                      New
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {quickActions.map((action) => (
-          <Link
-            key={action.name}
-            href={action.href}
-            className="relative group bg-white dark:bg-gray-800 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg shadow hover:bg-gray-50 dark:hover:bg-gray-700"
-          >
-            <div>
-              <span className="rounded-lg inline-flex p-3 bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 ring-4 ring-white dark:ring-gray-800">
-                <action.icon className="h-6 w-6" aria-hidden="true" />
-              </span>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                {action.name}
-              </h3>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                {action.description}
-              </p>
-            </div>
-            <span
-              className="absolute top-6 right-6 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 dark:group-hover:text-gray-500"
-              aria-hidden="true"
+      <div className="mb-8">
+        <h2 className="text-base font-semibold leading-6 text-white mb-4">Quick actions</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {quickActions.map((action) => (
+            <div
+              key={action.name}
+              className="relative flex items-center space-x-3 rounded-lg border border-gray-700 bg-gray-800 px-6 py-5 shadow-sm hover:border-gray-600"
             >
-              <ArrowRightIcon className="h-6 w-6" />
-            </span>
-          </Link>
-        ))}
+              <div className="flex-shrink-0">
+                <action.icon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <a href={action.href} className="focus:outline-none">
+                  <span className="absolute inset-0" aria-hidden="true" />
+                  <p className="text-sm font-medium text-white">{action.name}</p>
+                  <p className="truncate text-sm text-gray-400">{action.description}</p>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h2>
-          <div className="mt-4 space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="h-2 w-2 rounded-full bg-indigo-600 mt-2" />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">{activity.type}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{activity.description}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{activity.date}</p>
-                </div>
-              </div>
-            ))}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {/* Upcoming Events */}
+        <div className="overflow-hidden rounded-lg bg-gray-800 shadow">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold text-white">Upcoming Events</h2>
+              <button className="text-sm font-medium text-blue-400 hover:text-blue-300">
+                View all
+              </button>
+            </div>
+            <div className="mt-6 flow-root">
+              <ul role="list" className="-mb-8">
+                <li>
+                  <div className="relative pb-8">
+                    <span className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-700" aria-hidden="true" />
+                    <div className="relative flex space-x-3">
+                      <div>
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-900">
+                          <CalendarIcon className="h-5 w-5 text-blue-300" aria-hidden="true" />
+                        </span>
+                      </div>
+                      <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                        <div>
+                          <p className="text-sm text-white">Training Session</p>
+                          <p className="mt-0.5 text-sm text-gray-400">High-intensity training with Coach Mike</p>
+                        </div>
+                        <div className="whitespace-nowrap text-right text-sm text-gray-400">
+                          <time dateTime="2024-03-20">Tomorrow, 10:00 AM</time>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li>
+                  <div className="relative pb-8">
+                    <div className="relative flex space-x-3">
+                      <div>
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-900">
+                          <MapPinIcon className="h-5 w-5 text-green-300" aria-hidden="true" />
+                        </span>
+                      </div>
+                      <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                        <div>
+                          <p className="text-sm text-white">Local Match</p>
+                          <p className="mt-0.5 text-sm text-gray-400">vs United FC at Central Stadium</p>
+                        </div>
+                        <div className="whitespace-nowrap text-right text-sm text-gray-400">
+                          <time dateTime="2024-03-23">Saturday, 3:00 PM</time>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="overflow-hidden rounded-lg bg-gray-800 shadow">
+          <div className="p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold text-white">Recent Activity</h2>
+              <button className="text-sm font-medium text-blue-400 hover:text-blue-300">
+                View all
+              </button>
+            </div>
+            <div className="mt-6 flow-root">
+              <ul role="list" className="divide-y divide-gray-700">
+                <li className="py-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-purple-900">
+                        <VideoCameraIcon className="h-5 w-5 text-purple-300" aria-hidden="true" />
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white">New highlight video uploaded</p>
+                      <p className="text-sm text-gray-400">Your video "Match Highlights vs City FC" is now live</p>
+                    </div>
+                    <div className="flex-shrink-0 whitespace-nowrap text-sm text-gray-400">
+                      2h ago
+                    </div>
+                  </div>
+                </li>
+                <li className="py-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-yellow-900">
+                        <TrophyIcon className="h-5 w-5 text-yellow-300" aria-hidden="true" />
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white">Achievement unlocked</p>
+                      <p className="text-sm text-gray-400">You earned "Player of the Match" achievement</p>
+                    </div>
+                    <div className="flex-shrink-0 whitespace-nowrap text-sm text-gray-400">
+                      1d ago
+                    </div>
+                  </div>
+                </li>
+                <li className="py-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-green-900">
+                        <ChartBarIcon className="h-5 w-5 text-green-300" aria-hidden="true" />
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white">Performance update</p>
+                      <p className="text-sm text-gray-400">Your performance score increased by 0.5 points</p>
+                    </div>
+                    <div className="flex-shrink-0 whitespace-nowrap text-sm text-gray-400">
+                      2d ago
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
