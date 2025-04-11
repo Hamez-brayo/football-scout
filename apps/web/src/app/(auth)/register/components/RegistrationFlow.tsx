@@ -8,6 +8,7 @@ import { UserPath, PlayingStatus, PlayingLevel, ProfessionalFocus } from '@/type
 import { useRegistration } from '@/contexts/RegistrationContext';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Cookies from 'js-cookie';
 
 const steps = [
   {
@@ -39,19 +40,49 @@ export default function RegistrationFlow() {
         throw new Error('User not authenticated');
       }
 
+      // Allow either Firebase email or form email
+      const userEmail = user.email || data.email;
+      if (!userEmail) {
+        throw new Error('Email is required');
+      }
+
       // Update registration context
       updateRegistrationData(data);
 
       // Submit data to backend based on current step
       if (currentStep === 0) { // Personal Information
-        await fetch('/api/users/register/initial', {
+        // Format the data according to API expectations
+        const formattedData = {
+          basicInfo: {
+            fullName: data.fullName,
+            email: userEmail,
+            dateOfBirth: data.dateOfBirth,
+            nationality: data.nationality,
+            phone: data.phoneNumber,
+            city: data.city,
+            country: data.country,
+            bio: data.bio
+          }
+        };
+
+        console.log('Sending formatted data:', formattedData);
+
+        const response = await fetch('http://localhost:3002/api/users/register/initial', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user.uid,
-            basicInfo: data
-          })
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await user.getIdToken()}`
+          },
+          body: JSON.stringify(formattedData)
         });
+
+        const responseData = await response.json();
+        console.log('API Response:', responseData);
+
+        if (!response.ok) {
+          throw new Error(responseData.error || responseData.details || 'Failed to save personal information');
+        }
+
         setCurrentStep(currentStep + 1);
       }
     } catch (error) {
@@ -67,6 +98,7 @@ export default function RegistrationFlow() {
     level?: PlayingLevel;
     focus?: ProfessionalFocus;
     path: UserPath;
+    currentStatus: string;
   }) => {
     try {
       setError(null);
@@ -78,49 +110,55 @@ export default function RegistrationFlow() {
 
       console.log('Journey data received:', data);
 
-      // Update registration context with journey data
-      updateRegistrationData({
-        userType: 'TALENT',
-        basicInfo: {
-          fullName: '',
-          dateOfBirth: '',
-          nationality: '',
-          email: user.email || '',
-          phone: ''
-        },
-        footballProfile: {
-          position: '',
-          height: 0,
-          weight: 0,
-          preferredFoot: 'right',
-          experienceLevel: data.level === 'amateur' ? 'amateur' : 
-                          data.level === 'semi_pro' ? 'semi-professional' :
-                          data.level === 'pro' ? 'professional' : 'youth'
-        },
-        media: {
-          profilePhoto: ''
+      // Format the journey data according to API expectations
+      const journeyPayload = {
+        journeyData: {
+          path: data.path.toLowerCase(), // Convert to lowercase for API
+          status: data.status,
+          level: data.level,
+          focus: data.focus,
+          currentStatus: data.currentStatus
         }
-      });
+      };
+
+      console.log('Sending journey payload:', journeyPayload);
 
       // Submit journey data to backend
-      const response = await fetch('/api/users/journey', {
+      const response = await fetch('http://localhost:3002/api/users/journey', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.uid,
-          journeyData: {
-            path: data.path,
-            currentStatus: data.status === 'currently_playing' ? 'PLAYING' : 'PROFESSIONAL',
-            level: data.level?.toUpperCase() || 'AMATEUR',
-            experience: '5' // Default experience value
-          }
-        })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify(journeyPayload)
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to save journey data');
       }
+
+      // Mark registration as complete
+      const completeResponse = await fetch('http://localhost:3002/api/users/journey/complete', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify({ userId: user.uid })
+      });
+
+      if (!completeResponse.ok) {
+        const errorData = await completeResponse.json();
+        throw new Error(errorData.error || 'Failed to complete registration');
+      }
+
+      // Set registration complete cookie
+      Cookies.set('registration_complete', 'true', {
+        expires: 1,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
 
       // Get dashboard path based on user type
       const dashboardPath = getDashboardPath(data.status, data.focus ? [data.focus] : []);
@@ -195,7 +233,8 @@ export default function RegistrationFlow() {
                             status: journeyData.status,
                             level: journeyData.level,
                             focus: journeyData.focus,
-                            path: journeyData.path
+                            path: journeyData.path,
+                            currentStatus: journeyData.currentStatus
                           })}
                         />
                       )}

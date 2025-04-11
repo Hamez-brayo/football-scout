@@ -10,6 +10,7 @@ module.exports = {
       animation: {
         'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'spin': 'spin 1s linear infinite',
+        shimmer: 'shimmer 2s infinite linear'
       },
       keyframes: {
         pulse: {
@@ -20,6 +21,10 @@ module.exports = {
           from: { transform: 'rotate(0deg)' },
           to: { transform: 'rotate(360deg)' },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
+        }
       },
       borderWidth: {
         '3': '3px',

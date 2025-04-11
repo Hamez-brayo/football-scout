@@ -19,7 +19,7 @@ app.use('/', routes);
 
 // Basic route
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Football Scout API' });
+  res.json({ message: 'Welcome to the Vysion Analytics API' });
 });
 
 // Health check route

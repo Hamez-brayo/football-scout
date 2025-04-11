@@ -51,13 +51,28 @@ model Talent {
   fullName        String
   dateOfBirth     DateTime
   nationality     String
+  languages       String[]  // Array of languages spoken
+  currentLocation String?   // Current city/country
+  bio             String?   @db.Text
+  nickname        String?   // Player nickname
+  coverPhoto      String?   // URL to cover photo
 
   // Player Specifics
   positions       String[]  // Array of positions
+  primaryPosition String?   // Main position
+  secondaryPositions String[] // Secondary positions
   currentClub     String?
+  previousClubs   String[]  // Array of previous clubs
   height          Float?    // in cm
   weight          Float?    // in kg
   preferredFoot   String?
+  fitnessLevel    Int?      // 0-100 scale
+  playingStyle    String[]  // Array of playing styles
+
+  // Availability
+  isAvailableForTrials Boolean @default(false)
+  preferredRegions     String[] // Array of preferred regions
+  willingToRelocate    Boolean @default(false)
 
   // Experience
   playingHistory  Json?     // Structured JSON for history
@@ -66,6 +81,16 @@ model Talent {
   // Media
   profilePhoto    String?   // URL to photo
   mediaLinks      Json?     // URLs to media (for future)
+
+  // Social Links
+  socialLinks     Json?     // Structured JSON for social media links
+
+  // Privacy Settings
+  profileVisibility String?  @default("public") // public, scout-only, private
+  showContactInfo   Boolean  @default(true)
+  showLocation      Boolean  @default(true)
+  showAchievements  Boolean  @default(true)
+  showMedia         Boolean  @default(true)
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

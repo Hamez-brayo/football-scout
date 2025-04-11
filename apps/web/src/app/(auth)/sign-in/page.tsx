@@ -4,12 +4,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Eye, EyeSlash } from '@phosphor-icons/react';
+import ClientParticles from '@/components/ClientParticles';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
   const { signIn, signInWithGoogle, signInWithApple } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,11 +25,32 @@ export default function SignIn() {
     setEmail('');
     setPassword('');
     setError('');
+    setFormErrors({});
   }, []);
+
+  const validateForm = () => {
+    const errors: { email?: string; password?: string } = {};
+    if (!email) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    if (!password) {
+      errors.password = 'Password is required';
+    } else if (password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFormErrors({});
+
+    if (!validateForm()) return;
+
     setIsLoading(true);
 
     try {
@@ -37,7 +63,14 @@ export default function SignIn() {
         router.push(callbackUrl);
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to sign in');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in';
+      if (errorMessage.includes('auth/wrong-password') || errorMessage.includes('auth/user-not-found')) {
+        setError('Invalid email or password');
+      } else if (errorMessage.includes('auth/too-many-requests')) {
+        setError('Too many failed attempts. Please try again later');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -82,111 +115,173 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8 bg-black/50 backdrop-blur-lg p-8 rounded-xl border border-white/10">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-400">
-            Access your dashboard and analytics
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 rounded relative" role="alert">
-            <span className="block sm:inline">{error}</span>
-          </div>
-        )}
-
-        <div className="flex flex-col space-y-4">
-          <button
-            onClick={handleGoogleSignIn}
-            type="button"
-            disabled={isLoading}
-            className="group relative w-full flex justify-center items-center py-2 px-4 border border-white/10 text-sm font-medium rounded-md text-white bg-black/50 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48">
-              <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-              <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-              <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-              <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
-            </svg>
-            Continue with Google
-          </button>
-
-          <button
-            onClick={handleAppleSignIn}
-            type="button"
-            className="group relative w-full flex justify-center items-center py-2 px-4 border border-white/10 text-sm font-medium rounded-md text-white bg-black/50 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
-          >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 384 512">
-              <path
-                fill="currentColor"
-                d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
-              />
-            </svg>
-            Continue with Apple
-          </button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+    <div className="relative min-h-screen">
+      <div className="fixed inset-0">
+        <ClientParticles />
+      </div>
+      <div className="relative min-h-screen flex items-center justify-center p-4 z-10">
+        <div className="w-full max-w-md bg-black/40 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-xl">
+          <div className="p-8 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white text-center">
+                Sign in to your account
+              </h2>
+              <p className="mt-2 text-sm text-gray-400 text-center">
+                Access your dashboard and analytics
+              </p>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-black/50 text-gray-400">Or</span>
+
+            <div className="space-y-4">
+              <button
+                onClick={handleGoogleSignIn}
+                type="button"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 px-3 py-2 border border-gray-800 rounded-lg text-white hover:bg-gray-800/50 transition"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+                Continue with Google
+              </button>
+
+              <button
+                onClick={handleAppleSignIn}
+                type="button"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 px-3 py-2 border border-gray-800 rounded-lg text-white hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16.645 4.436c.973 0 2.07-.656 2.796-1.504.648-.762 1.12-1.817 1.12-2.872 0-.14-.012-.28-.036-.398-1.072.043-2.34.75-3.107 1.69-.604.703-1.168 1.759-1.168 2.826 0 .152.018.304.03.356.061.012.158.024.256.024zM16.815 6c-1.735 0-2.473 1.015-3.682 1.015-1.24 0-2.2-1.003-3.707-1.003-1.514 0-3.13.867-3.957 2.312-1.71 2.89-.44 7.167 1.198 9.514.82 1.15 1.771 2.438 3.01 2.392 1.22-.05 1.673-.77 3.142-.77 1.447 0 1.87.77 3.126.744 1.295-.024 2.11-1.143 2.894-2.305.934-1.297 1.296-2.576 1.32-2.642-.03-.012-2.522-.947-2.546-3.79-.018-2.37 1.973-3.484 2.065-3.545-1.15-1.641-2.911-1.815-3.516-1.852a5.09 5.09 0 0 0-.347-.07z" />
+                </svg>
+                Continue with Apple
+              </button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-800"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-black/40 text-gray-500">Or</span>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 text-sm text-red-500 bg-red-950/50 border border-red-900/50 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <input
+                    id="email-address"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className={`w-full px-3 py-2 bg-white/5 border ${
+                      formErrors.email ? 'border-red-500' : 'border-gray-800'
+                    } rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  {formErrors.email && (
+                    <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    className={`w-full px-3 py-2 bg-white/5 border ${
+                      formErrors.password ? 'border-red-500' : 'border-gray-800'
+                    } rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-400"
+                  >
+                    {showPassword ? (
+                      <EyeSlash className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                  {formErrors.password && (
+                    <p className="mt-1 text-sm text-red-500">{formErrors.password}</p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-800 bg-white/5 text-blue-500 focus:ring-blue-500"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
+                      Remember me
+                    </label>
+                  </div>
+
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-blue-500 hover:text-blue-400"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex justify-center py-2 px-4 rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    'Sign in'
+                  )}
+                </button>
+              </form>
+
+              <p className="text-center text-sm text-gray-500">
+                Don't have an account?{' '}
+                <Link href="/sign-up" className="text-blue-500 hover:text-blue-400">
+                  Sign up
+                </Link>
+              </p>
             </div>
           </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <input
-              id="email-address"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-white/10 placeholder-gray-400 text-white bg-transparent focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-white/10 placeholder-gray-400 text-white bg-transparent focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 disabled:opacity-50"
-            >
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-
-        <div className="text-center">
-          <Link
-            href="/sign-up"
-            className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors duration-200"
-          >
-            Don't have an account? Sign up
-          </Link>
         </div>
       </div>
     </div>

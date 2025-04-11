@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { Request } from 'express';
 import { auth } from '../config/firebase';
 import { authenticateUser, AuthRequest } from '../middleware/auth';
-import prisma from '../config/prisma';
+import { PrismaClient } from '@prisma/client';
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
 // Get current user profile
 router.get('/me', authenticateUser, async (req: AuthRequest, res) => {
@@ -22,9 +23,9 @@ router.get('/me', authenticateUser, async (req: AuthRequest, res) => {
 });
 
 // Sign in and get user data
-router.post('/sign-in', async (req: AuthRequest, res) => {
+router.post('/sign-in', async (req: Request, res) => {
   try {
-    const { token } = req.body;
+    const { token, isSignUp } = req.body;
     
     if (!token) {
       return res.status(400).json({ error: 'No token provided' });
@@ -36,34 +37,55 @@ router.post('/sign-in', async (req: AuthRequest, res) => {
     // Get the user's profile from Firebase
     const firebaseUser = await auth.getUser(decodedToken.uid);
     
-    // Get or create user in our database
-    let user = await prisma.user.findUnique({
-      where: { userId: decodedToken.uid },
-    });
+    try {
+      // Get or create user in our database
+      let user = await prisma.user.findUnique({
+        where: { userId: decodedToken.uid },
+      });
 
-    if (!user) {
-      // Create a new user if they don't exist
-      user = await prisma.user.create({
-        data: {
-          userId: decodedToken.uid,
-          email: firebaseUser.email || '',
-          fullName: firebaseUser.displayName || '',
-          registrationStatus: 'INCOMPLETE',
+      if (!user) {
+        if (isSignUp) {
+          // Create a new user with INCOMPLETE registration status
+          user = await prisma.user.create({
+            data: {
+              userId: decodedToken.uid,
+              email: firebaseUser.email || '',
+              fullName: firebaseUser.displayName || '',
+              registrationStatus: 'INCOMPLETE',
+            },
+          });
+        } else {
+          // For sign-in, create a user with COMPLETE registration status
+          user = await prisma.user.create({
+            data: {
+              userId: decodedToken.uid,
+              email: firebaseUser.email || '',
+              fullName: firebaseUser.displayName || '',
+              registrationStatus: 'COMPLETE',
+            },
+          });
+        }
+      }
+
+      // Return user data
+      res.json({
+        user: {
+          uid: decodedToken.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+          registrationStatus: user.registrationStatus,
         },
+        token
+      });
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
+      res.status(500).json({ 
+        error: 'Database connection error. Please ensure PostgreSQL is running and credentials are correct.',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
       });
     }
-
-    // Return user data
-    res.json({
-      user: {
-        uid: decodedToken.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        registrationStatus: user.registrationStatus,
-      },
-      token
-    });
   } catch (error) {
     console.error('Sign-in error:', error);
     res.status(401).json({ error: 'Invalid token' });

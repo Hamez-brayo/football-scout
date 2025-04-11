@@ -16,12 +16,89 @@ export interface BasicInfo {
   phone?: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  nickname?: string;
+  profilePhoto?: string;
+  coverPhoto?: string;
+  dateOfBirth: string;
+  nationality: string;
+  languages: string[];
+  currentLocation: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PhysicalAttributes {
+  userId: string;
+  height: number; // in cm
+  weight: number; // in kg
+  preferredFoot: 'left' | 'right' | 'both';
+  fitnessLevel: number; // 0-100
+  updatedAt: string;
+}
+
 export interface FootballProfile {
-  position: string;
-  strongFoot: 'LEFT' | 'RIGHT' | 'BOTH';
-  height: number;
-  weight: number;
+  userId: string;
+  primaryPosition: string;
+  secondaryPositions: string[];
   currentClub?: string;
+  previousClubs: string[];
+  playingStyle: string[];
+  updatedAt: string;
+}
+
+export interface Availability {
+  userId: string;
+  isAvailableForTrials: boolean;
+  preferredRegions: string[];
+  willingToRelocate: boolean;
+  updatedAt: string;
+}
+
+export interface MediaItem {
+  id: string;
+  userId: string;
+  type: 'video' | 'photo';
+  url: string;
+  thumbnailUrl?: string;
+  title: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface Achievement {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  date: string;
+  type: 'trophy' | 'certification' | 'performance';
+  createdAt: string;
+}
+
+export interface SocialLinks {
+  userId: string;
+  instagram?: string;
+  youtube?: string;
+  twitter?: string;
+  tiktok?: string;
+  updatedAt: string;
+}
+
+export interface PrivacySettings {
+  userId: string;
+  profileVisibility: 'public' | 'scout-only' | 'private';
+  showContactInfo: boolean;
+  showLocation: boolean;
+  showAchievements: boolean;
+  showMedia: boolean;
+  updatedAt: string;
 }
 
 export interface Experience {
@@ -30,12 +107,6 @@ export interface Experience {
   startDate: string;
   endDate?: string;
   achievements?: string[];
-}
-
-export interface Achievement {
-  title: string;
-  date: string;
-  description: string;
 }
 
 export interface Media {

@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import ParticlesBackground from '@/components/ParticlesBackground';
 
 export const metadata: Metadata = {
-  title: 'Register - Football Scout',
-  description: 'Join Football Scout as a player, agent, or club.',
+  title: 'Register - Vysion Analytics',
+  description: 'Join Vysion Analytics as a player, agent, or club.',
 };
 
 export default function RegisterLayout({

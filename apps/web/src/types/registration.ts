@@ -1,5 +1,5 @@
 // User Types
-export type UserType = 'talent' | 'organization';
+export type UserType = 'TALENT' | 'AGENT' | 'CLUB';
 
 // Basic Information
 export interface BasicInfo {
@@ -153,11 +153,17 @@ export interface FormTextAreaProps extends Omit<FormInputProps, 'type'> {
 
 export type UserPath = 'player' | 'agent' | 'club';
 
-export type PlayingStatus = 'currently_playing' | 'professional_role';
+export type PlayingStatus = 'PLAYING' | 'PROFESSIONAL';
 
-export type PlayingLevel = 'amateur' | 'academy' | 'semi_pro' | 'pro';
+export type ExperienceLevel = 'AMATEUR' | 'ACADEMY' | 'SEMI_PRO' | 'PRO';
 
-export type ProfessionalFocus = 'player_development' | 'team_operations' | 'talent_discovery' | 'club_management';
+export type PreferredFoot = 'LEFT' | 'RIGHT' | 'BOTH';
+
+export type ProfessionalFocus = 
+  | 'PLAYER_DEVELOPMENT'
+  | 'TEAM_OPERATIONS'
+  | 'TALENT_DISCOVERY'
+  | 'CLUB_MANAGEMENT';
 
 export interface RegistrationData {
   // Step 1: Universal Information
@@ -170,7 +176,7 @@ export interface RegistrationData {
   // Step 2: Football Journey
   journey?: {
     status: PlayingStatus;
-    level?: PlayingLevel;
+    level?: ExperienceLevel;
     focus?: ProfessionalFocus;
   };
   
@@ -201,4 +207,51 @@ export interface RegistrationData {
     documents?: string[];
     videos?: string[];
   };
+}
+
+export type RegistrationStatus = 'INCOMPLETE' | 'JOURNEY_COMPLETED' | 'COMPLETE';
+
+export interface JourneyData {
+  status: 'currently_playing' | 'professional_role';
+  level?: 'amateur' | 'academy' | 'semi_pro' | 'pro';
+  focus?: ProfessionalFocus;
+  path: UserType;
+  currentStatus?: PlayingStatus;
+}
+
+export interface User {
+  id: string;
+  userId: string;
+  email: string;
+  fullName?: string;
+  dateOfBirth?: string;
+  nationality?: string;
+  phone?: string;
+  registrationStatus: RegistrationStatus;
+  userType?: UserType;
+  
+  // Journey Info
+  playingStatus?: PlayingStatus;
+  experienceLevel?: ExperienceLevel;
+  professionalFocus?: ProfessionalFocus;
+  
+  // Path Specific
+  position?: string;
+  currentClub?: string;
+  preferredFoot?: PreferredFoot;
+  agencyName?: string;
+  yearsExperience?: number;
+  specialties: string[];
+  clubName?: string;
+  clubRole?: string;
+  department?: string;
+  
+  // Media
+  profilePicture?: string;
+  coverPhoto?: string;
+  documents: string[];
+  videos: string[];
+  
+  createdAt: string;
+  updatedAt: string;
 } 

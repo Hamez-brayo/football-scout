@@ -7,12 +7,76 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserType {
+  TALENT
+  AGENT
+  CLUB
+}
+
+enum RegistrationStatus {
+  INCOMPLETE
+  JOURNEY_COMPLETED
+  COMPLETE
+}
+
+enum PlayingStatus {
+  PLAYING
+  PROFESSIONAL
+}
+
+enum ExperienceLevel {
+  AMATEUR
+  ACADEMY
+  SEMI_PRO
+  PRO
+}
+
+enum PreferredFoot {
+  LEFT
+  RIGHT
+  BOTH
+}
+
+enum ProfessionalFocus {
+  PLAYER_DEVELOPMENT
+  TEAM_OPERATIONS
+  TALENT_DISCOVERY
+  CLUB_MANAGEMENT
+}
+
 model User {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  email             String   @unique
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  email             String            @unique
   fullName          String?
-  registrationStatus String  @default("INCOMPLETE")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  dateOfBirth       String?
+  nationality       String?
+  phone             String?
+  registrationStatus RegistrationStatus @default(INCOMPLETE)
+  userType          UserType?
+  
+  // Journey Info
+  playingStatus     PlayingStatus?
+  experienceLevel   ExperienceLevel?
+  professionalFocus ProfessionalFocus?
+  
+  // Path Specific
+  position          String?           // For TALENT
+  currentClub       String?           // For TALENT
+  preferredFoot     PreferredFoot?    // For TALENT
+  agencyName        String?           // For AGENT
+  yearsExperience   Int?              // For AGENT
+  specialties       String[]          @default([])
+  clubName          String?           // For CLUB
+  clubRole          String?           // For CLUB
+  department        String?           // For CLUB
+  
+  // Media
+  profilePicture    String?
+  coverPhoto        String?
+  documents         String[]          @default([])
+  videos            String[]          @default([])
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 } 

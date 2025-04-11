@@ -22,7 +22,7 @@ export default function Register() {
 
       try {
         setError(null);
-        const response = await fetch(`/api/users/${user.uid}/status`);
+        const response = await fetch(`/api/users/${user.uid}/registration-status`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -35,16 +35,14 @@ export default function Register() {
 
         const data = await response.json();
 
-        if (data.registrationCompleted) {
-          // Determine dashboard based on user type
-          const dashboardPath = data.userType === 'TALENT' 
-            ? '/talent'
-            : data.userType === 'AGENT'
-            ? '/agent'
-            : '/club';
-          
-          router.push(dashboardPath);
+        if (data.isRegistrationComplete) {
+          // If registration is complete, redirect to appropriate dashboard
+          router.push('/talent');
+          return;
         }
+        
+        // If registration is not complete, allow access to registration flow
+        setIsChecking(false);
       } catch (error) {
         console.error('Error checking registration status:', error);
         setError('Unable to verify registration status. Please try again later.');

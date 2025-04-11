@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { User } from '@phosphor-icons/react';
 
 export default function DashboardLayout({
   children,
@@ -29,19 +30,20 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <nav className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-white">
-                  Football Scout
-                </span>
-              </div>
-            </div>
-          </div>
+      <div className="absolute top-4 right-4 flex items-center space-x-2">
+        <span className="text-sm text-gray-300">{user?.displayName}</span>
+        <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden">
+          {user?.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          ) : (
+            <User className="w-5 h-5 text-gray-400" />
+          )}
         </div>
-      </nav>
+      </div>
       <main>{children}</main>
     </div>
   );

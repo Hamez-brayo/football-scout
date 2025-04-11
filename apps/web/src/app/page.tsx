@@ -445,7 +445,7 @@ export default function HomePage() {
           </div>
           <div className="mt-8 md:order-1 md:mt-0">
             <p className="text-center text-xs leading-5 text-gray-500">
-              &copy; {new Date().getFullYear()} Football Scout, Inc. All rights reserved.
+              &copy; {new Date().getFullYear()} Vysion Analytics, Inc. All rights reserved.
             </p>
           </div>
         </div>
