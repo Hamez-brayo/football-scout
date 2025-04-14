@@ -64,8 +64,8 @@ Our platform provides:
 ### 🔧 Installation
 1. Clone the repository:
    ```sh
-   git clone git@github.com:Hamez-brayo/football-scout.git
-   cd football-scout
+   git clone git@github.com:Hamez-brayo/vysion-analytics.git
+   cd vysion-analytics
    ```
 2. Install dependencies:
    ```sh
@@ -87,4 +87,4 @@ We welcome contributions! Please submit a pull request or reach out to discuss i
 ## 📞 Contact
 For inquiries, partnerships, or collaborations, please reach out via email at jamesbrian.kariuki@hotmail.com. 
 ---
-**Let's revolutionize football scouting together! ⚽🚀**
+**Let's revolutionize football analytics together! ⚽🚀**

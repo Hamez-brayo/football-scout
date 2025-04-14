@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { User, Trophy, Calendar, MapPin, VideoCamera, ChartLine, Share, Gear } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/useProfile'
+import Link from 'next/link'
 
 // Profile Header Component
 const ProfileHeader = ({ user }: { user: any }) => {
@@ -89,6 +90,15 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-white">Profile</h1>
+          <Link
+            href="/talent/profile/edit"
+            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200"
+          >
+            Edit Profile
+          </Link>
+        </div>
         {/* Profile Header */}
         <ProfileHeader user={profile.user} />
 
@@ -115,7 +125,7 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm text-gray-400">Languages</label>
                 <div className="flex space-x-2 mt-1">
-                  {profile.user.languages.map((lang, index) => (
+                  {(profile.user.languages || []).map((lang, index) => (
                     <span key={index} className="px-2 py-1 text-xs rounded-full bg-gray-700 text-white">
                       {lang}
                     </span>
@@ -158,7 +168,7 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm text-gray-400">Secondary Positions</label>
                 <div className="flex space-x-2 mt-1">
-                  {profile.footballProfile.secondaryPositions.map((pos, index) => (
+                  {(profile.footballProfile?.secondaryPositions || []).map((pos, index) => (
                     <span key={index} className="px-2 py-1 text-xs rounded-full bg-gray-700 text-white">
                       {pos}
                     </span>
@@ -172,7 +182,7 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm text-gray-400">Previous Clubs</label>
                 <div className="flex space-x-2 mt-1">
-                  {profile.footballProfile.previousClubs.map((club, index) => (
+                  {(profile.footballProfile?.previousClubs || []).map((club, index) => (
                     <span key={index} className="px-2 py-1 text-xs rounded-full bg-gray-700 text-white">
                       {club}
                     </span>
@@ -194,7 +204,7 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm text-gray-400">Preferred Regions</label>
                 <div className="flex space-x-2 mt-1">
-                  {profile.availability.preferredRegions.map((region, index) => (
+                  {(profile.availability?.preferredRegions || []).map((region, index) => (
                     <span key={index} className="px-2 py-1 text-xs rounded-full bg-gray-700 text-white">
                       {region}
                     </span>
@@ -212,7 +222,7 @@ export default function ProfilePage() {
           <Section title="Media" icon={VideoCamera}>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                {profile.media.slice(0, 2).map((item) => (
+                {(profile.media || []).slice(0, 2).map((item) => (
                   <div key={item.id} className="aspect-video bg-gray-700 rounded-lg overflow-hidden">
                     {item.type === 'video' ? (
                       <video src={item.url} className="w-full h-full object-cover" />
@@ -222,7 +232,7 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
-              {profile.media.length > 2 && (
+              {(profile.media || []).length > 2 && (
                 <button className="text-blue-400 hover:text-blue-300 text-sm">
                   View All Media ({profile.media.length})
                 </button>
@@ -236,7 +246,7 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm text-gray-400">Recent Achievements</label>
                 <ul className="mt-2 space-y-2">
-                  {profile.achievements.map((achievement) => (
+                  {(profile.achievements || []).map((achievement) => (
                     <li key={achievement.id} className="flex items-center space-x-2">
                       <Trophy className="h-4 w-4 text-yellow-400" />
                       <span className="text-white">{achievement.title}</span>

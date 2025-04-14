@@ -48,10 +48,28 @@ model User {
   id                String            @id @default(cuid())
   userId            String            @unique
   email             String            @unique
+  
+  // Basic Info
+  firstName         String?
+  lastName          String?
+  nickname          String?
   fullName          String?
   dateOfBirth       String?
   nationality       String?
   phone             String?
+  languages         String[]          @default([])
+  currentLocation   String?
+  contactEmail      String?
+  contactPhone      String?
+  
+  // Media
+  profilePhoto      String?
+  coverPhoto        String?
+  documents         String[]          @default([])
+  videos            String[]          @default([])
+  media             String[]          @default([])
+  
+  // Status and Type
   registrationStatus RegistrationStatus @default(INCOMPLETE)
   userType          UserType?
   
@@ -71,12 +89,92 @@ model User {
   clubRole          String?           // For CLUB
   department        String?           // For CLUB
   
-  // Media
-  profilePicture    String?
-  coverPhoto        String?
-  documents         String[]          @default([])
-  videos            String[]          @default([])
+  // Relations
+  physicalAttributes PhysicalAttributes?
+  footballProfile    FootballProfile?
+  availability      Availability?
+  socialLinks       SocialLinks?
+  privacySettings   PrivacySettings?
   
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+}
+
+model PhysicalAttributes {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [userId])
+  height        Float?
+  weight        Float?
+  wingspan      Float?
+  fitnessLevel  Int      @default(0)
+  preferredFoot PreferredFoot? @default(RIGHT)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model FootballProfile {
+  id                 String        @id @default(cuid())
+  userId             String        @unique
+  user               User          @relation(fields: [userId], references: [userId])
+  primaryPosition    String?
+  secondaryPositions String[]      @default([])
+  currentClub        String?
+  previousClubs      String[]      @default([])
+  playingStyle       String[]      @default([])
+  strongFoot         PreferredFoot?
+  experience         ExperienceLevel?
+  achievements       Achievement[]
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+
+model Achievement {
+  id               String          @id @default(cuid())
+  footballProfileId String
+  footballProfile   FootballProfile @relation(fields: [footballProfileId], references: [id])
+  title           String
+  description     String?
+  date            DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Availability {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [userId])
+  isAvailableForTrials Boolean @default(false)
+  preferredRegions    String[] @default([])
+  willingToRelocate   Boolean @default(false)
+  available           Boolean  @default(true)
+  startDate           DateTime?
+  endDate             DateTime?
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SocialLinks {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [userId])
+  twitter     String?
+  facebook    String?
+  instagram   String?
+  linkedin    String?
+  youtube     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PrivacySettings {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [userId])
+  profileVisibility     String   @default("public")
+  contactInfoVisibility String   @default("private")
+  mediaVisibility      String   @default("public")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 } 
