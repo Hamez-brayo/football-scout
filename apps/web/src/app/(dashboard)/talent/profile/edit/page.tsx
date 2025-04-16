@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useProfile } from '@/hooks/useProfile';
 import { User, Trophy, Calendar, MapPin, VideoCamera, ChartLine, Share, Gear, ArrowLeft } from '@phosphor-icons/react';
 import Link from 'next/link';
+import { MediaUpload } from '@/components/MediaUpload';
+import { useMedia } from '@/hooks/useMedia';
 
 interface ProfileFormData {
   basicInfo: {
@@ -28,13 +30,24 @@ interface ProfileFormData {
     secondaryPositions: string[];
     currentClub: string;
     previousClubs: string[];
+    playingStyle: string[];
+    strongFoot: 'left' | 'right' | 'both';
     experience: string;
-    achievements: string[];
+    achievements: Array<{
+      id: string;
+      title: string;
+      description?: string;
+      date?: string;
+    }>;
   };
   availability: {
     isAvailableForTrials: boolean;
     preferredRegions: string[];
-    notice: string;
+    willingToRelocate: boolean;
+    available: boolean;
+    startDate?: string;
+    endDate?: string;
+    notes?: string;
   };
   media: {
     profilePhoto: string;
@@ -42,9 +55,11 @@ interface ProfileFormData {
     highlightVideo?: string;
     matchFootage: string[];
   };
-  socialMedia: {
-    instagram?: string;
+  socialLinks: {
     twitter?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
     youtube?: string;
   };
 }
@@ -52,6 +67,7 @@ interface ProfileFormData {
 export default function EditProfilePage() {
   const router = useRouter();
   const { profile, loading, error, updateProfile } = useProfile();
+  const { uploadMedia, isUploading: isMediaUploading } = useMedia();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     basicInfo: {
@@ -75,13 +91,16 @@ export default function EditProfilePage() {
       secondaryPositions: [],
       currentClub: '',
       previousClubs: [],
+      playingStyle: [],
+      strongFoot: 'right',
       experience: '',
       achievements: [],
     },
     availability: {
       isAvailableForTrials: false,
       preferredRegions: [],
-      notice: '',
+      willingToRelocate: false,
+      available: false,
     },
     media: {
       profilePhoto: '',
@@ -89,9 +108,11 @@ export default function EditProfilePage() {
       highlightVideo: '',
       matchFootage: [],
     },
-    socialMedia: {
-      instagram: '',
+    socialLinks: {
       twitter: '',
+      facebook: '',
+      instagram: '',
+      linkedin: '',
       youtube: '',
     },
   });
@@ -119,13 +140,21 @@ export default function EditProfilePage() {
           secondaryPositions: profile.footballProfile?.secondaryPositions || [],
           currentClub: profile.footballProfile?.currentClub || '',
           previousClubs: profile.footballProfile?.previousClubs || [],
+          playingStyle: profile.footballProfile?.playingStyle || [],
+          strongFoot: profile.footballProfile?.strongFoot || 'right',
           experience: profile.footballProfile?.experience || '',
-          achievements: profile.footballProfile?.achievements || [],
+          achievements: profile.footballProfile?.achievements?.map(achievement => ({
+            id: achievement.id || '',
+            title: achievement.title || '',
+            description: achievement.description || '',
+            date: achievement.date || '',
+          })) || [],
         },
         availability: {
           isAvailableForTrials: profile.availability?.isAvailableForTrials || false,
           preferredRegions: profile.availability?.preferredRegions || [],
-          notice: profile.availability?.notice || '',
+          willingToRelocate: profile.availability?.willingToRelocate || false,
+          available: profile.availability?.available || false,
         },
         media: {
           profilePhoto: profile.media?.profilePhoto || '',
@@ -133,10 +162,12 @@ export default function EditProfilePage() {
           highlightVideo: profile.media?.highlightVideo || '',
           matchFootage: profile.media?.matchFootage || [],
         },
-        socialMedia: {
-          instagram: profile.socialMedia?.instagram || '',
-          twitter: profile.socialMedia?.twitter || '',
-          youtube: profile.socialMedia?.youtube || '',
+        socialLinks: {
+          twitter: profile.socialLinks?.twitter || '',
+          facebook: profile.socialLinks?.facebook || '',
+          instagram: profile.socialLinks?.instagram || '',
+          linkedin: profile.socialLinks?.linkedin || '',
+          youtube: profile.socialLinks?.youtube || '',
         },
       });
     }
@@ -398,36 +429,58 @@ export default function EditProfilePage() {
               <VideoCamera className="h-5 w-5" />
               Media
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               <div>
-                <label htmlFor="profilePhoto" className={labelClasses}>Profile Photo URL</label>
-                <input
-                  type="url"
-                  id="profilePhoto"
-                  value={formData.media.profilePhoto}
-                  onChange={(e) => handleInputChange('media', 'profilePhoto', e.target.value)}
-                  className={inputClasses}
-                  required
+                <label className={labelClasses}>Profile Photo</label>
+                <MediaUpload
+                  type="image"
+                  previewUrl={formData.media.profilePhoto}
+                  onUpload={async (file) => {
+                    try {
+                      const response = await uploadMedia(file, 'image', 'Profile Photo');
+                      handleInputChange('media', 'profilePhoto', response.url);
+                    } catch (error) {
+                      console.error('Error uploading profile photo:', error);
+                      alert('Failed to upload profile photo');
+                    }
+                  }}
+                  onRemove={() => handleInputChange('media', 'profilePhoto', '')}
                 />
               </div>
+              
               <div>
-                <label htmlFor="coverPhoto" className={labelClasses}>Cover Photo URL (Optional)</label>
-                <input
-                  type="url"
-                  id="coverPhoto"
-                  value={formData.media.coverPhoto}
-                  onChange={(e) => handleInputChange('media', 'coverPhoto', e.target.value)}
-                  className={inputClasses}
+                <label className={labelClasses}>Cover Photo</label>
+                <MediaUpload
+                  type="image"
+                  previewUrl={formData.media.coverPhoto}
+                  onUpload={async (file) => {
+                    try {
+                      const response = await uploadMedia(file, 'image', 'Cover Photo');
+                      handleInputChange('media', 'coverPhoto', response.url);
+                    } catch (error) {
+                      console.error('Error uploading cover photo:', error);
+                      alert('Failed to upload cover photo');
+                    }
+                  }}
+                  onRemove={() => handleInputChange('media', 'coverPhoto', '')}
                 />
               </div>
+              
               <div>
-                <label htmlFor="highlightVideo" className={labelClasses}>Highlight Video URL (Optional)</label>
-                <input
-                  type="url"
-                  id="highlightVideo"
-                  value={formData.media.highlightVideo}
-                  onChange={(e) => handleInputChange('media', 'highlightVideo', e.target.value)}
-                  className={inputClasses}
+                <label className={labelClasses}>Highlight Video</label>
+                <MediaUpload
+                  type="video"
+                  previewUrl={formData.media.highlightVideo}
+                  onUpload={async (file) => {
+                    try {
+                      const response = await uploadMedia(file, 'video', 'Highlight Video');
+                      handleInputChange('media', 'highlightVideo', response.url);
+                    } catch (error) {
+                      console.error('Error uploading highlight video:', error);
+                      alert('Failed to upload highlight video');
+                    }
+                  }}
+                  onRemove={() => handleInputChange('media', 'highlightVideo', '')}
                 />
               </div>
             </div>
@@ -441,23 +494,12 @@ export default function EditProfilePage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="instagram" className={labelClasses}>Instagram (Optional)</label>
-                <input
-                  type="url"
-                  id="instagram"
-                  value={formData.socialMedia.instagram}
-                  onChange={(e) => handleInputChange('socialMedia', 'instagram', e.target.value)}
-                  className={inputClasses}
-                  placeholder="https://instagram.com/username"
-                />
-              </div>
-              <div>
                 <label htmlFor="twitter" className={labelClasses}>Twitter (Optional)</label>
                 <input
                   type="url"
                   id="twitter"
-                  value={formData.socialMedia.twitter}
-                  onChange={(e) => handleInputChange('socialMedia', 'twitter', e.target.value)}
+                  value={formData.socialLinks.twitter}
+                  onChange={(e) => handleInputChange('socialLinks', 'twitter', e.target.value)}
                   className={inputClasses}
                   placeholder="https://twitter.com/username"
                 />
@@ -467,8 +509,8 @@ export default function EditProfilePage() {
                 <input
                   type="url"
                   id="youtube"
-                  value={formData.socialMedia.youtube}
-                  onChange={(e) => handleInputChange('socialMedia', 'youtube', e.target.value)}
+                  value={formData.socialLinks.youtube}
+                  onChange={(e) => handleInputChange('socialLinks', 'youtube', e.target.value)}
                   className={inputClasses}
                   placeholder="https://youtube.com/channel"
                 />

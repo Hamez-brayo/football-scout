@@ -5,6 +5,8 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+  previewFeatures = ["fullTextSearch"]
 }
 
 enum UserType {
@@ -67,7 +69,7 @@ model User {
   coverPhoto        String?
   documents         String[]          @default([])
   videos            String[]          @default([])
-  media             String[]          @default([])
+  mediaUrls         String[]          @default([])
   
   // Status and Type
   registrationStatus RegistrationStatus @default(INCOMPLETE)
@@ -95,6 +97,7 @@ model User {
   availability      Availability?
   socialLinks       SocialLinks?
   privacySettings   PrivacySettings?
+  media             Media[]
   
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -177,4 +180,17 @@ model PrivacySettings {
   mediaVisibility      String   @default("public")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [userId])
+  type        String   // 'image' or 'video'
+  url         String
+  thumbnail   String?  // For videos
+  title       String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 } 

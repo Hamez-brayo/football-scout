@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient, UserType, PlayingStatus, ExperienceLevel, PreferredFoot, ProfessionalFocus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { authenticateUser, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
@@ -34,7 +34,7 @@ router.post('/register/initial', authenticateUser, async (req: AuthRequest, res)
           nationality: basicInfo.nationality,
           phone: basicInfo.phone,
           registrationStatus: 'INCOMPLETE',
-          userType: 'TALENT' // Default type, will be updated in journey step
+          userType: 'TALENT' // Use the string value directly
         }
       });
     } else {
@@ -67,26 +67,23 @@ router.post('/journey', authenticateUser, async (req: AuthRequest, res) => {
   try {
     const uid = req.user!.uid;
     const { journeyData } = req.body;
-
     // Map frontend level to ExperienceLevel enum
-    const experienceLevelMap: { [key: string]: ExperienceLevel } = {
+    const experienceLevelMap: { [key: string]: string } = {
       'amateur': 'AMATEUR',
       'academy': 'ACADEMY',
       'semi_pro': 'SEMI_PRO',
       'pro': 'PRO'
     };
-
     // Map frontend path to UserType enum
-    const userTypeMap: { [key: string]: UserType } = {
+    const userTypeMap: { [key: string]: string } = {
       'player': 'TALENT',
       'agent': 'AGENT',
       'club': 'CLUB'
     };
-
     const userType = userTypeMap[journeyData.path];
-    const playingStatus = journeyData.currentStatus as PlayingStatus;
+    const playingStatus = journeyData.currentStatus;
     const experienceLevel = journeyData.level ? experienceLevelMap[journeyData.level] : undefined;
-    const focus = journeyData.focus?.toUpperCase() as ProfessionalFocus | undefined;
+    const focus = journeyData.focus?.toUpperCase();
 
     // Update user with journey data
     const updateData: any = {
@@ -191,7 +188,8 @@ router.get('/:userId/profile', authenticateUser, async (req: AuthRequest, res) =
         },
         availability: true,
         socialLinks: true,
-        privacySettings: true
+        privacySettings: true,
+        media: true
       }
     });
 
@@ -353,7 +351,8 @@ router.put('/:userId/profile', authenticateUser, async (req: AuthRequest, res) =
         },
         availability: true,
         socialLinks: true,
-        privacySettings: true
+        privacySettings: true,
+        media: true
       }
     });
 
