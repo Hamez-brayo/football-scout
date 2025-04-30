@@ -4,19 +4,24 @@ export enum UserType {
   CLUB = 'CLUB'
 }
 
-export enum RegistrationStatus {
-  PENDING = 'PENDING',
-  COMPLETE = 'COMPLETE',
-  VERIFIED = 'VERIFIED'
-}
-
 export interface BaseUser {
-  id: string;
+  userId: string;
   email: string;
+  fullName: string;
   userType: UserType;
-  registrationStatus: RegistrationStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  firstName?: string;
+  lastName?: string;
+  nickname?: string;
+  profilePhoto?: string;
+  coverPhoto?: string;
+  dateOfBirth?: string;
+  nationality?: string;
+  languages?: string[];
+  currentLocation?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Types for structured JSON data

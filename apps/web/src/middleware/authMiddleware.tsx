@@ -14,7 +14,7 @@ export default function AuthMiddleware({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && !pathname.startsWith('/sign-')) {
       // Store the attempted URL to redirect back after login
       sessionStorage.setItem('redirectUrl', pathname);
       router.push('/sign-in');
@@ -23,15 +23,13 @@ export default function AuthMiddleware({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-        <div className="bg-[#0f0f0f]/80 backdrop-blur-xl rounded-xl p-8 shadow-2xl border border-white/10">
-          <div className="animate-pulse text-white">Loading...</div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
   }
 
-  if (!user) {
+  if (!user && !pathname.startsWith('/sign-')) {
     return null;
   }
 

@@ -59,14 +59,17 @@ export default function HomePage() {
               Make informed decisions with comprehensive data analysis and visualization.
             </p>
             <div className={`mt-8 flex items-center gap-x-6 transition-opacity duration-500 ${showCTA ? 'opacity-100' : 'opacity-0'}`}>
-              <Link 
-                href="/register" 
-                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-transform duration-200 hover:scale-105"
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-5 py-3 text-base font-medium text-white shadow-lg hover:bg-indigo-500 transition-transform duration-300 hover:translate-y-[-2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
               >
                 Get Started
               </Link>
-              <Link href="#features" className="text-sm font-semibold leading-6 text-gray-900 dark:text-white group transition-all duration-300">
-                Learn more <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+              <Link 
+                href="#features" 
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-700 px-5 py-3 text-base font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-transform duration-300 hover:translate-y-[-2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+              >
+                Learn more <span aria-hidden="true" className="ml-2">→</span>
               </Link>
             </div>
           </div>
@@ -299,13 +302,16 @@ export default function HomePage() {
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
                   <Link
-                    href="/register"
-                    className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-transform duration-200 hover:scale-105"
+                    href="/sign-up"
+                    className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-5 py-3 text-base font-medium text-white shadow-lg hover:bg-indigo-500 transition-transform duration-300 hover:translate-y-[-2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
                   >
-                    Create Account
+                    Join Now
                   </Link>
-                  <Link href="/sign-in" className="text-sm font-semibold leading-6 text-white group transition-all duration-300">
-                    Sign In <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+                  <Link 
+                    href="/sign-in" 
+                    className="inline-flex items-center justify-center rounded-md border border-white/30 px-5 py-3 text-base font-medium text-white hover:bg-white/10 transition-transform duration-300 hover:translate-y-[-2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+                  >
+                    Sign In <span aria-hidden="true" className="ml-2">→</span>
                   </Link>
                 </div>
               </div>

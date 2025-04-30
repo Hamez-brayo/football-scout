@@ -1,4 +1,4 @@
-import express, { Request } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { auth } from '../config/firebase';
 import { authenticateUser, AuthRequest } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
@@ -44,27 +44,16 @@ router.post('/sign-in', async (req: Request, res) => {
       });
 
       if (!user) {
-        if (isSignUp) {
-          // Create a new user with INCOMPLETE registration status
-          user = await prisma.user.create({
-            data: {
-              userId: decodedToken.uid,
-              email: firebaseUser.email || '',
-              fullName: firebaseUser.displayName || '',
-              registrationStatus: 'INCOMPLETE',
-            },
-          });
-        } else {
-          // For sign-in, create a user with COMPLETE registration status
-          user = await prisma.user.create({
-            data: {
-              userId: decodedToken.uid,
-              email: firebaseUser.email || '',
-              fullName: firebaseUser.displayName || '',
-              registrationStatus: 'COMPLETE',
-            },
-          });
-        }
+        // Create a new user with minimal required fields
+        user = await prisma.user.create({
+          data: {
+            email: firebaseUser.email || '',
+            userId: decodedToken.uid,
+            fullName: firebaseUser.displayName || '',
+            registrationStatus: isSignUp ? 'INCOMPLETE' : 'COMPLETE',
+            userType: 'TALENT', // Default type
+          },
+        });
       }
 
       // Return user data
@@ -75,6 +64,7 @@ router.post('/sign-in', async (req: Request, res) => {
           displayName: firebaseUser.displayName,
           photoURL: firebaseUser.photoURL,
           registrationStatus: user.registrationStatus,
+          userType: user.userType
         },
         token
       });
@@ -110,6 +100,69 @@ router.put('/me', authenticateUser, async (req: AuthRequest, res) => {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Error updating user profile' });
   }
+});
+
+// Google Sign-in endpoint
+router.post('/google-sign-in', async (req: Request, res) => {
+  try {
+    const { token, email, displayName, photoURL } = req.body;
+    
+    if (!token) {
+      return res.status(400).json({ error: 'No token provided' });
+    }
+
+    // Verify the Firebase token
+    const decodedToken = await auth.verifyIdToken(token);
+    
+    try {
+      // Get or create user in our database
+      let user = await prisma.user.findUnique({
+        where: { userId: decodedToken.uid },
+      });
+
+      if (!user) {
+        // Create a new user
+        user = await prisma.user.create({
+          data: {
+            email,
+            userId: decodedToken.uid,
+            fullName: displayName,
+            registrationStatus: 'INCOMPLETE',
+            userType: 'TALENT', // Default type
+          },
+        });
+      }
+
+      // Return user data
+      res.json({
+        user: {
+          uid: decodedToken.uid,
+          email: email,
+          displayName: displayName,
+          photoURL: photoURL,
+          registrationStatus: user.registrationStatus,
+          userType: user.userType
+        }
+      });
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      res.status(500).json({ 
+        error: 'Database error',
+        details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    // Send a proper JSON error response
+    res.status(401).json({ 
+      error: 'Authentication failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  // ... existing code ...
 });
 
 export default router; 
