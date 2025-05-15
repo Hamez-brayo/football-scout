@@ -146,17 +146,18 @@ router.post('/google-sign-in', async (req: Request, res) => {
       });
     } catch (dbError) {
       console.error('Database error:', dbError);
+      const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
       res.status(500).json({ 
         error: 'Database error',
-        details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
       });
     }
   } catch (error) {
     console.error('Google sign-in error:', error);
-    // Send a proper JSON error response
+    const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
     res.status(401).json({ 
       error: 'Authentication failed',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     });
   }
 });
