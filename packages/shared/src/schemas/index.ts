@@ -35,6 +35,23 @@ export const FootballProfileSchema = z.object({
   experience: z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
 });
 
+/**
+ * Player Profile Schema (for scout discovery)
+ */
+export const PlayerProfileSchema = z.object({
+  fullName: z.string().min(2).max(100).optional(),
+  age: z.number().min(10).max(100).optional(),
+  nationality: z.string().max(100).optional(),
+  position: z.string().max(50).optional(),
+  preferredFoot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
+  height: z.number().min(100).max(250).optional(), // in cm
+  weight: z.number().min(30).max(200).optional(), // in kg
+  speed: z.number().min(0).max(100).optional(), // 0-100 rating
+  stamina: z.number().min(0).max(100).optional(), // 0-100 rating
+  currentClub: z.string().max(100).optional(),
+  profilePhoto: z.string().url().optional(),
+});
+
 export const AchievementSchema = z.object({
   title: z.string().min(3).max(200),
   description: z.string().max(1000).optional(),
@@ -78,6 +95,10 @@ export const SearchFiltersSchema = z.object({
   nationality: z.string().max(100).optional(),
   ageMin: z.number().min(10).max(100).optional(),
   ageMax: z.number().min(10).max(100).optional(),
+  heightMin: z.number().min(100).max(250).optional(), // in cm
+  heightMax: z.number().min(100).max(250).optional(), // in cm
+  speedMin: z.number().min(0).max(100).optional(), // 0-100 rating
+  speedMax: z.number().min(0).max(100).optional(), // 0-100 rating
   experienceLevel: z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
   currentClub: z.string().max(100).optional(),
   page: z.number().min(1).default(1),

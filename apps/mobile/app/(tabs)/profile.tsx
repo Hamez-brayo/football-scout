@@ -46,7 +46,11 @@ export default function ProfileScreen() {
 
         {/* Profile Options */}
         <View className="bg-white rounded-lg shadow-sm mb-6">
-          <ProfileOption title="Edit Profile" icon="✏️" />
+          <ProfileOption 
+            title="Edit Profile" 
+            icon="✏️" 
+            onPress={() => router.push('/(tabs)/edit-profile')}
+          />
           <ProfileOption title="Physical Attributes" icon="💪" />
           <ProfileOption title="Football Profile" icon="⚽" />
           <ProfileOption title="Media Gallery" icon="📸" />
@@ -75,9 +79,20 @@ export default function ProfileScreen() {
   );
 }
 
-function ProfileOption({ title, icon }: { title: string; icon: string }) {
+function ProfileOption({ 
+  title, 
+  icon, 
+  onPress 
+}: { 
+  title: string; 
+  icon: string;
+  onPress?: () => void;
+}) {
   return (
-    <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-100">
+    <TouchableOpacity 
+      className="flex-row items-center p-4 border-b border-gray-100"
+      onPress={onPress}
+    >
       <Text className="text-2xl mr-4">{icon}</Text>
       <Text className="flex-1 text-gray-900 font-medium">{title}</Text>
       <Text className="text-gray-400">›</Text>

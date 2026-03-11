@@ -61,8 +61,8 @@ var Position;
  */
 var VerificationStatus;
 (function (VerificationStatus) {
-    VerificationStatus["PENDING"] = "PENDING";
-    VerificationStatus["IN_PROGRESS"] = "IN_PROGRESS";
-    VerificationStatus["VERIFIED"] = "VERIFIED";
-    VerificationStatus["REJECTED"] = "REJECTED";
+    VerificationStatus["UNVERIFIED"] = "UNVERIFIED";
+    VerificationStatus["IDENTITY_VERIFIED"] = "IDENTITY_VERIFIED";
+    VerificationStatus["COACH_VERIFIED"] = "COACH_VERIFIED";
+    VerificationStatus["FULLY_VERIFIED"] = "FULLY_VERIFIED";
 })(VerificationStatus || (exports.VerificationStatus = VerificationStatus = {}));

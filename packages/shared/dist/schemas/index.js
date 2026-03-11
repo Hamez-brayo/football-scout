@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageSchema = exports.VerificationRequestSchema = exports.SearchFiltersSchema = exports.SignInSchema = exports.SignUpSchema = exports.MediaUploadSchema = exports.AchievementSchema = exports.FootballProfileSchema = exports.PhysicalAttributesSchema = exports.UserProfileSchema = void 0;
+exports.MessageSchema = exports.VerificationRequestSchema = exports.SearchFiltersSchema = exports.SignInSchema = exports.SignUpSchema = exports.MediaUploadSchema = exports.AchievementSchema = exports.PlayerProfileSchema = exports.FootballProfileSchema = exports.PhysicalAttributesSchema = exports.UserProfileSchema = void 0;
 exports.validateData = validateData;
 exports.validateDataSafe = validateDataSafe;
 const zod_1 = require("zod");
@@ -34,6 +34,22 @@ exports.FootballProfileSchema = zod_1.z.object({
     playingStyle: zod_1.z.array(zod_1.z.string()).default([]),
     strongFoot: zod_1.z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
     experience: zod_1.z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
+});
+/**
+ * Player Profile Schema (for scout discovery)
+ */
+exports.PlayerProfileSchema = zod_1.z.object({
+    fullName: zod_1.z.string().min(2).max(100).optional(),
+    age: zod_1.z.number().min(10).max(100).optional(),
+    nationality: zod_1.z.string().max(100).optional(),
+    position: zod_1.z.string().max(50).optional(),
+    preferredFoot: zod_1.z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
+    height: zod_1.z.number().min(100).max(250).optional(), // in cm
+    weight: zod_1.z.number().min(30).max(200).optional(), // in kg
+    speed: zod_1.z.number().min(0).max(100).optional(), // 0-100 rating
+    stamina: zod_1.z.number().min(0).max(100).optional(), // 0-100 rating
+    currentClub: zod_1.z.string().max(100).optional(),
+    profilePhoto: zod_1.z.string().url().optional(),
 });
 exports.AchievementSchema = zod_1.z.object({
     title: zod_1.z.string().min(3).max(200),
@@ -71,6 +87,10 @@ exports.SearchFiltersSchema = zod_1.z.object({
     nationality: zod_1.z.string().max(100).optional(),
     ageMin: zod_1.z.number().min(10).max(100).optional(),
     ageMax: zod_1.z.number().min(10).max(100).optional(),
+    heightMin: zod_1.z.number().min(100).max(250).optional(), // in cm
+    heightMax: zod_1.z.number().min(100).max(250).optional(), // in cm
+    speedMin: zod_1.z.number().min(0).max(100).optional(), // 0-100 rating
+    speedMax: zod_1.z.number().min(0).max(100).optional(), // 0-100 rating
     experienceLevel: zod_1.z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
     currentClub: zod_1.z.string().max(100).optional(),
     page: zod_1.z.number().min(1).default(1),

@@ -4,6 +4,93 @@ import { playerService } from '@/services/playerService';
 
 export class PlayerController {
   /**
+   * Create player profile
+   */
+  async createPlayerProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'User not authenticated',
+          },
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const profile = await playerService.createPlayerProfile(userId, req.body);
+
+      res.status(201).json({
+        success: true,
+        data: profile,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get player profile (current user)
+   */
+  async getPlayerProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'User not authenticated',
+          },
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const profile = await playerService.getPlayerProfile(userId);
+
+      res.json({
+        success: true,
+        data: profile,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Update player profile
+   */
+  async updatePlayerProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'User not authenticated',
+          },
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const profile = await playerService.updatePlayerProfile(userId, req.body);
+
+      res.json({
+        success: true,
+        data: profile,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Search players
    */
   async searchPlayers(req: AuthRequest, res: Response, next: NextFunction) {

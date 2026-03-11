@@ -90,6 +90,29 @@ export interface FootballProfile {
     createdAt: Date;
     updatedAt: Date;
 }
+/**
+ * Player Profile Type (for scout discovery)
+ */
+export interface PlayerProfile {
+    id: string;
+    userId: string;
+    fullName?: string;
+    age?: number;
+    nationality?: string;
+    position?: string;
+    preferredFoot?: PreferredFoot;
+    height?: number;
+    weight?: number;
+    speed?: number;
+    stamina?: number;
+    currentClub?: string;
+    verificationStatus: VerificationStatus;
+    profilePhoto?: string;
+    physicalAttributes?: PhysicalAttributes;
+    footballProfile?: FootballProfile;
+    createdAt: Date;
+    updatedAt: Date;
+}
 export interface Achievement {
     id: string;
     footballProfileId: string;
@@ -151,6 +174,10 @@ export interface SearchFilters {
     nationality?: string;
     ageMin?: number;
     ageMax?: number;
+    heightMin?: number;
+    heightMax?: number;
+    speedMin?: number;
+    speedMax?: number;
     experienceLevel?: ExperienceLevel;
     currentClub?: string;
     page?: number;
@@ -167,10 +194,10 @@ export interface PaginatedResponse<T> {
  * Verification Types
  */
 export declare enum VerificationStatus {
-    PENDING = "PENDING",
-    IN_PROGRESS = "IN_PROGRESS",
-    VERIFIED = "VERIFIED",
-    REJECTED = "REJECTED"
+    UNVERIFIED = "UNVERIFIED",
+    IDENTITY_VERIFIED = "IDENTITY_VERIFIED",
+    COACH_VERIFIED = "COACH_VERIFIED",
+    FULLY_VERIFIED = "FULLY_VERIFIED"
 }
 export interface VerificationRequest {
     id: string;

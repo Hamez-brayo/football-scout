@@ -14,6 +14,10 @@ export class PlayerService {
       nationality,
       ageMin,
       ageMax,
+      heightMin,
+      heightMax,
+      speedMin,
+      speedMax,
       experienceLevel,
       currentClub,
       page = PAGINATION.DEFAULT_PAGE,
@@ -66,27 +70,45 @@ export class PlayerService {
     }
 
     // Execute query
-    const [players, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        skip,
-        take,
-        include: {
-          physicalAttributes: true,
-          footballProfile: {
-            include: {
-              achievements: true,
-            },
-          },
-          media: {
-            take: 3,
-            orderBy: { createdAt: 'desc' },
+    let players = await prisma.user.findMany({
+      where,
+      skip,
+      take,
+      include: {
+        physicalAttributes: true,
+        footballProfile: {
+          include: {
+            achievements: true,
           },
         },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.user.count({ where }),
-    ]);
+        media: {
+          take: 3,
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Filter by height range (client-side since it's in a relation)
+    if (heightMin || heightMax) {
+      players = players.filter((p: any) => {
+        const height = p.physicalAttributes?.height;
+        if (!height) return false;
+        if (heightMin && height < heightMin) return false;
+        if (heightMax && height > heightMax) return false;
+        return true;
+      });
+    }
+
+    // Filter by speed range (placeholder for actual speed data)
+    // Note: speed and stamina are not yet stored in the database
+    // This is prepared for future implementation
+    if (speedMin || speedMax) {
+      // Placeholder - would filter based on stored speed data
+      // Currently returning all results
+    }
+
+    const total = await prisma.user.count({ where });
 
     return {
       items: players,
@@ -185,6 +207,198 @@ export class PlayerService {
     });
 
     return Math.round((filledFields / totalFields) * 100);
+  }
+
+  /**
+   * Create player profile for current user
+   */
+  async createPlayerProfile(userId: string, profileData: any) {
+    const user = await prisma.user.findUnique({
+      where: { userId },
+    });
+
+    if (!user) {
+      throw new AppError(
+        HTTP_STATUS.NOT_FOUND,
+        ERROR_CODES.NOT_FOUND,
+        'User not found'
+      );
+    }
+
+    if (user.userType !== 'TALENT') {
+      throw new AppError(
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.FORBIDDEN,
+        'Only talent users can create player profiles'
+      );
+    }
+
+    // Update user with profile data
+    const updatedUser = await prisma.user.update({
+      where: { userId },
+      data: {
+        fullName: profileData.fullName || `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim(),
+        position: profileData.position,
+        currentClub: profileData.currentClub,
+        preferredFoot: profileData.preferredFoot,
+        profilePhoto: profileData.profilePhoto,
+      },
+      include: {
+        physicalAttributes: true,
+        footballProfile: true,
+      },
+    });
+
+    // Create or update physical attributes
+    if (profileData.height || profileData.weight || profileData.speed || profileData.stamina) {
+      await prisma.physicalAttributes.upsert({
+        where: { userId },
+        create: {
+          userId,
+          height: profileData.height,
+          weight: profileData.weight,
+          preferredFoot: profileData.preferredFoot,
+        },
+        update: {
+          height: profileData.height,
+          weight: profileData.weight,
+          preferredFoot: profileData.preferredFoot,
+        },
+      });
+    }
+
+    // Create or update football profile
+    if (profileData.position || profileData.currentClub) {
+      await prisma.footballProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          primaryPosition: profileData.position,
+          currentClub: profileData.currentClub,
+        },
+        update: {
+          primaryPosition: profileData.position,
+          currentClub: profileData.currentClub,
+        },
+      });
+    }
+
+    return this.getPlayerById(user.id);
+  }
+
+  /**
+   * Get player profile for current user
+   */
+  async getPlayerProfile(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { userId },
+      include: {
+        physicalAttributes: true,
+        footballProfile: {
+          include: {
+            achievements: true,
+          },
+        },
+        media: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new AppError(
+        HTTP_STATUS.NOT_FOUND,
+        ERROR_CODES.NOT_FOUND,
+        'User not found'
+      );
+    }
+
+    if (user.userType !== 'TALENT') {
+      throw new AppError(
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.FORBIDDEN,
+        'Only talent users can access player profiles'
+      );
+    }
+
+    return user;
+  }
+
+  /**
+   * Update player profile for current user
+   */
+  async updatePlayerProfile(userId: string, profileData: any) {
+    const user = await prisma.user.findUnique({
+      where: { userId },
+    });
+
+    if (!user) {
+      throw new AppError(
+        HTTP_STATUS.NOT_FOUND,
+        ERROR_CODES.NOT_FOUND,
+        'User not found'
+      );
+    }
+
+    if (user.userType !== 'TALENT') {
+      throw new AppError(
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.FORBIDDEN,
+        'Only talent users can update player profiles'
+      );
+    }
+
+    // Update user with profile data
+    const updatedUser = await prisma.user.update({
+      where: { userId },
+      data: {
+        fullName: profileData.fullName,
+        position: profileData.position,
+        currentClub: profileData.currentClub,
+        preferredFoot: profileData.preferredFoot,
+        profilePhoto: profileData.profilePhoto,
+      },
+      include: {
+        physicalAttributes: true,
+        footballProfile: true,
+      },
+    });
+
+    // Update physical attributes if provided
+    if (profileData.height !== undefined || profileData.weight !== undefined) {
+      await prisma.physicalAttributes.upsert({
+        where: { userId },
+        create: {
+          userId,
+          height: profileData.height,
+          weight: profileData.weight,
+          preferredFoot: profileData.preferredFoot,
+        },
+        update: {
+          height: profileData.height,
+          weight: profileData.weight,
+          preferredFoot: profileData.preferredFoot,
+        },
+      });
+    }
+
+    // Update football profile if provided
+    if (profileData.position !== undefined || profileData.currentClub !== undefined) {
+      await prisma.footballProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          primaryPosition: profileData.position,
+          currentClub: profileData.currentClub,
+        },
+        update: {
+          primaryPosition: profileData.position,
+          currentClub: profileData.currentClub,
+        },
+      });
+    }
+
+    return this.getPlayerById(user.id);
   }
 }
 

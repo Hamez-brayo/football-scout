@@ -80,6 +80,46 @@ export declare const FootballProfileSchema: z.ZodObject<{
     strongFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
     experience?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
 }>;
+/**
+ * Player Profile Schema (for scout discovery)
+ */
+export declare const PlayerProfileSchema: z.ZodObject<{
+    fullName: z.ZodOptional<z.ZodString>;
+    age: z.ZodOptional<z.ZodNumber>;
+    nationality: z.ZodOptional<z.ZodString>;
+    position: z.ZodOptional<z.ZodString>;
+    preferredFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+    height: z.ZodOptional<z.ZodNumber>;
+    weight: z.ZodOptional<z.ZodNumber>;
+    speed: z.ZodOptional<z.ZodNumber>;
+    stamina: z.ZodOptional<z.ZodNumber>;
+    currentClub: z.ZodOptional<z.ZodString>;
+    profilePhoto: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    nationality?: string | undefined;
+    profilePhoto?: string | undefined;
+    height?: number | undefined;
+    weight?: number | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    currentClub?: string | undefined;
+    fullName?: string | undefined;
+    age?: number | undefined;
+    position?: string | undefined;
+    speed?: number | undefined;
+    stamina?: number | undefined;
+}, {
+    nationality?: string | undefined;
+    profilePhoto?: string | undefined;
+    height?: number | undefined;
+    weight?: number | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    currentClub?: string | undefined;
+    fullName?: string | undefined;
+    age?: number | undefined;
+    position?: string | undefined;
+    speed?: number | undefined;
+    stamina?: number | undefined;
+}>;
 export declare const AchievementSchema: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodOptional<z.ZodString>;
@@ -150,6 +190,10 @@ export declare const SearchFiltersSchema: z.ZodObject<{
     nationality: z.ZodOptional<z.ZodString>;
     ageMin: z.ZodOptional<z.ZodNumber>;
     ageMax: z.ZodOptional<z.ZodNumber>;
+    heightMin: z.ZodOptional<z.ZodNumber>;
+    heightMax: z.ZodOptional<z.ZodNumber>;
+    speedMin: z.ZodOptional<z.ZodNumber>;
+    speedMax: z.ZodOptional<z.ZodNumber>;
     experienceLevel: z.ZodOptional<z.ZodEnum<["AMATEUR", "ACADEMY", "SEMI_PRO", "PRO"]>>;
     currentClub: z.ZodOptional<z.ZodString>;
     page: z.ZodDefault<z.ZodNumber>;
@@ -159,18 +203,26 @@ export declare const SearchFiltersSchema: z.ZodObject<{
     limit: number;
     nationality?: string | undefined;
     currentClub?: string | undefined;
-    query?: string | undefined;
     position?: string | undefined;
+    query?: string | undefined;
     ageMin?: number | undefined;
     ageMax?: number | undefined;
+    heightMin?: number | undefined;
+    heightMax?: number | undefined;
+    speedMin?: number | undefined;
+    speedMax?: number | undefined;
     experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
 }, {
     nationality?: string | undefined;
     currentClub?: string | undefined;
-    query?: string | undefined;
     position?: string | undefined;
+    query?: string | undefined;
     ageMin?: number | undefined;
     ageMax?: number | undefined;
+    heightMin?: number | undefined;
+    heightMax?: number | undefined;
+    speedMin?: number | undefined;
+    speedMax?: number | undefined;
     experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
