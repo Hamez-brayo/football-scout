@@ -1,0 +1,32 @@
+{
+  "name": "@vysion/database",
+  "version": "1.0.0",
+  "description": "Centralized Prisma database configuration for Vysion Analytics",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:reset": "prisma migrate reset",
+    "generate": "prisma generate",
+    "studio": "prisma studio",
+    "seed": "ts-node prisma/seed.ts",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull"
+  },
+  "keywords": [
+    "prisma",
+    "database",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prisma": "^6.6.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

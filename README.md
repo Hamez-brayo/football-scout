@@ -1,7 +1,18 @@
 # Football Talent Scouting Platform
 
-## 📌 Overview
-The **Football Talent Scouting Platform** is a digital ecosystem designed to bridge the gap between undiscovered football talent and professional scouts, clubs, and agents. It provides players with standardized profiles, AI-powered video analysis, and multi-layered verification to enhance their visibility and credibility in the football industry.
+# Vysion Analytics - Football Talent Scouting Platform
+
+> **⚡ Version 2.0** - Complete rebuild with mobile-first architecture
+
+## 📌 Overview  
+**Vysion Analytics** is a comprehensive digital ecosystem connecting undiscovered football talent with professional scouts, clubs, and agents worldwide. Build your professional player profile, upload match highlights, get verified, and connect with opportunities.
+
+### 🌟 What's New in v2.0
+- ✅ **Mobile-First** - React Native + Expo app for iOS & Android
+- ✅ **Clean Architecture** - Modular, scalable, production-ready
+- ✅ **Shared Packages** - Reusable types, schemas, utilities
+- ✅ **Modern Tech Stack** - TypeScript, Prisma, Firebase, NativeWind
+- ✅ **Better DX** - Comprehensive docs, coding standards, examples
 
 ## 🎯 Problem Statement
 Football scouting faces several challenges:
@@ -44,12 +55,24 @@ Our platform provides:
 - User reporting system to enhance profile credibility
 
 ## 🏗️ Tech Stack
-- **Frontend**: Next.js, React, Tailwind CSS
-- **Backend**: Node.js, Express, Prisma (PostgreSQL)
-- **Database**: PostgreSQL
-- **Authentication**: Firebase Auth
-- **File Storage**: Firebase Storage / AWS S3
-- **AI Analysis**: Computer Vision for video verification (Future Integration)
+### Mobile App
+- **Framework**: React Native + Expo SDK 50+
+- **Routing**: Expo Router (file-based navigation)
+- **Styling**: NativeWind (Tailwind for React Native)
+- **State**: Zustand
+- **Forms**: React Hook Form + Zod validation
+
+### Backend API
+- **Runtime**: Node.js + Express + TypeScript
+- **ORM**: Prisma with PostgreSQL
+- **Authentication**: Firebase Admin SDK
+- **Validation**: Zod schemas
+- **Logging**: Winston
+
+### Shared Infrastructure
+- **Authentication**: Firebase Auth (Email, Google, Apple)
+- **Shared Code**: `@vysion/shared` package
+- **Future AI**: Python microservices for video analysis
 
 ## 🚀 Roadmap
 
@@ -61,25 +84,32 @@ Our platform provides:
 
 ## 📌 Getting Started
 
-### 🔧 Installation
-1. Clone the repository:
-   ```sh
-   git clone git@github.com:Hamez-brayo/vysion-analytics.git
-   cd vysion-analytics
-   ```
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-3. Set up environment variables (`.env.local`):
-   ```ini
-   DATABASE_URL=your_postgresql_url
-   FIREBASE_CONFIG=your_firebase_config
-   ```
-4. Run the development server:
-   ```sh
-   npm run dev
-   ```
+### Quick Start
+
+```bash
+# 1. Clone repository
+git clone git@github.com:Hamez-brayo/vysion-analytics.git
+cd vysion-analytics
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+cp apps/new-backend/.env.example apps/new-backend/.env
+cp apps/mobile/.env.example apps/mobile/.env
+# Edit .env files with your credentials
+
+# 4. Set up database
+cd database
+npm run migrate
+npm run seed
+cd ..
+
+# 5. Start development servers
+npm run dev
+```
+
+**📖 Detailed Guide**: See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 
 ## 🤝 Contributing
 We welcome contributions! Please submit a pull request or reach out to discuss ideas.

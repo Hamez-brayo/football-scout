@@ -57,7 +57,7 @@ router.post('/sign-in', async (req, res) => {
       res.status(500).json({ 
         error: 'Database error',
         details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      });
+      })
     }
   } catch (error) {
     console.error('Sign-in error:', error);

@@ -1,0 +1,29 @@
+{
+  "name": "@vysion/shared",
+  "version": "1.0.0",
+  "description": "Shared types, schemas, constants, and utilities for Vysion Analytics",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "vysion",
+    "football",
+    "scouting",
+    "shared"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.8.3"
+  }
+}
