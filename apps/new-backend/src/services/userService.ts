@@ -40,7 +40,17 @@ export class UserService {
       },
       include: {
         physicalAttributes: true,
-        footballProfile: true,
+        footballProfile: {
+          include: {
+            achievements: true,
+          },
+        },
+        availability: true,
+        socialLinks: true,
+        privacySettings: true,
+        media: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -115,7 +125,7 @@ export class UserService {
     const user = await prisma.user.update({
       where: { userId },
       data: {
-        ...data,
+        ...(data as any),
         fullName:
           data.firstName && data.lastName
             ? `${data.firstName} ${data.lastName}`
@@ -145,10 +155,10 @@ export class UserService {
   ) {
     const attributes = await prisma.physicalAttributes.upsert({
       where: { userId },
-      update: data,
+      update: data as any,
       create: {
         userId,
-        ...data,
+        ...(data as any),
       },
     });
 

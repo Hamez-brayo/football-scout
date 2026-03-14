@@ -3,6 +3,7 @@ import { auth } from '@/config/firebase';
 import { prisma } from '@/config/database';
 import { logger } from '@/config/logger';
 import { ERROR_CODES, HTTP_STATUS } from '@vysion/shared';
+import { authService } from '@/services/authService';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -105,6 +106,50 @@ export const authenticate = async (
       error: {
         code: ERROR_CODES.INVALID_TOKEN,
         message: 'Invalid authentication token',
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+/**
+ * JWT-based middleware — does NOT require Firebase.
+ * Verifies the Bearer token as a local JWT and attaches user to request.
+ */
+export const authenticateJwt = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        error: { code: ERROR_CODES.UNAUTHORIZED, message: 'No token provided' },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const token = authHeader.slice(7);
+    const payload = authService.verifyToken(token);
+
+    req.user = {
+      id: payload.userId,   // fallback — full DB id only needed for DB queries
+      userId: payload.userId,
+      email: payload.email,
+      userType: payload.userType ?? undefined,
+    };
+
+    next();
+  } catch (error: any) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      success: false,
+      error: {
+        code: error.error?.code ?? ERROR_CODES.INVALID_TOKEN,
+        message: error.message ?? 'Invalid token',
       },
       timestamp: new Date().toISOString(),
     });

@@ -57,6 +57,7 @@ model User {
   id                String            @id @default(cuid())
   userId            String            @unique
   email             String            @unique
+  password          String?           // nullable — Firebase users have no local password
   
   // Basic Info
   firstName         String?

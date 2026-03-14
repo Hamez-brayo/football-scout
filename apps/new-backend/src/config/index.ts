@@ -12,6 +12,10 @@ export const config = {
   // Database
   DATABASE_URL: process.env.DATABASE_URL!,
 
+  // JWT
+  JWT_SECRET: process.env.JWT_SECRET || 'devsecret',
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
+
   // Firebase
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID!,
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL!,
@@ -35,10 +39,6 @@ export const config = {
 // Validate required environment variables
 const requiredEnvVars = [
   'DATABASE_URL',
-  'FIREBASE_PROJECT_ID',
-  'FIREBASE_CLIENT_EMAIL',
-  'FIREBASE_PRIVATE_KEY',
-  'FIREBASE_STORAGE_BUCKET',
 ];
 
 const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);

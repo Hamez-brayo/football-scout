@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { auth } from '@/config/firebase';
 import { userService } from '@/services/userService';
+import { authService } from '@/services/authService';
 import { HTTP_STATUS, SUCCESS_MESSAGES, ERROR_CODES } from '@vysion/shared';
 import { SignUpSchema, SignInSchema } from '@vysion/shared';
 import { validateBody } from '@/middleware/validate';
+import { authenticateJwt } from '@/middleware/auth';
 
 const router = Router();
 
@@ -120,6 +122,92 @@ router.post('/signout', async (req, res, next) => {
     res.json({
       success: true,
       message: 'Signed out successfully',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ─── JWT-based local auth routes ──────────────────────────────────────────────
+
+/**
+ * POST /api/auth/register
+ * Register with email + password (no Firebase required)
+ */
+router.post('/register', async (req, res, next) => {
+  try {
+    const { email, password, firstName, lastName, userType } = req.body;
+
+    if (!email || !password) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: { code: ERROR_CODES.VALIDATION_ERROR, message: 'email and password are required' },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const { user, token } = await authService.registerUser({
+      email,
+      password,
+      firstName,
+      lastName,
+      userType,
+    });
+
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: { user, token },
+      message: 'Account created successfully',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/auth/login
+ * Login with email + password, returns JWT
+ */
+router.post('/login', async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: { code: ERROR_CODES.VALIDATION_ERROR, message: 'email and password are required' },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const { user, token } = await authService.loginUser({ email, password });
+
+    res.json({
+      success: true,
+      data: { user, token },
+      message: 'Login successful',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/auth/me
+ * Return authenticated user's profile (JWT required)
+ */
+router.get('/me', authenticateJwt, async (req: any, res, next) => {
+  try {
+    const user = await authService.getCurrentUser(req.user.userId);
+
+    res.json({
+      success: true,
+      data: { user },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
