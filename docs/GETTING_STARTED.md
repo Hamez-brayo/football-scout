@@ -48,10 +48,10 @@ This will install dependencies for:
 
 #### Backend (.env)
 
-Create `apps/new-backend/.env`:
+Create `services/api/.env`:
 
 ```bash
-cp apps/new-backend/.env.example apps/new-backend/.env
+cp services/api/.env.example services/api/.env
 ```
 
 Edit the file with your credentials:
@@ -143,7 +143,7 @@ This starts:
 
 **Backend:**
 ```bash
-cd apps/new-backend
+cd services/api
 npm run dev
 ```
 
@@ -231,7 +231,7 @@ Make sure simulators are installed and configured.
 ### Backend Tests
 
 ```bash
-cd apps/new-backend
+cd services/api
 npm test
 ```
 
@@ -242,7 +242,7 @@ npm test
 npm run type-check
 
 # Backend only
-cd apps/new-backend
+cd services/api
 npm run type-check
 
 # Mobile only
@@ -262,7 +262,7 @@ git checkout -b feature/player-search
 
 ### 2. Make Changes
 
-- Backend code in `apps/new-backend/src/`
+- Backend code in `services/api/src/`
 - Mobile code in `apps/mobile/app/` and `apps/mobile/components/`
 - Shared types/utils in `packages/shared/src/`
 
@@ -270,7 +270,7 @@ git checkout -b feature/player-search
 
 ```bash
 # Run backend
-cd apps/new-backend
+cd services/api
 npm run dev
 
 # Run mobile
@@ -313,7 +313,7 @@ npm run seed            # Seed database
 
 ### Backend Commands
 ```bash
-cd apps/new-backend
+cd services/api
 npm run dev              # Start dev server
 npm run build            # Build for production
 npm start                # Run production build

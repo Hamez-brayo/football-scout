@@ -95,7 +95,7 @@ cd vysion-analytics
 npm install
 
 # 3. Set up environment variables
-cp apps/new-backend/.env.example apps/new-backend/.env
+cp services/api/.env.example services/api/.env
 cp apps/mobile/.env.example apps/mobile/.env
 # Edit .env files with your credentials
 
