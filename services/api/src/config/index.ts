@@ -6,6 +6,9 @@ export const config = {
   // Server
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3002', 10),
+  HOST:
+    process.env.HOST ||
+    (process.env.NODE_ENV === 'development' ? '0.0.0.0' : '127.0.0.1'),
   API_VERSION: process.env.API_VERSION || 'v1',
   API_PREFIX: process.env.API_PREFIX || '/api',
 

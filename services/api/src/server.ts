@@ -9,6 +9,7 @@ import { logger } from '@/config/logger';
 import { testDatabaseConnection } from '@/config/database';
 import routes from '@/routes';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
+import { requestLogger } from '@/middleware/requestLogger';
 
 // Create Express app
 const app: Application = express();
@@ -43,6 +44,8 @@ if (config.NODE_ENV === 'development') {
   );
 }
 
+app.use(requestLogger);
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
@@ -72,10 +75,11 @@ const startServer = async () => {
     }
 
     // Start listening
-    app.listen(config.PORT, () => {
+    app.listen(config.PORT, config.HOST, () => {
       logger.info('================================================');
       logger.info(`🚀 Vysion Analytics API v2.0.0`);
       logger.info(`🌍 Environment: ${config.NODE_ENV}`);
+      logger.info(`🖥️  Host: ${config.HOST}`);
       logger.info(`📡 Server running on port ${config.PORT}`);
       logger.info(`🔗 API URL: http://localhost:${config.PORT}${config.API_PREFIX}`);
       logger.info(`✅ Database connected`);

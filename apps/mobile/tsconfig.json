@@ -4,16 +4,19 @@
     "strict": true,
     "baseUrl": ".",
     "jsx": "react-jsx",
-    "types": ["react", "react-native", "nativewind/types"],
+    "types": [
+      "react",
+      "react-native"
+    ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
     "**/*.d.ts",
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.tsx"
   ]
 }
