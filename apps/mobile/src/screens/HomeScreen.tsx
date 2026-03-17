@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { Container, Typography, Button } from '@/src/components/ui';
 
 const HomeScreen = () => {
   const { user, logout } = useAuth();
@@ -8,7 +9,6 @@ const HomeScreen = () => {
 
   const handleLogout = async () => {
     setLoggingOut(true);
-
     try {
       await logout();
     } finally {
@@ -17,38 +17,30 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
-      <Text style={styles.subtitle}>Main app placeholder after authentication</Text>
-      <Text style={styles.subtitle}>Signed in as: {user?.email || 'Unknown user'}</Text>
+    <Container centered>
+      <Typography variant="h1">Home</Typography>
+      <Typography variant="body" color="#64748b" style={styles.subtitle}>
+        Signed in as {user?.email ?? 'Unknown'}
+      </Typography>
+
       <View style={styles.actions}>
-        {loggingOut ? (
-          <ActivityIndicator />
-        ) : (
-          <Button title="Sign out to Login" onPress={handleLogout} />
-        )}
+        <Button
+          title="Sign Out"
+          variant="outline"
+          onPress={handleLogout}
+          loading={loggingOut}
+        />
       </View>
-    </View>
+    </Container>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    marginTop: 8,
   },
   actions: {
-    marginTop: 16,
+    marginTop: 32,
     gap: 12,
   },
 });

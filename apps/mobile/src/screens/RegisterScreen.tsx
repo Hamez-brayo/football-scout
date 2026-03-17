@@ -1,114 +1,170 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, TextInput, ActivityIndicator } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SignUpSchema } from '@vysion/shared';
+import { z } from 'zod';
+
 import { useAuth } from '@/src/contexts/AuthContext';
+import { Container, Typography, Input, Button } from '@/src/components/ui';
+import type { RootStackParamList } from '@/src/types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
+type SignUpForm = z.infer<typeof SignUpSchema>;
 
 const RegisterScreen = ({ navigation }: Props) => {
   const { register } = useAuth();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
-  const [error, setError] = React.useState<string | null>(null);
-  const [submitting, setSubmitting] = React.useState(false);
+  
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<SignUpForm>({
+    resolver: zodResolver(SignUpSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      userType: 'TALENT', // Default to talent for now
+    },
+  });
 
-  const handleRegister = async () => {
-    setError(null);
-    setSubmitting(true);
-
+  const onSubmit = async (data: SignUpForm) => {
     try {
       await register({
-        email: email.trim(),
-        password,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        userType: 'TALENT',
+        ...data,
+        email: data.email.trim(),
+        userType: data.userType || 'TALENT',
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to register.');
-    } finally {
-      setSubmitting(false);
+    } catch (err: any) {
+      setError('root.serverError', {
+        type: 'server',
+        message: err?.message || 'Failed to register account.',
+      });
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register Screen</Text>
-      <Text style={styles.subtitle}>Create your account</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="First name"
-        value={firstName}
-        onChangeText={setFirstName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Last name"
-        value={lastName}
-        onChangeText={setLastName}
-      />
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        secureTextEntry
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <View style={styles.actions}>
-        {submitting ? (
-          <ActivityIndicator />
-        ) : (
-          <Button
-            title="Register"
-            onPress={handleRegister}
-            disabled={!firstName || !lastName || !email || !password}
+    <Container centered keyboardAware scrollable>
+      <Typography variant="h1" accessibilityRole="header">
+        Create Account
+      </Typography>
+      <Typography variant="body" color="#64748b" style={styles.subtitle}>
+        Join Vysion Analytics
+      </Typography>
+
+      <View style={styles.form}>
+        <View style={styles.nameRow}>
+          <Controller
+            control={control}
+            name="firstName"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="First name"
+                placeholder="John"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                error={errors.firstName?.message}
+                containerStyle={styles.nameField}
+              />
+            )}
           />
+          <Controller
+            control={control}
+            name="lastName"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Last name"
+                placeholder="Doe"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                error={errors.lastName?.message}
+                containerStyle={styles.nameField}
+              />
+            )}
+          />
+        </View>
+
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="you@example.com"
+              value={value}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              error={errors.email?.message}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Password"
+              secureTextEntry
+              placeholder="Min. 8 characters"
+              value={value}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              error={errors.password?.message}
+            />
+          )}
+        />
+        
+        {errors.root?.serverError && (
+          <Typography variant="caption" color="#ef4444" accessibilityRole="alert">
+            {errors.root.serverError.message}
+          </Typography>
         )}
-        <Button title="Back to Login" onPress={() => navigation.navigate('Login')} />
       </View>
-    </View>
+
+      <View style={styles.actions}>
+        <Button
+          title="Create Account"
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          disabled={!isValid || isSubmitting}
+        />
+        <Button
+          title="Already have an account? Sign in"
+          variant="ghost"
+          onPress={() => navigation.navigate('Login')}
+        />
+      </View>
+    </Container>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
+  subtitle: {
+    marginTop: 8,
+  },
+  form: {
+    marginTop: 32,
+    gap: 16,
+  },
+  nameRow: {
+    flexDirection: 'row',
     gap: 12,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  error: {
-    color: '#b00020',
+  nameField: {
+    flex: 1,
   },
   actions: {
-    marginTop: 16,
+    marginTop: 24,
     gap: 12,
   },
 });

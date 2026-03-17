@@ -1,90 +1,123 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, TextInput, ActivityIndicator } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SignInSchema } from '@vysion/shared';
+import { z } from 'zod';
+
 import { useAuth } from '@/src/contexts/AuthContext';
+import { Container, Typography, Input, Button } from '@/src/components/ui';
+import type { RootStackParamList } from '@/src/types/navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+type SignInForm = z.infer<typeof SignInSchema>;
 
 const LoginScreen = ({ navigation }: Props) => {
   const { login } = useAuth();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [error, setError] = React.useState<string | null>(null);
-  const [submitting, setSubmitting] = React.useState(false);
+  
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<SignInForm>({
+    resolver: zodResolver(SignInSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-  const handleLogin = async () => {
-    setError(null);
-    setSubmitting(true);
-
+  const onSubmit = async (data: SignInForm) => {
     try {
-      await login(email.trim(), password);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to login.');
-    } finally {
-      setSubmitting(false);
+      await login(data.email.trim(), data.password);
+    } catch (err: any) {
+      setError('root.serverError', {
+        type: 'server',
+        message: err?.message || 'Failed to login. Please check your credentials.',
+      });
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login Screen</Text>
-      <Text style={styles.subtitle}>Sign in to Vysion Analytics</Text>
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        secureTextEntry
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <View style={styles.actions}>
-        {submitting ? (
-          <ActivityIndicator />
-        ) : (
-          <Button title="Login" onPress={handleLogin} disabled={!email || !password} />
+    <Container centered keyboardAware scrollable>
+      <Typography variant="h1" accessibilityRole="header">
+        Welcome Back
+      </Typography>
+      <Typography variant="body" color="#64748b" style={styles.subtitle}>
+        Sign in to Vysion Analytics
+      </Typography>
+
+      <View style={styles.form}>
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="you@example.com"
+              value={value}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              error={errors.email?.message}
+            />
+          )}
+        />
+        
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Password"
+              secureTextEntry
+              placeholder="Enter your password"
+              value={value}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              error={errors.password?.message}
+            />
+          )}
+        />
+        
+        {errors.root?.serverError && (
+          <Typography variant="caption" color="#ef4444" accessibilityRole="alert">
+            {errors.root.serverError.message}
+          </Typography>
         )}
-        <Button title="Go to Register" onPress={() => navigation.navigate('Register')} />
       </View>
-    </View>
+
+      <View style={styles.actions}>
+        <Button
+          title="Sign In"
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+          disabled={!isValid || isSubmitting}
+        />
+        <Button
+          title="Create an account"
+          variant="ghost"
+          onPress={() => navigation.navigate('Register')}
+        />
+      </View>
+    </Container>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    marginTop: 8,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  error: {
-    color: '#b00020',
+  form: {
+    marginTop: 32,
+    gap: 16,
   },
   actions: {
-    marginTop: 16,
+    marginTop: 24,
     gap: 12,
   },
 });

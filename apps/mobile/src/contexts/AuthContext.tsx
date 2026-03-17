@@ -1,24 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import * as SecureStore from 'expo-secure-store';
-import { authApi, AuthUser } from '@/src/api/auth';
+import { onIdTokenChanged, type User as FirebaseUser } from 'firebase/auth';
+import { useQueryClient } from '@tanstack/react-query';
+import { AuthService, type RegisterInput } from '@/src/services/AuthService';
+import { auth } from '@/src/config/firebase';
 import { setAuthToken } from '@/src/api/client';
-
-const AUTH_TOKEN_KEY = 'vysion_auth_token';
-
-type RegisterInput = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  userType: string;
-};
+import type { AuthUser } from '@/src/api/auth';
 
 type AuthContextValue = {
   user: AuthUser | null;
-  token: string | null;
+  firebaseUser: FirebaseUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  initializeAuth: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
@@ -28,71 +20,79 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const logout = useCallback(async () => {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-    setAuthToken(null);
-    setToken(null);
-    setUser(null);
-  }, []);
+  // Grab the query client to clear the cache upon auth state change/logout
+  const queryClient = useQueryClient();
 
-  const initializeAuth = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const storedToken = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  useEffect(() => {
+    // onIdTokenChanged is preferable over onAuthStateChanged because it fires on 
+    // token refresh, sign in, sign out. Ensures we never submit a stale token.
+    const unsubscribe = onIdTokenChanged(auth, async (fbUser) => {
+      try {
+        if (!fbUser) {
+          // Logged out
+          setFirebaseUser(null);
+          setUser(null);
+          setAuthToken(null);
+          queryClient.clear(); // Clear application server state
+          setIsLoading(false);
+          return;
+        }
 
-      if (!storedToken) {
-        setAuthToken(null);
-        setToken(null);
-        setUser(null);
-        return;
+        const token = await fbUser.getIdToken();
+        setAuthToken(token); // keep client in sync
+        setFirebaseUser(fbUser);
+
+        // Fetch application user data from backend
+        // We sync Identity (Firebase) with Data (Backend)
+        const appUser = await AuthService.getBackendUser(fbUser);
+        
+        if (appUser) {
+          setUser(appUser);
+        } else {
+          // A Firebase user exists but a backend record does not!
+          // We force logout or they enter a "limbo" / wizard onboarding state
+          // For now, logout immediately to prevent corrupted session forms
+          console.warn('Backend user missing for identity:', fbUser.uid);
+          await AuthService.logout();
+        }
+      } catch (error) {
+        console.error('Session sync error:', error);
+      } finally {
+        setIsLoading(false);
       }
+    });
 
-      setAuthToken(storedToken);
-      const me = await authApi.me();
-      setToken(storedToken);
-      setUser(me);
-    } catch {
-      await logout();
-    } finally {
-      setIsLoading(false);
-    }
-  }, [logout]);
+    return () => unsubscribe();
+  }, [queryClient]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const response = await authApi.login(email, password);
-    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, response.token);
-    setAuthToken(response.token);
-    setToken(response.token);
-    setUser(response.user);
+    // We let onIdTokenChanged handle the state propagation! 
+    // Calling login just issues the command to Firebase.
+    await AuthService.login(email, password);
   }, []);
 
   const register = useCallback(async (payload: RegisterInput) => {
-    const response = await authApi.register(payload);
-    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, response.token);
-    setAuthToken(response.token);
-    setToken(response.token);
-    setUser(response.user);
+    await AuthService.register(payload);
   }, []);
 
-  useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
+  const logout = useCallback(async () => {
+    await AuthService.logout();
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      token,
-      isAuthenticated: !!token && !!user,
+      firebaseUser,
+      isAuthenticated: !!user && !!firebaseUser,
       isLoading,
-      initializeAuth,
       login,
       register,
       logout,
     }),
-    [user, token, isLoading, initializeAuth, login, register, logout]
+    [user, firebaseUser, isLoading, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -103,6 +103,5 @@ export const useAuth = (): AuthContextValue => {
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider');
   }
-
   return context;
 };
