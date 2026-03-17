@@ -5,7 +5,7 @@ import { authService } from '@/services/authService';
 import { HTTP_STATUS, SUCCESS_MESSAGES, ERROR_CODES } from '@vysion/shared';
 import { SignUpSchema } from '@vysion/shared';
 import { validateBody } from '@/middleware/validate';
-import { authenticate } from '@/middleware/auth';
+import { authenticate, authenticateJwt } from '@/middleware/auth';
 
 const router = Router();
 
@@ -62,8 +62,76 @@ router.post('/signup', validateBody(SignUpSchema), async (req, res, next) => {
 });
 
 /**
+ * POST /api/auth/session
+ * Exchange a Firebase ID token for a backend application session JWT.
+ * This is the only endpoint that verifies Firebase tokens directly.
+ * Returns a signed backend JWT + app user; client stores the JWT and uses
+ * it as Bearer token for all subsequent API requests.
+ */
+router.post('/session', async (req, res, next) => {
+  try {
+    const { idToken, firstName, lastName, userType } = req.body;
+
+    if (!idToken) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        error: {
+          code: ERROR_CODES.VALIDATION_ERROR,
+          message: 'idToken is required',
+        },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Firebase verification happens only here — not in route middleware
+    const decoded = await auth.verifyIdToken(idToken);
+
+    // Get or create the application user record
+    let user = await userService.getUserByUserId(decoded.uid).catch(() => null);
+
+    if (!user) {
+      user = await userService.createUser({
+        userId: decoded.uid,
+        email: decoded.email!,
+        firstName: firstName ?? decoded.name?.split(' ')[0],
+        lastName: lastName ?? (decoded.name?.split(' ').slice(1).join(' ') || undefined),
+        userType,
+      });
+    }
+
+    // Issue a backend application session JWT
+    const token = authService.signSessionToken({
+      userId: user.userId,
+      email: user.email,
+      userType: user.userType ?? undefined,
+    });
+
+    res.json({
+      success: true,
+      data: { user, appToken: token },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    if (error.code?.startsWith?.('auth/')) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        error: {
+          code: ERROR_CODES.INVALID_TOKEN,
+          message: 'Invalid or expired Firebase ID token',
+        },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+    next(error);
+  }
+});
+
+/**
  * POST /api/auth/verify-token
  * Verify Firebase ID token and get/create user
+ * @deprecated — use POST /auth/session which also issues a backend JWT.
  */
 router.post('/verify-token', async (req, res, next) => {
   try {
@@ -201,7 +269,12 @@ router.post('/local/login', async (req, res, next) => {
  * GET /api/auth/me
  * Return authenticated user's profile (Firebase ID token required)
  */
-router.get('/me', authenticate, async (req: any, res, next) => {
+/**
+ * GET /api/auth/me
+ * Return authenticated user's profile.
+ * Requires a backend session JWT (obtained via POST /auth/session).
+ */
+router.get('/me', authenticateJwt, async (req: any, res, next) => {
   try {
     const user = await userService.getUserByUserId(req.user.userId);
 

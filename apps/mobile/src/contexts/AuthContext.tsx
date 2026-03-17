@@ -27,35 +27,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // onIdTokenChanged is preferable over onAuthStateChanged because it fires on 
-    // token refresh, sign in, sign out. Ensures we never submit a stale token.
+    // onIdTokenChanged fires on sign-in, sign-out, and every Firebase token refresh
+    // (~every hour). Each fire triggers a fresh backend session exchange so the
+    // backend JWT stays in sync with the Firebase identity lifecycle.
     const unsubscribe = onIdTokenChanged(auth, async (fbUser) => {
       try {
         if (!fbUser) {
-          // Logged out
+          // Signed out — clear backend JWT and app state
           setFirebaseUser(null);
           setUser(null);
           setAuthToken(null);
-          queryClient.clear(); // Clear application server state
+          queryClient.clear();
           setIsLoading(false);
           return;
         }
 
-        const token = await fbUser.getIdToken();
-        setAuthToken(token); // keep client in sync
         setFirebaseUser(fbUser);
 
-        // Fetch application user data from backend
-        // We sync Identity (Firebase) with Data (Backend)
-        const appUser = await AuthService.getBackendUser(fbUser);
-        
+        // Exchange Firebase ID token for a backend session JWT and app user.
+        // createSession stores the backend JWT on the API client.
+        const appUser = await AuthService.createSession(fbUser);
+
         if (appUser) {
           setUser(appUser);
         } else {
-          // A Firebase user exists but a backend record does not!
-          // We force logout or they enter a "limbo" / wizard onboarding state
-          // For now, logout immediately to prevent corrupted session forms
-          console.warn('Backend user missing for identity:', fbUser.uid);
+          // Backend session could not be created — log out to prevent limbo state.
+          // C4 will replace this with an auto-heal reconciliation path.
+          console.warn('Backend session creation failed for Firebase UID:', fbUser.uid);
           await AuthService.logout();
         }
       } catch (error) {

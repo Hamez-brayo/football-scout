@@ -1,6 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { auth } from '@/config/firebase';
-import { prisma } from '@/config/database';
 import { logger } from '@/config/logger';
 import { ERROR_CODES, HTTP_STATUS } from '@vysion/shared';
 import { authService } from '@/services/authService';
@@ -15,7 +13,9 @@ export interface AuthRequest extends Request {
 }
 
 /**
- * Middleware to authenticate requests using Firebase Auth
+ * Primary route authentication middleware.
+ * Verifies the Bearer token as a backend application session JWT issued
+ * by POST /auth/session. Firebase tokens are never accepted here directly.
  */
 export const authenticate = async (
   req: AuthRequest,
@@ -25,7 +25,7 @@ export const authenticate = async (
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
         error: {
@@ -37,107 +37,11 @@ export const authenticate = async (
       return;
     }
 
-    const token = authHeader.replace('Bearer ', '');
-
-    if (!token) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        error: {
-          code: ERROR_CODES.UNAUTHORIZED,
-          message: 'No token provided',
-        },
-        timestamp: new Date().toISOString(),
-      });
-      return;
-    }
-
-    // Verify Firebase token
-    const decodedToken = await auth.verifyIdToken(token);
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { userId: decodedToken.uid },
-      select: {
-        id: true,
-        userId: true,
-        email: true,
-        userType: true,
-      },
-    });
-
-    if (!user) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({
-        success: false,
-        error: {
-          code: ERROR_CODES.NOT_FOUND,
-          message: 'User not found in database',
-        },
-        timestamp: new Date().toISOString(),
-      });
-      return;
-    }
-
-    // Attach user to request
-    req.user = {
-      id: user.id,
-      userId: user.userId,
-      email: user.email,
-      userType: user.userType || undefined,
-    };
-
-    next();
-  } catch (error: any) {
-    logger.error('Authentication error:', error);
-
-    if (error.code === 'auth/id-token-expired') {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        error: {
-          code: ERROR_CODES.TOKEN_EXPIRED,
-          message: 'Token has expired',
-        },
-        timestamp: new Date().toISOString(),
-      });
-      return;
-    }
-
-    res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      success: false,
-      error: {
-        code: ERROR_CODES.INVALID_TOKEN,
-        message: 'Invalid authentication token',
-      },
-      timestamp: new Date().toISOString(),
-    });
-  }
-};
-
-/**
- * Legacy JWT-based middleware for local auth routes only.
- * Mobile clients should use Firebase ID tokens with `authenticate`.
- */
-export const authenticateJwt = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader?.startsWith('Bearer ')) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        error: { code: ERROR_CODES.UNAUTHORIZED, message: 'No token provided' },
-        timestamp: new Date().toISOString(),
-      });
-      return;
-    }
-
     const token = authHeader.slice(7);
     const payload = authService.verifyToken(token);
 
     req.user = {
-      id: payload.userId,   // fallback — full DB id only needed for DB queries
+      id: payload.userId,
       userId: payload.userId,
       email: payload.email,
       userType: payload.userType ?? undefined,
@@ -145,16 +49,22 @@ export const authenticateJwt = async (
 
     next();
   } catch (error: any) {
+    logger.error('Authentication error:', error);
     res.status(HTTP_STATUS.UNAUTHORIZED).json({
       success: false,
       error: {
         code: error.error?.code ?? ERROR_CODES.INVALID_TOKEN,
-        message: error.message ?? 'Invalid token',
+        message: error.message ?? 'Invalid authentication token',
       },
       timestamp: new Date().toISOString(),
     });
   }
 };
+
+/**
+ * Alias for `authenticate`. Retained for compatibility with existing route imports.
+ */
+export const authenticateJwt = authenticate;
 
 /**
  * Middleware to check if user has specific user type
@@ -190,52 +100,33 @@ export const requireUserType = (...allowedTypes: string[]) => {
 };
 
 /**
- * Optional authentication - doesn't fail if no token is provided
+ * Optional authentication — JWT-based, does not fail if no token present.
  */
-export const optionalAuth = async (
+export const optionalAuth = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
-): Promise<void> => {
+): void => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       next();
       return;
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.slice(7);
+    const payload = authService.verifyToken(token);
 
-    if (!token) {
-      next();
-      return;
-    }
-
-    const decodedToken = await auth.verifyIdToken(token);
-
-    const user = await prisma.user.findUnique({
-      where: { userId: decodedToken.uid },
-      select: {
-        id: true,
-        userId: true,
-        email: true,
-        userType: true,
-      },
-    });
-
-    if (user) {
-      req.user = {
-        id: user.id,
-        userId: user.userId,
-        email: user.email,
-        userType: user.userType || undefined,
-      };
-    }
-
-    next();
-  } catch (error) {
-    // Silently fail for optional auth
-    next();
+    req.user = {
+      id: payload.userId,
+      userId: payload.userId,
+      email: payload.email,
+      userType: payload.userType ?? undefined,
+    };
+  } catch {
+    // Silently ignore invalid/expired tokens for optional auth
   }
+
+  next();
 };

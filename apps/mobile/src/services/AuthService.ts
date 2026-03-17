@@ -18,59 +18,70 @@ export type RegisterInput = {
 };
 
 /**
- * AuthService controls interaction with Firebase identity 
- * and backend application data.
- * 
- * Flow:
- * 1. Firebase resolves identity
- * 2. Token intercepts and gets sent to backend
- * 3. Backend verifies token, resolves/returns user record
+ * AuthService controls interaction with Firebase identity and the backend
+ * application session layer.
+ *
+ * Hybrid auth flow:
+ * 1. Firebase Auth resolves identity (sign-in / registration).
+ * 2. A fresh Firebase ID token is exchanged for a backend JWT via POST /auth/session.
+ * 3. The backend JWT is stored and used as the Bearer token for all API requests.
+ * 4. Firebase ID tokens are never forwarded to protected API routes directly.
+ * 5. onIdTokenChanged in AuthContext drives the session-creation lifecycle.
  */
 export const AuthService = {
   /**
-   * Log in via Firebase.
-   * State management is handled implicitly by Firebase's onAuthStateChanged
+   * Sign in via Firebase.
+   * onIdTokenChanged in AuthContext will handle the session exchange automatically.
    */
   async login(email: string, password: string): Promise<void> {
     await signInWithEmailAndPassword(auth, email, password);
   },
 
   /**
-   * Register via Firebase.
-   * Creates Firebase identity, then calls backend to construct the application record.
+   * Register via Firebase and immediately create the backend user record.
+   * Passes registration fields so the backend can populate the profile on first session.
    */
   async register(payload: RegisterInput): Promise<void> {
-    // 1. Create Firebase Identity
+    // 1. Create the Firebase identity
     const credential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
-    
-    // 2. Obtain fresh token to authenticate the backend request
-    const token = await credential.user.getIdToken();
-    setAuthToken(token);
 
-    // 3. Verify/reconcile backend session and user from Firebase token
-    await authApi.verifySession(token);
+    // 2. Exchange Firebase ID token for a backend session JWT, passing registration data
+    //    so the user record is created with full profile fields on first call.
+    const idToken = await credential.user.getIdToken();
+    const { appToken } = await authApi.session(idToken, {
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      userType: payload.userType,
+    });
+
+    // 3. Store backend JWT so subsequent API calls are authenticated immediately
+    setAuthToken(appToken);
+
+    // onIdTokenChanged will also fire and call createSession again (idempotent).
   },
 
   /**
-   * Log out via Firebase, clear local traces
+   * Sign out: clear the backend JWT first, then revoke the Firebase session.
    */
   async logout(): Promise<void> {
-    await signOut(auth);
     setAuthToken(null);
+    await signOut(auth);
   },
 
   /**
-   * Resolve backend application data for a given Firebase User
-   * If metadata is missing, we could implement a forced fix.
+   * Exchange a (fresh) Firebase ID token for a backend application session.
+   * Stores the returned backend JWT on the API client and returns the app user.
+   * Called by AuthContext.onIdTokenChanged on every login and token refresh.
    */
-  async getBackendUser(firebaseUser: FirebaseUser): Promise<AuthUser | null> {
+  async createSession(firebaseUser: FirebaseUser): Promise<AuthUser | null> {
     try {
-      const token = await firebaseUser.getIdToken();
-      setAuthToken(token);
-      return await authApi.verifySession(token);
+      const idToken = await firebaseUser.getIdToken();
+      const { user, appToken } = await authApi.session(idToken);
+      setAuthToken(appToken);
+      return user;
     } catch (error) {
-      console.warn('Failed to fetch backend user for firebase UID: ', firebaseUser.uid, error);
+      console.warn('Failed to create backend session for Firebase UID:', firebaseUser.uid, error);
       return null;
     }
-  }
+  },
 };

@@ -176,6 +176,14 @@ export const authService = {
   },
 
   /**
+   * Issue a signed application session JWT.
+   * Used by POST /auth/session after Firebase ID token verification.
+   */
+  signSessionToken(payload: JwtPayload): string {
+    return signToken(payload);
+  },
+
+  /**
    * Verify a JWT and return its decoded payload.
    */
   verifyToken(token: string): JwtPayload {

@@ -1,28 +1,29 @@
 import apiClient from './client';
-
-export interface AuthUser {
-  userId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  userType?: string;
-}
-
-interface MeApiResponse {
-  success: boolean;
-  data: {
-    user: AuthUser;
-  };
-}
+import type { AuthUser, SessionResponse } from '../../../../shared/src/types/auth';
 
 export const authApi = {
-  async verifySession(idToken: string): Promise<AuthUser> {
-    const response = await apiClient.post<MeApiResponse>('/auth/verify-token', { idToken });
-    return response.data.data.user;
+  /**
+   * Exchange a Firebase ID token for a backend application session JWT.
+   * Called once after every Firebase sign-in or token refresh.
+   * Optional registration fields are used to populate the user record on first call.
+   */
+  async session(
+    idToken: string,
+    registrationData?: { firstName?: string; lastName?: string; userType?: string },
+  ): Promise<{ user: AuthUser; appToken: string }> {
+    const response = await apiClient.post<SessionResponse>('/auth/session', {
+      idToken,
+      ...registrationData,
+    });
+    return { user: response.data.data.user, appToken: response.data.data.appToken! };
   },
 
+  /**
+   * Fetch the current authenticated user profile.
+   * Requires a backend session JWT in the Authorization header.
+   */
   async me(): Promise<AuthUser> {
-    const response = await apiClient.get<MeApiResponse>('/auth/me');
+    const response = await apiClient.get<SessionResponse>('/auth/me');
     return response.data.data.user;
   },
 };

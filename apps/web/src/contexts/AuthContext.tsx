@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   User,
   signInWithEmailAndPassword,
@@ -11,11 +11,16 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import Cookies from 'js-cookie';
+import { exchangeSession } from '@/lib/session';
+import type { AuthUser, SessionResponse } from '../../../../shared/src/types/auth';
+import { setToken, clearToken, getToken } from '@/lib/token';
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
+  token: string | null;
+  loading: boolean; // Firebase loading
+  tokenLoading: boolean; // JWT loading
+  isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -26,34 +31,53 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Firebase loading
+  const [token, setTokenState] = useState<string | null>(getToken());
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const lastIdTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // Listen for both auth state and ID token changes (token refresh)
+    const handleAuthChange = async (user: User | null) => {
       setUser(user);
       setLoading(false);
-    });
-
-    return () => unsubscribe();
+      if (user) {
+        setTokenLoading(true);
+        try {
+          const idToken = await user.getIdToken();
+          if (lastIdTokenRef.current === idToken && getToken()) {
+            setTokenLoading(false);
+            return; // Prevent duplicate session exchange
+          }
+          lastIdTokenRef.current = idToken;
+          const backendJwt = await exchangeSession();
+          setToken(backendJwt);
+          setTokenState(backendJwt);
+        } catch (err) {
+          clearToken();
+          setTokenState(null);
+        } finally {
+          setTokenLoading(false);
+        }
+      } else {
+        clearToken();
+        setTokenState(null);
+        lastIdTokenRef.current = null;
+      }
+    };
+    const unsub1 = onAuthStateChanged(auth, handleAuthChange);
+    // @ts-ignore: onIdTokenChanged exists in Firebase v9+
+    const unsub2 = auth.onIdTokenChanged?.(handleAuthChange);
+    return () => {
+      unsub1();
+      if (unsub2) unsub2();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
-      
-      // Call your backend API to create/update user
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: idToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to authenticate with backend');
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged will handle session exchange and JWT storage
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
@@ -62,21 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, displayName: string) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
-      
-      // Call your backend API to create user
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: idToken, isSignUp: true }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create user in backend');
-      }
+      await createUserWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged will handle session exchange and JWT storage
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
@@ -86,26 +97,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const idToken = await userCredential.user.getIdToken();
-      
-      // Call your backend API
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          token: idToken,
-          email: userCredential.user.email,
-          displayName: userCredential.user.displayName,
-          photoURL: userCredential.user.photoURL,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to authenticate with backend');
-      }
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle session exchange and JWT storage
     } catch (error) {
       console.error('Google sign in error:', error);
       throw error;
@@ -114,6 +107,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      clearToken();
+      setTokenState(null);
+      lastIdTokenRef.current = null;
       await firebaseSignOut(auth);
     } catch (error) {
       console.error('Sign out error:', error);
@@ -121,9 +117,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = {
+  const value: AuthContextType & {
+    token: string | null;
+    tokenLoading: boolean;
+    isAuthenticated: boolean;
+  } = {
     user,
+    token,
     loading,
+    tokenLoading,
+    isAuthenticated: !!user && !!token && !loading && !tokenLoading,
     signIn,
     signUp,
     signOut,

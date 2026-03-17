@@ -11,4 +11,4 @@ if (process.env.NODE_ENV === 'development') {
   global.prisma = prisma
 }
 
-export default prisma 
+// Legacy Prisma client removed. Not used in web app.
