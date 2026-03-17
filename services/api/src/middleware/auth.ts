@@ -113,8 +113,8 @@ export const authenticate = async (
 };
 
 /**
- * JWT-based middleware — does NOT require Firebase.
- * Verifies the Bearer token as a local JWT and attaches user to request.
+ * Legacy JWT-based middleware for local auth routes only.
+ * Mobile clients should use Firebase ID tokens with `authenticate`.
  */
 export const authenticateJwt = async (
   req: AuthRequest,

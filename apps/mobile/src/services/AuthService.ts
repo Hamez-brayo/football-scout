@@ -47,9 +47,8 @@ export const AuthService = {
     const token = await credential.user.getIdToken();
     setAuthToken(token);
 
-    // 3. Register user in backend DB using the token 
-    // Uses the API route for registration, assuming backend extracts uid from token
-    await authApi.register(payload);
+    // 3. Verify/reconcile backend session and user from Firebase token
+    await authApi.verifySession(token);
   },
 
   /**
@@ -68,7 +67,7 @@ export const AuthService = {
     try {
       const token = await firebaseUser.getIdToken();
       setAuthToken(token);
-      return await authApi.me();
+      return await authApi.verifySession(token);
     } catch (error) {
       console.warn('Failed to fetch backend user for firebase UID: ', firebaseUser.uid, error);
       return null;

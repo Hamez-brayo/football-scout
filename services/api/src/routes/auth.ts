@@ -3,9 +3,9 @@ import { auth } from '@/config/firebase';
 import { userService } from '@/services/userService';
 import { authService } from '@/services/authService';
 import { HTTP_STATUS, SUCCESS_MESSAGES, ERROR_CODES } from '@vysion/shared';
-import { SignUpSchema, SignInSchema } from '@vysion/shared';
+import { SignUpSchema } from '@vysion/shared';
 import { validateBody } from '@/middleware/validate';
-import { authenticateJwt } from '@/middleware/auth';
+import { authenticate } from '@/middleware/auth';
 
 const router = Router();
 
@@ -129,13 +129,13 @@ router.post('/signout', async (req, res, next) => {
   }
 });
 
-// ─── JWT-based local auth routes ──────────────────────────────────────────────
+// ─── JWT-based local auth routes (isolated from Firebase-first mobile flow) ───
 
 /**
- * POST /api/auth/register
- * Register with email + password (no Firebase required)
+ * POST /api/auth/local/register
+ * Register with email + password (legacy local JWT flow)
  */
-router.post('/register', async (req, res, next) => {
+router.post('/local/register', async (req, res, next) => {
   try {
     const { email, password, firstName, lastName, userType } = req.body;
 
@@ -168,10 +168,10 @@ router.post('/register', async (req, res, next) => {
 });
 
 /**
- * POST /api/auth/login
- * Login with email + password, returns JWT
+ * POST /api/auth/local/login
+ * Login with email + password, returns local JWT
  */
-router.post('/login', async (req, res, next) => {
+router.post('/local/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -199,11 +199,41 @@ router.post('/login', async (req, res, next) => {
 
 /**
  * GET /api/auth/me
- * Return authenticated user's profile (JWT required)
+ * Return authenticated user's profile (Firebase ID token required)
  */
-router.get('/me', authenticateJwt, async (req: any, res, next) => {
+router.get('/me', authenticate, async (req: any, res, next) => {
   try {
-    const user = await authService.getCurrentUser(req.user.userId);
+    const user = await userService.getUserByUserId(req.user.userId);
+
+    res.json({
+      success: true,
+      data: { user },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/auth/local/me
+ * Return authenticated user's profile (legacy local JWT flow)
+ */
+router.get('/local/me', async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        error: { code: ERROR_CODES.UNAUTHORIZED, message: 'No token provided' },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const payload = authService.verifyToken(authHeader.slice(7));
+    const user = await authService.getCurrentUser(payload.userId);
 
     res.json({
       success: true,

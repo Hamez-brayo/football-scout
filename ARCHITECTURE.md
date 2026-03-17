@@ -194,14 +194,17 @@ vysion-analytics/
 ## 🔐 Authentication Flow
 
 ### Mobile App
-1. User opens app → Check AsyncStorage for token
-2. If no token → Show login/signup screens
+1. User opens app and Firebase restores persisted auth state
+2. If no Firebase session → Show login/signup screens
 3. User authenticates with Firebase Auth (email/password, Google, Apple)
-4. Receive Firebase ID token
-5. Send token to backend for validation
-6. Backend returns custom JWT + user data
-7. Store tokens securely in AsyncStorage
-8. Include token in all API requests (Authorization header)
+4. Client obtains Firebase ID token
+5. Client sends ID token to backend session verification endpoint
+6. Backend verifies token and returns/creates application user data
+7. Client uses Firebase ID token as the Authorization bearer token for API requests
+
+### Local JWT Flow (Isolated)
+- Local JWT endpoints are retained for non-mobile legacy clients under `/api/auth/local/*`.
+- Mobile clients do not use local JWT login/register routes.
 
 ### Backend Validation
 1. Middleware intercepts requests
