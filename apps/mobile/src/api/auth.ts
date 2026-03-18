@@ -1,6 +1,10 @@
 import apiClient from './client';
 import type { AuthUser, SessionResponse } from '../../../../shared/src/types/auth';
 
+// Re-export for consumers that import AuthUser from '@/src/api/auth'
+export type { AuthUser, SessionResponse };
+
+
 export const authApi = {
   /**
    * Exchange a Firebase ID token for a backend application session JWT.

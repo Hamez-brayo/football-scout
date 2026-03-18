@@ -13,6 +13,7 @@ enum UserType {
   TALENT
   AGENT
   CLUB
+  SCOUT
 }
 
 enum RegistrationStatus {
