@@ -192,7 +192,6 @@ model PrivacySettings {
   updatedAt            DateTime @updatedAt
 }
 
-model Media {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [userId])
@@ -203,4 +202,95 @@ model Media {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-} 
+  type        String   // 'image' or 'video'
+  url         String
+  thumbnail   String?  // For videos
+  title       String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// --- TRAINING SYSTEM ---
+model TrainingProgram {
+  id             String   @id @default(cuid())
+  title          String
+  level          String
+  positionFocus  String
+  drills         Drill[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Drill {
+  id                String   @id @default(cuid())
+  trainingProgramId  String
+  trainingProgram    TrainingProgram @relation(fields: [trainingProgramId], references: [id])
+  title              String
+  type               String // 'technical' | 'athletic'
+  instructions       String
+  videoUrl           String?
+  submissions        DrillSubmission[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model DrillSubmission {
+  id         String   @id @default(cuid())
+  playerId   String
+  player     User     @relation(fields: [playerId], references: [userId])
+  drillId    String
+  drill      Drill    @relation(fields: [drillId], references: [id])
+  videoUrl   String
+  status     DrillSubmissionStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum DrillSubmissionStatus {
+  PENDING
+  VERIFIED
+}
+
+/// --- PERFORMANCE TRACKING ---
+model MetricType {
+  id        String   @id @default(cuid())
+  name      String  @unique // e.g. 'speed', 'stamina', 'dribbling'
+  stats     PlayerStat[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PlayerStat {
+  id           String   @id @default(cuid())
+  playerId     String
+  player       User     @relation(fields: [playerId], references: [userId])
+  metricTypeId String
+  metricType   MetricType @relation(fields: [metricTypeId], references: [id])
+  value        Float
+  recordedAt   DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// --- SCOUT SYSTEM ---
+model Shortlist {
+  id        String   @id @default(cuid())
+  scoutId   String
+  scout     User     @relation(fields: [scoutId], references: [userId])
+  playerId  String
+  player    User     @relation(fields: [playerId], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([scoutId, playerId])
+}
+
+model PlayerView {
+  id        String   @id @default(cuid())
+  scoutId   String
+  scout     User     @relation(fields: [scoutId], references: [userId])
+  playerId  String
+  player    User     @relation(fields: [playerId], references: [userId])
+  viewedAt  DateTime @default(now())
+  @@unique([scoutId, playerId])
+}
