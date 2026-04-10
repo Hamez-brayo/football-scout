@@ -4,14 +4,14 @@
   "description": "Centralized Prisma database configuration for Vysion Analytics",
   "main": "index.js",
   "scripts": {
-    "migrate": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "migrate:reset": "prisma migrate reset",
-    "generate": "prisma generate",
-    "studio": "prisma studio",
-    "seed": "ts-node prisma/seed.ts",
-    "db:push": "prisma db push",
-    "db:pull": "prisma db pull"
+    "migrate": "npx prisma migrate dev",
+    "migrate:deploy": "npx prisma migrate deploy",
+    "migrate:reset": "npx prisma migrate reset",
+    "generate": "npx prisma generate",
+    "studio": "npx prisma studio",
+    "seed": "npx ts-node prisma/seed.ts",
+    "db:push": "npx prisma db push",
+    "db:pull": "npx prisma db pull"
   },
   "keywords": [
     "prisma",

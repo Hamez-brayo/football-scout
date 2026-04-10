@@ -2,28 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/src/api/client';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { queryKeys } from './queryKeys';
-import type { AuthUser } from '../../../../../shared/src/types/auth';
-
-interface UserProfileApiResponse {
-  success: boolean;
-  data: {
-    user: AuthUser & {
-      firstName?: string;
-      lastName?: string;
-      nickname?: string;
-      profilePhoto?: string;
-      currentLocation?: string;
-      position?: string;
-      currentClub?: string;
-      [key: string]: unknown;
-    };
-  };
-  timestamp: string;
-}
+import type { ApiResponseEnvelope, UserProfile } from '@vysion/shared';
 
 const fetchCurrentUserProfile = async () => {
-  const response = await apiClient.get<UserProfileApiResponse>('/users/me');
-  return response.data.data.user;
+  const response = await apiClient.get<ApiResponseEnvelope<UserProfile>>('/users/me');
+  return response.data.data;
 };
 
 /**

@@ -2,6 +2,10 @@ import { Router } from 'express';
 import authRoutes from './auth';
 import userRoutes from './users';
 import playerRoutes from './players';
+import trainingRoutes from './training';
+import statsRoutes from './stats';
+import scoutRoutes from './scout';
+import mediaRoutes from './media';
 
 const router = Router();
 
@@ -19,5 +23,9 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/players', playerRoutes);
+router.use('/training', trainingRoutes);
+router.use('/stats', statsRoutes);
+router.use('/scout', scoutRoutes);
+router.use('/media', mediaRoutes);
 
 export default router;

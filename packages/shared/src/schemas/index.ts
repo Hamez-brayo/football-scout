@@ -1,55 +1,59 @@
 import { z } from 'zod';
 
-/**
- * User Schemas
- */
+export const RoleSchema = z.enum(['PLAYER', 'SCOUT']);
+
+export const ApiPaginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const SignUpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  firstName: z.string().min(2).max(50),
+  lastName: z.string().min(2).max(50),
+  role: RoleSchema.optional(),
+  // Backward compatibility for old client payloads.
+  userType: RoleSchema.optional(),
+});
+
+export const SignInSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export const SessionExchangeSchema = z.object({
+  idToken: z.string().min(1),
+  firstName: z.string().min(2).max(50).optional(),
+  lastName: z.string().min(2).max(50).optional(),
+  role: RoleSchema.optional(),
+  userType: RoleSchema.optional(),
+});
 
 export const UserProfileSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
-  nickname: z.string().max(50).optional(),
-  dateOfBirth: z.string().optional(),
+  firstName: z.string().min(2).max(50).optional(),
+  lastName: z.string().min(2).max(50).optional(),
+  fullName: z.string().max(120).optional(),
+  dateOfBirth: z.string().datetime().optional(),
   nationality: z.string().min(2).max(100).optional(),
   phone: z.string().max(20).optional(),
-  languages: z.array(z.string()).default([]),
   currentLocation: z.string().max(200).optional(),
   profilePhoto: z.string().url().optional(),
-  coverPhoto: z.string().url().optional(),
 });
 
 export const PhysicalAttributesSchema = z.object({
-  height: z.number().min(100).max(250).optional(), // in cm
-  weight: z.number().min(30).max(200).optional(), // in kg
-  wingspan: z.number().min(100).max(300).optional(), // in cm
-  fitnessLevel: z.number().min(0).max(100).default(0),
-  preferredFoot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
+  heightCm: z.number().min(100).max(250).optional(),
+  weightKg: z.number().min(30).max(200).optional(),
+  wingspanCm: z.number().min(100).max(300).optional(),
+  sprintSpeed: z.number().min(0).max(20).optional(),
+  staminaScore: z.number().min(0).max(100).optional(),
 });
 
 export const FootballProfileSchema = z.object({
-  primaryPosition: z.string().max(50).optional(),
-  secondaryPositions: z.array(z.string()).default([]),
-  currentClub: z.string().max(100).optional(),
-  previousClubs: z.array(z.string()).default([]),
-  playingStyle: z.array(z.string()).default([]),
-  strongFoot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
-  experience: z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
-});
-
-/**
- * Player Profile Schema (for scout discovery)
- */
-export const PlayerProfileSchema = z.object({
-  fullName: z.string().min(2).max(100).optional(),
-  age: z.number().min(10).max(100).optional(),
-  nationality: z.string().max(100).optional(),
-  position: z.string().max(50).optional(),
-  preferredFoot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
-  height: z.number().min(100).max(250).optional(), // in cm
-  weight: z.number().min(30).max(200).optional(), // in kg
-  speed: z.number().min(0).max(100).optional(), // 0-100 rating
-  stamina: z.number().min(0).max(100).optional(), // 0-100 rating
-  currentClub: z.string().max(100).optional(),
-  profilePhoto: z.string().url().optional(),
+  dominantFoot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
+  playingStyle: z.array(z.string().max(80)).default([]),
+  strongestSkills: z.array(z.string().max(80)).default([]),
+  weakFootRating: z.number().int().min(1).max(5).optional(),
 });
 
 export const AchievementSchema = z.object({
@@ -58,75 +62,96 @@ export const AchievementSchema = z.object({
   date: z.string().datetime().optional(),
 });
 
-/**
- * Media Schemas
- */
+export const CreateProfileSchema = z.object({
+  primaryPosition: z.string().max(50).optional(),
+  secondaryPositions: z.array(z.string().max(50)).default([]),
+  currentClub: z.string().max(100).optional(),
+  preferredFoot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
+  experienceLevel: z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
+  isAvailable: z.boolean().optional(),
+  bio: z.string().max(1000).optional(),
+  physicalAttributes: PhysicalAttributesSchema.optional(),
+  footballProfile: FootballProfileSchema.optional(),
+});
+
+export const UpdateProfileSchema = CreateProfileSchema.partial();
+
+// Backward-compatible alias used by existing routes.
+export const PlayerProfileSchema = CreateProfileSchema;
 
 export const MediaUploadSchema = z.object({
-  type: z.enum(['image', 'video']),
+  type: z.enum(['IMAGE', 'VIDEO', 'image', 'video']).transform((value) => value.toUpperCase() as 'IMAGE' | 'VIDEO'),
   title: z.string().max(200).optional(),
+  description: z.string().max(1000).optional(),
+  mimeType: z.string().min(3).max(120),
+  sizeBytes: z.number().int().positive(),
+  durationSec: z.number().int().positive().optional(),
+});
+
+export const TrainingProgramSchema = z.object({
+  title: z.string().min(3).max(150),
+  level: z.string().min(2).max(50),
+  positionFocus: z.string().min(2).max(50),
   description: z.string().max(1000).optional(),
 });
 
-/**
- * Authentication Schemas
- */
-
-export const SignUpSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  firstName: z.string().min(2).max(50),
-  lastName: z.string().min(2).max(50),
-  userType: z.enum(['TALENT', 'SCOUT', 'AGENT', 'CLUB']).optional(),
+export const DrillSchema = z.object({
+  trainingProgramId: z.string().min(1),
+  title: z.string().min(3).max(150),
+  type: z.enum(['TECHNICAL', 'ATHLETIC']),
+  instructions: z.string().min(10).max(5000),
+  videoUrl: z.string().url().optional(),
+  displayOrder: z.number().int().min(0).optional(),
 });
 
-export const SignInSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+export const DrillSubmissionSchema = z.object({
+  drillId: z.string().min(1),
+  videoUrl: z.string().url(),
 });
 
-/**
- * Search Schemas
- */
+export const MetricTypeSchema = z.object({
+  key: z.string().min(2).max(50),
+  displayName: z.string().min(2).max(100),
+  unit: z.string().max(30).optional(),
+  description: z.string().max(500).optional(),
+});
 
-export const SearchFiltersSchema = z.object({
+export const PlayerStatCreateSchema = z.object({
+  playerId: z.string().min(1),
+  metricKey: z.string().min(2).max(50),
+  value: z.number(),
+  recordedAt: z.string().datetime().optional(),
+  source: z.string().max(100).optional(),
+});
+
+export const PlayerStatsSchema = z.object({
+  metricKey: z.string().min(2).max(50).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+});
+
+export const SearchFiltersSchema = ApiPaginationSchema.extend({
   query: z.string().max(200).optional(),
-  position: z.string().optional(),
+  position: z.string().max(50).optional(),
   nationality: z.string().max(100).optional(),
-  ageMin: z.number().min(10).max(100).optional(),
-  ageMax: z.number().min(10).max(100).optional(),
-  heightMin: z.number().min(100).max(250).optional(), // in cm
-  heightMax: z.number().min(100).max(250).optional(), // in cm
-  speedMin: z.number().min(0).max(100).optional(), // 0-100 rating
-  speedMax: z.number().min(0).max(100).optional(), // 0-100 rating
+  ageMin: z.coerce.number().int().min(10).max(100).optional(),
+  ageMax: z.coerce.number().int().min(10).max(100).optional(),
+  heightMin: z.coerce.number().min(100).max(250).optional(),
+  heightMax: z.coerce.number().min(100).max(250).optional(),
+  speedMin: z.coerce.number().min(0).max(20).optional(),
+  speedMax: z.coerce.number().min(0).max(20).optional(),
   experienceLevel: z.enum(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO']).optional(),
   currentClub: z.string().max(100).optional(),
-  page: z.number().min(1).default(1),
-  limit: z.number().min(1).max(100).default(20),
 });
 
-/**
- * Verification Schemas
- */
-
-export const VerificationRequestSchema = z.object({
-  type: z.enum(['face', 'skill', 'document']),
-  mediaUrls: z.array(z.string().url()).min(1),
-  notes: z.string().max(1000).optional(),
+export const ScoutShortlistSchema = z.object({
+  playerId: z.string().min(1),
+  notes: z.string().max(500).optional(),
 });
 
-/**
- * Messaging Schemas
- */
-
-export const MessageSchema = z.object({
-  receiverId: z.string().min(1),
-  content: z.string().min(1).max(5000),
+export const PlayerViewSchema = z.object({
+  playerId: z.string().min(1),
 });
-
-/**
- * Helper function to validate data
- */
 
 export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): T {
   return schema.parse(data);

@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import { authenticate } from '@/middleware/auth';
+import { authenticate, requireUserType } from '@/middleware/auth';
 import { validateBody } from '@/middleware/validate';
 import { userController } from '@/controllers/userController';
 import {
   UserProfileSchema,
   PhysicalAttributesSchema,
   FootballProfileSchema,
+  UserRole,
 } from '@vysion/shared';
 
 const router = Router();
@@ -19,12 +20,23 @@ router.use(authenticate);
  */
 router.get('/me', userController.getCurrentUser.bind(userController));
 
+// Backward-compatible alias retained during contract freeze migration.
+router.get('/profile', userController.getCurrentUser.bind(userController));
+
 /**
  * PUT /api/users/profile
  * Update user profile
  */
 router.put(
   '/profile',
+  requireUserType(UserRole.PLAYER),
+  validateBody(UserProfileSchema.partial()),
+  userController.updateProfile.bind(userController)
+);
+
+router.patch(
+  '/me',
+  requireUserType(UserRole.PLAYER),
   validateBody(UserProfileSchema.partial()),
   userController.updateProfile.bind(userController)
 );
@@ -35,6 +47,7 @@ router.put(
  */
 router.put(
   '/physical-attributes',
+  requireUserType(UserRole.PLAYER),
   validateBody(PhysicalAttributesSchema),
   userController.updatePhysicalAttributes.bind(userController)
 );
@@ -45,6 +58,7 @@ router.put(
  */
 router.put(
   '/football-profile',
+  requireUserType(UserRole.PLAYER),
   validateBody(FootballProfileSchema),
   userController.updateFootballProfile.bind(userController)
 );
@@ -53,7 +67,11 @@ router.put(
  * GET /api/users/:id
  * Get user by ID
  */
-router.get('/:id', userController.getUserById.bind(userController));
+router.get(
+  '/:id',
+  requireUserType(UserRole.SCOUT),
+  userController.getUserById.bind(userController)
+);
 
 /**
  * DELETE /api/users/account

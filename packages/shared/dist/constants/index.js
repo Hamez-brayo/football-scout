@@ -8,14 +8,15 @@ exports.API_ENDPOINTS = {
     // Authentication
     AUTH: {
         SIGN_UP: '/api/auth/signup',
-        SIGN_IN: '/api/auth/signin',
+        SIGN_IN: '/api/auth/local/login',
+        SESSION: '/api/auth/session',
+        ME: '/api/auth/me',
         SIGN_OUT: '/api/auth/signout',
         VERIFY_TOKEN: '/api/auth/verify',
-        REFRESH_TOKEN: '/api/auth/refresh',
     },
     // Users
     USERS: {
-        PROFILE: '/api/users/profile',
+        ME: '/api/users/me',
         UPDATE: '/api/users/profile',
         GET_BY_ID: (id) => `/api/users/${id}`,
         PHYSICAL_ATTRIBUTES: '/api/users/physical-attributes',
@@ -35,6 +36,19 @@ exports.API_ENDPOINTS = {
         DELETE: (id) => `/api/media/${id}`,
         LIST: '/api/media',
     },
+    TRAINING: {
+        PROGRAMS: '/api/training/programs',
+        DRILLS: '/api/training/drills',
+        SUBMISSIONS: '/api/training/submissions',
+    },
+    STATS: {
+        BASE: '/api/stats',
+        PLAYER: (playerId) => `/api/stats/${playerId}`,
+    },
+    SCOUT: {
+        SEARCH: '/api/scout/search',
+        SHORTLIST: '/api/scout/shortlist',
+    },
     // Verification
     VERIFICATION: {
         INITIATE: '/api/verification/initiate',
@@ -48,11 +62,6 @@ exports.API_ENDPOINTS = {
         GET_CONVERSATION: (id) => `/api/messages/conversation/${id}`,
         LIST_CONVERSATIONS: '/api/messages/conversations',
         MARK_READ: (id) => `/api/messages/${id}/read`,
-    },
-    // Scouts
-    SCOUTS: {
-        DASHBOARD: '/api/scouts/dashboard',
-        SEARCH_PLAYERS: '/api/scouts/search',
     },
 };
 /**

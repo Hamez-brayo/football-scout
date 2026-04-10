@@ -4,14 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '@/config/database';
 import { config } from '@/config';
 import { AppError } from '@/middleware/errorHandler';
-import { HTTP_STATUS, ERROR_CODES } from '@vysion/shared';
+import { HTTP_STATUS, ERROR_CODES, UserRole } from '@vysion/shared';
 
 const SALT_ROUNDS = 12;
 
 export interface JwtPayload {
   userId: string;
   email: string;
-  userType?: string | null;
+  role?: UserRole | null;
 }
 
 export interface RegisterInput {
@@ -19,7 +19,7 @@ export interface RegisterInput {
   password: string;
   firstName?: string;
   lastName?: string;
-  userType?: string;
+  role?: UserRole;
 }
 
 export interface LoginInput {
@@ -28,19 +28,22 @@ export interface LoginInput {
 }
 
 function signToken(payload: JwtPayload): string {
+  if (!config.JWT_SECRET) {
+    throw new AppError(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      ERROR_CODES.INTERNAL_ERROR,
+      'JWT secret is not configured'
+    );
+  }
+
   return jwt.sign(payload, config.JWT_SECRET, {
     expiresIn: config.JWT_EXPIRES_IN,
   } as jwt.SignOptions);
 }
 
 export const authService = {
-  /**
-   * Register a new user with email + password.
-   * Generates a cuid-compatible userId so the record is compatible with
-   * Firebase-created users should they be merged later.
-   */
   async registerUser(input: RegisterInput) {
-    const { email, password, firstName, lastName, userType } = input;
+    const { email, password, firstName, lastName, role } = input;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -53,6 +56,7 @@ export const authService = {
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const userId = uuidv4();
+    const normalizedRole = role ?? UserRole.PLAYER;
 
     const user = await prisma.user.create({
       data: {
@@ -63,7 +67,7 @@ export const authService = {
         lastName,
         fullName:
           firstName && lastName ? `${firstName} ${lastName}` : undefined,
-        userType: (userType as any) || undefined,
+        role: normalizedRole,
         registrationStatus: 'INCOMPLETE',
       },
       select: {
@@ -73,7 +77,7 @@ export const authService = {
         firstName: true,
         lastName: true,
         fullName: true,
-        userType: true,
+        role: true,
         registrationStatus: true,
         createdAt: true,
       },
@@ -82,16 +86,12 @@ export const authService = {
     const token = signToken({
       userId: user.userId,
       email: user.email,
-      userType: user.userType,
+      role: user.role as unknown as UserRole,
     });
 
     return { user, token };
   },
 
-  /**
-   * Authenticate an existing user.
-   * Only works for locally-registered users (password IS set).
-   */
   async loginUser(input: LoginInput) {
     const { email, password } = input;
 
@@ -125,42 +125,28 @@ export const authService = {
     const token = signToken({
       userId: user.userId,
       email: user.email,
-      userType: user.userType,
+      role: user.role as unknown as UserRole,
     });
 
-    // Strip password from returned object
     const { password: _pw, ...safeUser } = user;
     return { user: safeUser, token };
   },
 
-  /**
-   * Retrieve the current user by userId from a decoded JWT payload.
-   */
   async getCurrentUser(userId: string) {
     const user = await prisma.user.findUnique({
       where: { userId },
-      select: {
-        id: true,
-        userId: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        fullName: true,
-        userType: true,
-        registrationStatus: true,
-        verificationStatus: true,
-        profilePhoto: true,
-        nationality: true,
-        position: true,
-        currentClub: true,
-        createdAt: true,
-        updatedAt: true,
-        physicalAttributes: true,
-        footballProfile: {
-          include: { achievements: true },
+      include: {
+        playerProfile: {
+          include: {
+            physicalAttributes: true,
+            footballProfile: {
+              include: { achievements: true },
+            },
+          },
         },
-        availability: true,
-        socialLinks: true,
+        media: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -175,20 +161,21 @@ export const authService = {
     return user;
   },
 
-  /**
-   * Issue a signed application session JWT.
-   * Used by POST /auth/session after Firebase ID token verification.
-   */
   signSessionToken(payload: JwtPayload): string {
     return signToken(payload);
   },
 
-  /**
-   * Verify a JWT and return its decoded payload.
-   */
   verifyToken(token: string): JwtPayload {
     try {
-      return jwt.verify(token, config.JWT_SECRET) as JwtPayload;
+      if (!config.JWT_SECRET) {
+        throw new AppError(
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          ERROR_CODES.INTERNAL_ERROR,
+          'JWT secret is not configured'
+        );
+      }
+
+      return jwt.verify(token, config.JWT_SECRET) as unknown as JwtPayload;
     } catch (err: any) {
       if (err.name === 'TokenExpiredError') {
         throw new AppError(

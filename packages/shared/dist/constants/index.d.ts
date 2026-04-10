@@ -5,12 +5,13 @@ export declare const API_ENDPOINTS: {
     AUTH: {
         SIGN_UP: string;
         SIGN_IN: string;
+        SESSION: string;
+        ME: string;
         SIGN_OUT: string;
         VERIFY_TOKEN: string;
-        REFRESH_TOKEN: string;
     };
     USERS: {
-        PROFILE: string;
+        ME: string;
         UPDATE: string;
         GET_BY_ID: (id: string) => string;
         PHYSICAL_ATTRIBUTES: string;
@@ -28,6 +29,19 @@ export declare const API_ENDPOINTS: {
         DELETE: (id: string) => string;
         LIST: string;
     };
+    TRAINING: {
+        PROGRAMS: string;
+        DRILLS: string;
+        SUBMISSIONS: string;
+    };
+    STATS: {
+        BASE: string;
+        PLAYER: (playerId: string) => string;
+    };
+    SCOUT: {
+        SEARCH: string;
+        SHORTLIST: string;
+    };
     VERIFICATION: {
         INITIATE: string;
         UPLOAD: string;
@@ -39,10 +53,6 @@ export declare const API_ENDPOINTS: {
         GET_CONVERSATION: (id: string) => string;
         LIST_CONVERSATIONS: string;
         MARK_READ: (id: string) => string;
-    };
-    SCOUTS: {
-        DASHBOARD: string;
-        SEARCH_PLAYERS: string;
     };
 };
 /**

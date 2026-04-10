@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '@/middleware/auth';
 import { userService } from '@/services/userService';
-import { HTTP_STATUS, SUCCESS_MESSAGES } from '@vysion/shared';
+import { SUCCESS_MESSAGES, type ApiResponseEnvelope } from '@vysion/shared';
 
 export class UserController {
   /**
@@ -11,11 +11,13 @@ export class UserController {
     try {
       const user = await userService.getUserByUserId(req.user!.userId);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof user> = {
         success: true,
         data: user,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -29,11 +31,13 @@ export class UserController {
       const { id } = req.params;
       const user = await userService.getUserById(id);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof user> = {
         success: true,
         data: user,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -46,12 +50,14 @@ export class UserController {
     try {
       const user = await userService.updateProfile(req.user!.userId, req.body);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof user> = {
         success: true,
         data: user,
         message: SUCCESS_MESSAGES.PROFILE_UPDATED,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -71,12 +77,14 @@ export class UserController {
         req.body
       );
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof attributes> = {
         success: true,
         data: attributes,
         message: 'Physical attributes updated successfully',
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -96,12 +104,14 @@ export class UserController {
         req.body
       );
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof profile> = {
         success: true,
         data: profile,
         message: 'Football profile updated successfully',
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -114,11 +124,13 @@ export class UserController {
     try {
       const result = await userService.deleteUser(req.user!.userId);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof result> = {
         success: true,
         data: result,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }

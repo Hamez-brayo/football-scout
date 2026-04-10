@@ -1,124 +1,128 @@
 import { z } from 'zod';
-/**
- * User Schemas
- */
-export declare const UserProfileSchema: z.ZodObject<{
+export declare const RoleSchema: z.ZodEnum<["PLAYER", "SCOUT"]>;
+export declare const ApiPaginationSchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodNumber>;
+    limit: z.ZodDefault<z.ZodNumber>;
+}, "strip", z.ZodTypeAny, {
+    page: number;
+    limit: number;
+}, {
+    page?: number | undefined;
+    limit?: number | undefined;
+}>;
+export declare const SignUpSchema: z.ZodObject<{
+    email: z.ZodString;
+    password: z.ZodString;
     firstName: z.ZodString;
     lastName: z.ZodString;
-    nickname: z.ZodOptional<z.ZodString>;
+    role: z.ZodOptional<z.ZodEnum<["PLAYER", "SCOUT"]>>;
+    userType: z.ZodOptional<z.ZodEnum<["PLAYER", "SCOUT"]>>;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role?: "PLAYER" | "SCOUT" | undefined;
+    userType?: "PLAYER" | "SCOUT" | undefined;
+}, {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role?: "PLAYER" | "SCOUT" | undefined;
+    userType?: "PLAYER" | "SCOUT" | undefined;
+}>;
+export declare const SignInSchema: z.ZodObject<{
+    email: z.ZodString;
+    password: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    email: string;
+    password: string;
+}, {
+    email: string;
+    password: string;
+}>;
+export declare const SessionExchangeSchema: z.ZodObject<{
+    idToken: z.ZodString;
+    firstName: z.ZodOptional<z.ZodString>;
+    lastName: z.ZodOptional<z.ZodString>;
+    role: z.ZodOptional<z.ZodEnum<["PLAYER", "SCOUT"]>>;
+    userType: z.ZodOptional<z.ZodEnum<["PLAYER", "SCOUT"]>>;
+}, "strip", z.ZodTypeAny, {
+    idToken: string;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    role?: "PLAYER" | "SCOUT" | undefined;
+    userType?: "PLAYER" | "SCOUT" | undefined;
+}, {
+    idToken: string;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    role?: "PLAYER" | "SCOUT" | undefined;
+    userType?: "PLAYER" | "SCOUT" | undefined;
+}>;
+export declare const UserProfileSchema: z.ZodObject<{
+    firstName: z.ZodOptional<z.ZodString>;
+    lastName: z.ZodOptional<z.ZodString>;
+    fullName: z.ZodOptional<z.ZodString>;
     dateOfBirth: z.ZodOptional<z.ZodString>;
     nationality: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
-    languages: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
     currentLocation: z.ZodOptional<z.ZodString>;
     profilePhoto: z.ZodOptional<z.ZodString>;
-    coverPhoto: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    firstName: string;
-    lastName: string;
-    languages: string[];
-    nickname?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    fullName?: string | undefined;
     dateOfBirth?: string | undefined;
     nationality?: string | undefined;
     phone?: string | undefined;
     currentLocation?: string | undefined;
     profilePhoto?: string | undefined;
-    coverPhoto?: string | undefined;
 }, {
-    firstName: string;
-    lastName: string;
-    nickname?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    fullName?: string | undefined;
     dateOfBirth?: string | undefined;
     nationality?: string | undefined;
     phone?: string | undefined;
-    languages?: string[] | undefined;
     currentLocation?: string | undefined;
     profilePhoto?: string | undefined;
-    coverPhoto?: string | undefined;
 }>;
 export declare const PhysicalAttributesSchema: z.ZodObject<{
-    height: z.ZodOptional<z.ZodNumber>;
-    weight: z.ZodOptional<z.ZodNumber>;
-    wingspan: z.ZodOptional<z.ZodNumber>;
-    fitnessLevel: z.ZodDefault<z.ZodNumber>;
-    preferredFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+    heightCm: z.ZodOptional<z.ZodNumber>;
+    weightKg: z.ZodOptional<z.ZodNumber>;
+    wingspanCm: z.ZodOptional<z.ZodNumber>;
+    sprintSpeed: z.ZodOptional<z.ZodNumber>;
+    staminaScore: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    fitnessLevel: number;
-    height?: number | undefined;
-    weight?: number | undefined;
-    wingspan?: number | undefined;
-    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    heightCm?: number | undefined;
+    weightKg?: number | undefined;
+    wingspanCm?: number | undefined;
+    sprintSpeed?: number | undefined;
+    staminaScore?: number | undefined;
 }, {
-    height?: number | undefined;
-    weight?: number | undefined;
-    wingspan?: number | undefined;
-    fitnessLevel?: number | undefined;
-    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    heightCm?: number | undefined;
+    weightKg?: number | undefined;
+    wingspanCm?: number | undefined;
+    sprintSpeed?: number | undefined;
+    staminaScore?: number | undefined;
 }>;
 export declare const FootballProfileSchema: z.ZodObject<{
-    primaryPosition: z.ZodOptional<z.ZodString>;
-    secondaryPositions: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
-    currentClub: z.ZodOptional<z.ZodString>;
-    previousClubs: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+    dominantFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
     playingStyle: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
-    strongFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
-    experience: z.ZodOptional<z.ZodEnum<["AMATEUR", "ACADEMY", "SEMI_PRO", "PRO"]>>;
+    strongestSkills: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+    weakFootRating: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    secondaryPositions: string[];
-    previousClubs: string[];
     playingStyle: string[];
-    primaryPosition?: string | undefined;
-    currentClub?: string | undefined;
-    strongFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
-    experience?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    strongestSkills: string[];
+    dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    weakFootRating?: number | undefined;
 }, {
-    primaryPosition?: string | undefined;
-    secondaryPositions?: string[] | undefined;
-    currentClub?: string | undefined;
-    previousClubs?: string[] | undefined;
+    dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
     playingStyle?: string[] | undefined;
-    strongFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
-    experience?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
-}>;
-/**
- * Player Profile Schema (for scout discovery)
- */
-export declare const PlayerProfileSchema: z.ZodObject<{
-    fullName: z.ZodOptional<z.ZodString>;
-    age: z.ZodOptional<z.ZodNumber>;
-    nationality: z.ZodOptional<z.ZodString>;
-    position: z.ZodOptional<z.ZodString>;
-    preferredFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
-    height: z.ZodOptional<z.ZodNumber>;
-    weight: z.ZodOptional<z.ZodNumber>;
-    speed: z.ZodOptional<z.ZodNumber>;
-    stamina: z.ZodOptional<z.ZodNumber>;
-    currentClub: z.ZodOptional<z.ZodString>;
-    profilePhoto: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
-    nationality?: string | undefined;
-    profilePhoto?: string | undefined;
-    height?: number | undefined;
-    weight?: number | undefined;
-    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
-    currentClub?: string | undefined;
-    fullName?: string | undefined;
-    age?: number | undefined;
-    position?: string | undefined;
-    speed?: number | undefined;
-    stamina?: number | undefined;
-}, {
-    nationality?: string | undefined;
-    profilePhoto?: string | undefined;
-    height?: number | undefined;
-    weight?: number | undefined;
-    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
-    currentClub?: string | undefined;
-    fullName?: string | undefined;
-    age?: number | undefined;
-    position?: string | undefined;
-    speed?: number | undefined;
-    stamina?: number | undefined;
+    strongestSkills?: string[] | undefined;
+    weakFootRating?: number | undefined;
 }>;
 export declare const AchievementSchema: z.ZodObject<{
     title: z.ZodString;
@@ -133,58 +137,386 @@ export declare const AchievementSchema: z.ZodObject<{
     description?: string | undefined;
     date?: string | undefined;
 }>;
-/**
- * Media Schemas
- */
+export declare const CreateProfileSchema: z.ZodObject<{
+    primaryPosition: z.ZodOptional<z.ZodString>;
+    secondaryPositions: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+    currentClub: z.ZodOptional<z.ZodString>;
+    preferredFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+    experienceLevel: z.ZodOptional<z.ZodEnum<["AMATEUR", "ACADEMY", "SEMI_PRO", "PRO"]>>;
+    isAvailable: z.ZodOptional<z.ZodBoolean>;
+    bio: z.ZodOptional<z.ZodString>;
+    physicalAttributes: z.ZodOptional<z.ZodObject<{
+        heightCm: z.ZodOptional<z.ZodNumber>;
+        weightKg: z.ZodOptional<z.ZodNumber>;
+        wingspanCm: z.ZodOptional<z.ZodNumber>;
+        sprintSpeed: z.ZodOptional<z.ZodNumber>;
+        staminaScore: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    }, {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    }>>;
+    footballProfile: z.ZodOptional<z.ZodObject<{
+        dominantFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+        playingStyle: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        strongestSkills: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        weakFootRating: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        playingStyle: string[];
+        strongestSkills: string[];
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        weakFootRating?: number | undefined;
+    }, {
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        playingStyle?: string[] | undefined;
+        strongestSkills?: string[] | undefined;
+        weakFootRating?: number | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    secondaryPositions: string[];
+    primaryPosition?: string | undefined;
+    currentClub?: string | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    isAvailable?: boolean | undefined;
+    bio?: string | undefined;
+    physicalAttributes?: {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    } | undefined;
+    footballProfile?: {
+        playingStyle: string[];
+        strongestSkills: string[];
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        weakFootRating?: number | undefined;
+    } | undefined;
+}, {
+    primaryPosition?: string | undefined;
+    secondaryPositions?: string[] | undefined;
+    currentClub?: string | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    isAvailable?: boolean | undefined;
+    bio?: string | undefined;
+    physicalAttributes?: {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    } | undefined;
+    footballProfile?: {
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        playingStyle?: string[] | undefined;
+        strongestSkills?: string[] | undefined;
+        weakFootRating?: number | undefined;
+    } | undefined;
+}>;
+export declare const UpdateProfileSchema: z.ZodObject<{
+    primaryPosition: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    secondaryPositions: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString, "many">>>;
+    currentClub: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    preferredFoot: z.ZodOptional<z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>>;
+    experienceLevel: z.ZodOptional<z.ZodOptional<z.ZodEnum<["AMATEUR", "ACADEMY", "SEMI_PRO", "PRO"]>>>;
+    isAvailable: z.ZodOptional<z.ZodOptional<z.ZodBoolean>>;
+    bio: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    physicalAttributes: z.ZodOptional<z.ZodOptional<z.ZodObject<{
+        heightCm: z.ZodOptional<z.ZodNumber>;
+        weightKg: z.ZodOptional<z.ZodNumber>;
+        wingspanCm: z.ZodOptional<z.ZodNumber>;
+        sprintSpeed: z.ZodOptional<z.ZodNumber>;
+        staminaScore: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    }, {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    }>>>;
+    footballProfile: z.ZodOptional<z.ZodOptional<z.ZodObject<{
+        dominantFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+        playingStyle: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        strongestSkills: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        weakFootRating: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        playingStyle: string[];
+        strongestSkills: string[];
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        weakFootRating?: number | undefined;
+    }, {
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        playingStyle?: string[] | undefined;
+        strongestSkills?: string[] | undefined;
+        weakFootRating?: number | undefined;
+    }>>>;
+}, "strip", z.ZodTypeAny, {
+    primaryPosition?: string | undefined;
+    secondaryPositions?: string[] | undefined;
+    currentClub?: string | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    isAvailable?: boolean | undefined;
+    bio?: string | undefined;
+    physicalAttributes?: {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    } | undefined;
+    footballProfile?: {
+        playingStyle: string[];
+        strongestSkills: string[];
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        weakFootRating?: number | undefined;
+    } | undefined;
+}, {
+    primaryPosition?: string | undefined;
+    secondaryPositions?: string[] | undefined;
+    currentClub?: string | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    isAvailable?: boolean | undefined;
+    bio?: string | undefined;
+    physicalAttributes?: {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    } | undefined;
+    footballProfile?: {
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        playingStyle?: string[] | undefined;
+        strongestSkills?: string[] | undefined;
+        weakFootRating?: number | undefined;
+    } | undefined;
+}>;
+export declare const PlayerProfileSchema: z.ZodObject<{
+    primaryPosition: z.ZodOptional<z.ZodString>;
+    secondaryPositions: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+    currentClub: z.ZodOptional<z.ZodString>;
+    preferredFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+    experienceLevel: z.ZodOptional<z.ZodEnum<["AMATEUR", "ACADEMY", "SEMI_PRO", "PRO"]>>;
+    isAvailable: z.ZodOptional<z.ZodBoolean>;
+    bio: z.ZodOptional<z.ZodString>;
+    physicalAttributes: z.ZodOptional<z.ZodObject<{
+        heightCm: z.ZodOptional<z.ZodNumber>;
+        weightKg: z.ZodOptional<z.ZodNumber>;
+        wingspanCm: z.ZodOptional<z.ZodNumber>;
+        sprintSpeed: z.ZodOptional<z.ZodNumber>;
+        staminaScore: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    }, {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    }>>;
+    footballProfile: z.ZodOptional<z.ZodObject<{
+        dominantFoot: z.ZodOptional<z.ZodEnum<["LEFT", "RIGHT", "BOTH"]>>;
+        playingStyle: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        strongestSkills: z.ZodDefault<z.ZodArray<z.ZodString, "many">>;
+        weakFootRating: z.ZodOptional<z.ZodNumber>;
+    }, "strip", z.ZodTypeAny, {
+        playingStyle: string[];
+        strongestSkills: string[];
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        weakFootRating?: number | undefined;
+    }, {
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        playingStyle?: string[] | undefined;
+        strongestSkills?: string[] | undefined;
+        weakFootRating?: number | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    secondaryPositions: string[];
+    primaryPosition?: string | undefined;
+    currentClub?: string | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    isAvailable?: boolean | undefined;
+    bio?: string | undefined;
+    physicalAttributes?: {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    } | undefined;
+    footballProfile?: {
+        playingStyle: string[];
+        strongestSkills: string[];
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        weakFootRating?: number | undefined;
+    } | undefined;
+}, {
+    primaryPosition?: string | undefined;
+    secondaryPositions?: string[] | undefined;
+    currentClub?: string | undefined;
+    preferredFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    isAvailable?: boolean | undefined;
+    bio?: string | undefined;
+    physicalAttributes?: {
+        heightCm?: number | undefined;
+        weightKg?: number | undefined;
+        wingspanCm?: number | undefined;
+        sprintSpeed?: number | undefined;
+        staminaScore?: number | undefined;
+    } | undefined;
+    footballProfile?: {
+        dominantFoot?: "LEFT" | "RIGHT" | "BOTH" | undefined;
+        playingStyle?: string[] | undefined;
+        strongestSkills?: string[] | undefined;
+        weakFootRating?: number | undefined;
+    } | undefined;
+}>;
 export declare const MediaUploadSchema: z.ZodObject<{
-    type: z.ZodEnum<["image", "video"]>;
+    type: z.ZodEffects<z.ZodEnum<["IMAGE", "VIDEO", "image", "video"]>, "IMAGE" | "VIDEO", "IMAGE" | "VIDEO" | "image" | "video">;
     title: z.ZodOptional<z.ZodString>;
     description: z.ZodOptional<z.ZodString>;
+    mimeType: z.ZodString;
+    sizeBytes: z.ZodNumber;
+    durationSec: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    type: "image" | "video";
+    type: "IMAGE" | "VIDEO";
+    mimeType: string;
+    sizeBytes: number;
     title?: string | undefined;
     description?: string | undefined;
+    durationSec?: number | undefined;
 }, {
-    type: "image" | "video";
+    type: "IMAGE" | "VIDEO" | "image" | "video";
+    mimeType: string;
+    sizeBytes: number;
     title?: string | undefined;
     description?: string | undefined;
+    durationSec?: number | undefined;
 }>;
-/**
- * Authentication Schemas
- */
-export declare const SignUpSchema: z.ZodObject<{
-    email: z.ZodString;
-    password: z.ZodString;
-    firstName: z.ZodString;
-    lastName: z.ZodString;
-    userType: z.ZodOptional<z.ZodEnum<["TALENT", "SCOUT", "AGENT", "CLUB"]>>;
+export declare const TrainingProgramSchema: z.ZodObject<{
+    title: z.ZodString;
+    level: z.ZodString;
+    positionFocus: z.ZodString;
+    description: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    userType?: "TALENT" | "SCOUT" | "AGENT" | "CLUB" | undefined;
+    title: string;
+    level: string;
+    positionFocus: string;
+    description?: string | undefined;
 }, {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    userType?: "TALENT" | "SCOUT" | "AGENT" | "CLUB" | undefined;
+    title: string;
+    level: string;
+    positionFocus: string;
+    description?: string | undefined;
 }>;
-export declare const SignInSchema: z.ZodObject<{
-    email: z.ZodString;
-    password: z.ZodString;
+export declare const DrillSchema: z.ZodObject<{
+    trainingProgramId: z.ZodString;
+    title: z.ZodString;
+    type: z.ZodEnum<["TECHNICAL", "ATHLETIC"]>;
+    instructions: z.ZodString;
+    videoUrl: z.ZodOptional<z.ZodString>;
+    displayOrder: z.ZodOptional<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    email: string;
-    password: string;
+    type: "TECHNICAL" | "ATHLETIC";
+    title: string;
+    trainingProgramId: string;
+    instructions: string;
+    videoUrl?: string | undefined;
+    displayOrder?: number | undefined;
 }, {
-    email: string;
-    password: string;
+    type: "TECHNICAL" | "ATHLETIC";
+    title: string;
+    trainingProgramId: string;
+    instructions: string;
+    videoUrl?: string | undefined;
+    displayOrder?: number | undefined;
 }>;
-/**
- * Search Schemas
- */
+export declare const DrillSubmissionSchema: z.ZodObject<{
+    drillId: z.ZodString;
+    videoUrl: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    videoUrl: string;
+    drillId: string;
+}, {
+    videoUrl: string;
+    drillId: string;
+}>;
+export declare const MetricTypeSchema: z.ZodObject<{
+    key: z.ZodString;
+    displayName: z.ZodString;
+    unit: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    key: string;
+    displayName: string;
+    description?: string | undefined;
+    unit?: string | undefined;
+}, {
+    key: string;
+    displayName: string;
+    description?: string | undefined;
+    unit?: string | undefined;
+}>;
+export declare const PlayerStatCreateSchema: z.ZodObject<{
+    playerId: z.ZodString;
+    metricKey: z.ZodString;
+    value: z.ZodNumber;
+    recordedAt: z.ZodOptional<z.ZodString>;
+    source: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    value: number;
+    playerId: string;
+    metricKey: string;
+    recordedAt?: string | undefined;
+    source?: string | undefined;
+}, {
+    value: number;
+    playerId: string;
+    metricKey: string;
+    recordedAt?: string | undefined;
+    source?: string | undefined;
+}>;
+export declare const PlayerStatsSchema: z.ZodObject<{
+    metricKey: z.ZodOptional<z.ZodString>;
+    from: z.ZodOptional<z.ZodString>;
+    to: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    metricKey?: string | undefined;
+    from?: string | undefined;
+    to?: string | undefined;
+}, {
+    metricKey?: string | undefined;
+    from?: string | undefined;
+    to?: string | undefined;
+}>;
 export declare const SearchFiltersSchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodNumber>;
+    limit: z.ZodDefault<z.ZodNumber>;
+} & {
     query: z.ZodOptional<z.ZodString>;
     position: z.ZodOptional<z.ZodString>;
     nationality: z.ZodOptional<z.ZodString>;
@@ -196,69 +528,52 @@ export declare const SearchFiltersSchema: z.ZodObject<{
     speedMax: z.ZodOptional<z.ZodNumber>;
     experienceLevel: z.ZodOptional<z.ZodEnum<["AMATEUR", "ACADEMY", "SEMI_PRO", "PRO"]>>;
     currentClub: z.ZodOptional<z.ZodString>;
-    page: z.ZodDefault<z.ZodNumber>;
-    limit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
     nationality?: string | undefined;
     currentClub?: string | undefined;
-    position?: string | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
     query?: string | undefined;
+    position?: string | undefined;
     ageMin?: number | undefined;
     ageMax?: number | undefined;
     heightMin?: number | undefined;
     heightMax?: number | undefined;
     speedMin?: number | undefined;
     speedMax?: number | undefined;
-    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
 }, {
-    nationality?: string | undefined;
-    currentClub?: string | undefined;
-    position?: string | undefined;
-    query?: string | undefined;
-    ageMin?: number | undefined;
-    ageMax?: number | undefined;
-    heightMin?: number | undefined;
-    heightMax?: number | undefined;
-    speedMin?: number | undefined;
-    speedMax?: number | undefined;
-    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    nationality?: string | undefined;
+    currentClub?: string | undefined;
+    experienceLevel?: "AMATEUR" | "ACADEMY" | "SEMI_PRO" | "PRO" | undefined;
+    query?: string | undefined;
+    position?: string | undefined;
+    ageMin?: number | undefined;
+    ageMax?: number | undefined;
+    heightMin?: number | undefined;
+    heightMax?: number | undefined;
+    speedMin?: number | undefined;
+    speedMax?: number | undefined;
 }>;
-/**
- * Verification Schemas
- */
-export declare const VerificationRequestSchema: z.ZodObject<{
-    type: z.ZodEnum<["face", "skill", "document"]>;
-    mediaUrls: z.ZodArray<z.ZodString, "many">;
+export declare const ScoutShortlistSchema: z.ZodObject<{
+    playerId: z.ZodString;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    type: "face" | "skill" | "document";
-    mediaUrls: string[];
+    playerId: string;
     notes?: string | undefined;
 }, {
-    type: "face" | "skill" | "document";
-    mediaUrls: string[];
+    playerId: string;
     notes?: string | undefined;
 }>;
-/**
- * Messaging Schemas
- */
-export declare const MessageSchema: z.ZodObject<{
-    receiverId: z.ZodString;
-    content: z.ZodString;
+export declare const PlayerViewSchema: z.ZodObject<{
+    playerId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    receiverId: string;
-    content: string;
+    playerId: string;
 }, {
-    receiverId: string;
-    content: string;
+    playerId: string;
 }>;
-/**
- * Helper function to validate data
- */
 export declare function validateData<T>(schema: z.ZodSchema<T>, data: unknown): T;
 export declare function validateDataSafe<T>(schema: z.ZodSchema<T>, data: unknown): {
     success: true;

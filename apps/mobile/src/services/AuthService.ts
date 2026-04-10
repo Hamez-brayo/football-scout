@@ -1,87 +1,127 @@
 import {
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { auth } from '@/src/config/firebase';
-import { authApi } from '@/src/api/auth';
-import { setAuthToken } from '@/src/api/client';
-import type { AuthUser } from '@/src/api/auth';
+import apiClient, { setAuthToken } from '@/src/api/client';
+import type {
+  ApiResponseEnvelope,
+  AuthUser,
+  SignInRequest,
+  SignUpRequest,
+  UserRole,
+} from '@vysion/shared';
 
-export type RegisterInput = {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  userType: string;
+type AuthTokenResponse = {
+  user: AuthUser;
+  token: string;
 };
 
-/**
- * AuthService controls interaction with Firebase identity and the backend
- * application session layer.
- *
- * Hybrid auth flow:
- * 1. Firebase Auth resolves identity (sign-in / registration).
- * 2. A fresh Firebase ID token is exchanged for a backend JWT via POST /auth/session.
- * 3. The backend JWT is stored and used as the Bearer token for all API requests.
- * 4. Firebase ID tokens are never forwarded to protected API routes directly.
- * 5. onIdTokenChanged in AuthContext drives the session-creation lifecycle.
- */
-export const AuthService = {
-  /**
-   * Sign in via Firebase.
-   * onIdTokenChanged in AuthContext will handle the session exchange automatically.
-   */
-  async login(email: string, password: string): Promise<void> {
-    await signInWithEmailAndPassword(auth, email, password);
+type AuthSessionResponse = {
+  user: AuthUser;
+  appToken: string;
+};
+
+export type AuthSession = {
+  user: AuthUser;
+  token: string;
+  role: UserRole | null;
+};
+
+export type RegisterInput = SignUpRequest;
+
+const deriveRole = (user: AuthUser): UserRole | null => {
+  return (user.role ?? user.userType ?? null) as UserRole | null;
+};
+
+const assertTokenPayload = (
+  payload: AuthTokenResponse | AuthSessionResponse | undefined,
+  tokenField: 'token' | 'appToken'
+): AuthSession => {
+  if (!payload?.user) {
+    throw new Error('Invalid auth response payload');
+  }
+
+  const token =
+    tokenField === 'token'
+      ? (payload as Partial<AuthTokenResponse>).token
+      : (payload as Partial<AuthSessionResponse>).appToken;
+
+  if (!token) {
+    throw new Error('Invalid auth response payload');
+  }
+
+  setAuthToken(token);
+
+  return {
+    user: payload.user,
+    token,
+    role: deriveRole(payload.user),
+  };
+};
+
+export const authService = {
+  async login(credentials: SignInRequest): Promise<AuthSession> {
+    const response = await apiClient.post<ApiResponseEnvelope<AuthTokenResponse>>('/auth/login', credentials);
+    return assertTokenPayload(response.data.data, 'token');
   },
 
-  /**
-   * Register via Firebase and immediately create the backend user record.
-   * Passes registration fields so the backend can populate the profile on first session.
-   */
-  async register(payload: RegisterInput): Promise<void> {
-    // 1. Create the Firebase identity
-    const credential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
+  async register(payload: SignUpRequest): Promise<AuthSession> {
+    const response = await apiClient.post<ApiResponseEnvelope<AuthTokenResponse>>('/auth/register', payload);
+    return assertTokenPayload(response.data.data, 'token');
+  },
 
-    // 2. Exchange Firebase ID token for a backend session JWT, passing registration data
-    //    so the user record is created with full profile fields on first call.
-    const idToken = await credential.user.getIdToken();
-    const { appToken } = await authApi.session(idToken, {
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-      userType: payload.userType,
+  async exchangeFirebaseSession(
+    firebaseUser: FirebaseUser,
+    registrationData?: { firstName?: string; lastName?: string; role?: UserRole }
+  ): Promise<AuthSession> {
+    const idToken = await firebaseUser.getIdToken();
+    const response = await apiClient.post<ApiResponseEnvelope<AuthSessionResponse>>('/auth/session', {
+      idToken,
+      ...registrationData,
     });
 
-    // 3. Store backend JWT so subsequent API calls are authenticated immediately
-    setAuthToken(appToken);
-
-    // onIdTokenChanged will also fire and call createSession again (idempotent).
+    return assertTokenPayload(response.data.data, 'appToken');
   },
 
-  /**
-   * Sign out: clear the backend JWT first, then revoke the Firebase session.
-   */
+  async loginWithFirebase(credentials: SignInRequest): Promise<AuthSession> {
+    const credential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+    return this.exchangeFirebaseSession(credential.user);
+  },
+
+  async registerWithFirebase(payload: SignUpRequest): Promise<AuthSession> {
+    const credential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
+    return this.exchangeFirebaseSession(credential.user, {
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      role: payload.role,
+    });
+  },
+
   async logout(): Promise<void> {
+    const activeUserId = auth.currentUser?.uid;
+
     setAuthToken(null);
+
+    if (activeUserId) {
+      await apiClient.post('/auth/signout', { userId: activeUserId });
+    }
+
     await signOut(auth);
   },
 
-  /**
-   * Exchange a (fresh) Firebase ID token for a backend application session.
-   * Stores the returned backend JWT on the API client and returns the app user.
-   * Called by AuthContext.onIdTokenChanged on every login and token refresh.
-   */
   async createSession(firebaseUser: FirebaseUser): Promise<AuthUser | null> {
     try {
-      const idToken = await firebaseUser.getIdToken();
-      const { user, appToken } = await authApi.session(idToken);
-      setAuthToken(appToken);
-      return user;
+      const session = await this.exchangeFirebaseSession(firebaseUser);
+      return session.user;
     } catch (error) {
       console.warn('Failed to create backend session for Firebase UID:', firebaseUser.uid, error);
       return null;
     }
   },
 };
+
+// Backward-compatible export while old imports are being migrated.
+export const AuthService = authService;

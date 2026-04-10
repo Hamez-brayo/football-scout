@@ -1,14 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import { logger } from '@/config/logger';
+import { config } from '@/config';
 import { ERROR_CODES, HTTP_STATUS } from '@vysion/shared';
-import { authService } from '@/services/authService';
+
+type SessionJwtPayload = {
+  userId: string;
+  email: string;
+  role?: string | null;
+};
+
+const verifySessionToken = (token: string): SessionJwtPayload => {
+  if (!config.JWT_SECRET) {
+    throw new Error('JWT secret is not configured');
+  }
+
+  return jwt.verify(token, config.JWT_SECRET) as SessionJwtPayload;
+};
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     userId: string;
     email: string;
-    userType?: string;
+    role?: string;
   };
 }
 
@@ -38,13 +53,13 @@ export const authenticate = async (
     }
 
     const token = authHeader.slice(7);
-    const payload = authService.verifyToken(token);
+    const payload = verifySessionToken(token);
 
     req.user = {
       id: payload.userId,
       userId: payload.userId,
       email: payload.email,
-      userType: payload.userType ?? undefined,
+      role: payload.role ?? undefined,
     };
 
     next();
@@ -83,7 +98,7 @@ export const requireUserType = (...allowedTypes: string[]) => {
       return;
     }
 
-    if (!req.user.userType || !allowedTypes.includes(req.user.userType)) {
+    if (!req.user.role || !allowedTypes.includes(req.user.role)) {
       res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         error: {
@@ -116,13 +131,13 @@ export const optionalAuth = (
     }
 
     const token = authHeader.slice(7);
-    const payload = authService.verifyToken(token);
+    const payload = verifySessionToken(token);
 
     req.user = {
       id: payload.userId,
       userId: payload.userId,
       email: payload.email,
-      userType: payload.userType ?? undefined,
+      role: payload.role ?? undefined,
     };
   } catch {
     // Silently ignore invalid/expired tokens for optional auth

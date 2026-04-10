@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = useCallback(async (email: string, password: string) => {
     // We let onIdTokenChanged handle the state propagation! 
     // Calling login just issues the command to Firebase.
-    await AuthService.login(email, password);
+    await AuthService.login({ email, password });
   }, []);
 
   const register = useCallback(async (payload: RegisterInput) => {

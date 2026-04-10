@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { AuthUser, SessionResponse } from '../../../../shared/src/types/auth';
+import type { AuthUser, SessionResponse, UserRole } from '@vysion/shared';
 
 // Re-export for consumers that import AuthUser from '@/src/api/auth'
 export type { AuthUser, SessionResponse };
@@ -13,13 +13,19 @@ export const authApi = {
    */
   async session(
     idToken: string,
-    registrationData?: { firstName?: string; lastName?: string; userType?: string },
+    registrationData?: { firstName?: string; lastName?: string; role?: UserRole; userType?: UserRole },
   ): Promise<{ user: AuthUser; appToken: string }> {
     const response = await apiClient.post<SessionResponse>('/auth/session', {
       idToken,
       ...registrationData,
     });
-    return { user: response.data.data.user, appToken: response.data.data.appToken! };
+    const payload = response.data.data;
+
+    if (!payload?.user || !payload?.appToken) {
+      throw new Error('Invalid session response payload');
+    }
+
+    return { user: payload.user, appToken: payload.appToken };
   },
 
   /**
@@ -28,6 +34,10 @@ export const authApi = {
    */
   async me(): Promise<AuthUser> {
     const response = await apiClient.get<SessionResponse>('/auth/me');
-    return response.data.data.user;
+    const payload = response.data.data;
+    if (!payload?.user) {
+      throw new Error('Invalid current user response payload');
+    }
+    return payload.user;
   },
 };

@@ -1,16 +1,11 @@
 "use strict";
-/**
- * User Types and Interfaces
- */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VerificationStatus = exports.Position = exports.ProfessionalFocus = exports.PreferredFoot = exports.ExperienceLevel = exports.PlayingStatus = exports.RegistrationStatus = exports.UserType = void 0;
-var UserType;
-(function (UserType) {
-    UserType["TALENT"] = "TALENT";
-    UserType["SCOUT"] = "SCOUT";
-    UserType["AGENT"] = "AGENT";
-    UserType["CLUB"] = "CLUB";
-})(UserType || (exports.UserType = UserType = {}));
+exports.VerificationStatus = exports.DrillSubmissionStatus = exports.DrillType = exports.MediaStatus = exports.MediaType = exports.PreferredFoot = exports.ExperienceLevel = exports.Position = exports.ProfessionalFocus = exports.PlayingStatus = exports.RegistrationStatus = exports.UserType = exports.UserRole = void 0;
+var UserRole;
+(function (UserRole) {
+    UserRole["PLAYER"] = "PLAYER";
+    UserRole["SCOUT"] = "SCOUT";
+})(UserRole || (exports.UserType = exports.UserRole = UserRole = {}));
 var RegistrationStatus;
 (function (RegistrationStatus) {
     RegistrationStatus["INCOMPLETE"] = "INCOMPLETE";
@@ -22,19 +17,6 @@ var PlayingStatus;
     PlayingStatus["PLAYING"] = "PLAYING";
     PlayingStatus["PROFESSIONAL"] = "PROFESSIONAL";
 })(PlayingStatus || (exports.PlayingStatus = PlayingStatus = {}));
-var ExperienceLevel;
-(function (ExperienceLevel) {
-    ExperienceLevel["AMATEUR"] = "AMATEUR";
-    ExperienceLevel["ACADEMY"] = "ACADEMY";
-    ExperienceLevel["SEMI_PRO"] = "SEMI_PRO";
-    ExperienceLevel["PRO"] = "PRO";
-})(ExperienceLevel || (exports.ExperienceLevel = ExperienceLevel = {}));
-var PreferredFoot;
-(function (PreferredFoot) {
-    PreferredFoot["LEFT"] = "LEFT";
-    PreferredFoot["RIGHT"] = "RIGHT";
-    PreferredFoot["BOTH"] = "BOTH";
-})(PreferredFoot || (exports.PreferredFoot = PreferredFoot = {}));
 var ProfessionalFocus;
 (function (ProfessionalFocus) {
     ProfessionalFocus["PLAYER_DEVELOPMENT"] = "PLAYER_DEVELOPMENT";
@@ -54,11 +36,41 @@ var Position;
     Position["LEFT_WINGER"] = "LEFT_WINGER";
     Position["RIGHT_WINGER"] = "RIGHT_WINGER";
     Position["STRIKER"] = "STRIKER";
-    Position["FORWARD"] = "FORWARD";
 })(Position || (exports.Position = Position = {}));
-/**
- * Verification Types
- */
+var ExperienceLevel;
+(function (ExperienceLevel) {
+    ExperienceLevel["AMATEUR"] = "AMATEUR";
+    ExperienceLevel["ACADEMY"] = "ACADEMY";
+    ExperienceLevel["SEMI_PRO"] = "SEMI_PRO";
+    ExperienceLevel["PRO"] = "PRO";
+})(ExperienceLevel || (exports.ExperienceLevel = ExperienceLevel = {}));
+var PreferredFoot;
+(function (PreferredFoot) {
+    PreferredFoot["LEFT"] = "LEFT";
+    PreferredFoot["RIGHT"] = "RIGHT";
+    PreferredFoot["BOTH"] = "BOTH";
+})(PreferredFoot || (exports.PreferredFoot = PreferredFoot = {}));
+var MediaType;
+(function (MediaType) {
+    MediaType["IMAGE"] = "IMAGE";
+    MediaType["VIDEO"] = "VIDEO";
+})(MediaType || (exports.MediaType = MediaType = {}));
+var MediaStatus;
+(function (MediaStatus) {
+    MediaStatus["PENDING"] = "PENDING";
+    MediaStatus["READY"] = "READY";
+    MediaStatus["FAILED"] = "FAILED";
+})(MediaStatus || (exports.MediaStatus = MediaStatus = {}));
+var DrillType;
+(function (DrillType) {
+    DrillType["TECHNICAL"] = "TECHNICAL";
+    DrillType["ATHLETIC"] = "ATHLETIC";
+})(DrillType || (exports.DrillType = DrillType = {}));
+var DrillSubmissionStatus;
+(function (DrillSubmissionStatus) {
+    DrillSubmissionStatus["PENDING"] = "PENDING";
+    DrillSubmissionStatus["VERIFIED"] = "VERIFIED";
+})(DrillSubmissionStatus || (exports.DrillSubmissionStatus = DrillSubmissionStatus = {}));
 var VerificationStatus;
 (function (VerificationStatus) {
     VerificationStatus["UNVERIFIED"] = "UNVERIFIED";

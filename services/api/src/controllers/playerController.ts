@@ -1,6 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '@/middleware/auth';
 import { playerService } from '@/services/playerService';
+import { scoutService } from '@/services/scoutService';
+import { UserRole, type ApiResponseEnvelope } from '@vysion/shared';
 
 export class PlayerController {
   /**
@@ -22,11 +24,13 @@ export class PlayerController {
 
       const profile = await playerService.createPlayerProfile(userId, req.body);
 
-      res.status(201).json({
+      const response: ApiResponseEnvelope<typeof profile> = {
         success: true,
         data: profile,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.status(201).json(response);
     } catch (error) {
       next(error);
     }
@@ -51,11 +55,13 @@ export class PlayerController {
 
       const profile = await playerService.getPlayerProfile(userId);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof profile> = {
         success: true,
         data: profile,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -80,11 +86,13 @@ export class PlayerController {
 
       const profile = await playerService.updatePlayerProfile(userId, req.body);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof profile> = {
         success: true,
         data: profile,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -98,11 +106,13 @@ export class PlayerController {
       const filters = req.query as any;
       const result = await playerService.searchPlayers(filters);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof result> = {
         success: true,
         data: result,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -116,11 +126,17 @@ export class PlayerController {
       const { id } = req.params;
       const player = await playerService.getPlayerById(id);
 
-      res.json({
+      if (req.user?.role === UserRole.SCOUT) {
+        await scoutService.recordPlayerView(req.user.userId, player.userId);
+      }
+
+      const response: ApiResponseEnvelope<typeof player> = {
         success: true,
         data: player,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
@@ -134,11 +150,13 @@ export class PlayerController {
       const { id } = req.params;
       const stats = await playerService.getPlayerStats(id);
 
-      res.json({
+      const response: ApiResponseEnvelope<typeof stats> = {
         success: true,
         data: stats,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      res.json(response);
     } catch (error) {
       next(error);
     }

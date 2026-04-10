@@ -1,18 +1,19 @@
 import { prisma } from '@/config/database';
 import { AppError } from '@/middleware/errorHandler';
-import { HTTP_STATUS, ERROR_CODES } from '@vysion/shared';
-import type { UserProfile } from '@vysion/shared';
+import {
+  ERROR_CODES,
+  HTTP_STATUS,
+  UserRole,
+  type UserProfile,
+} from '@vysion/shared';
 
 export class UserService {
-  /**
-   * Create a new user
-   */
   async createUser(data: {
     userId: string;
     email: string;
     firstName?: string;
     lastName?: string;
-    userType?: string;
+    role?: UserRole;
   }) {
     const existingUser = await prisma.user.findUnique({
       where: { userId: data.userId },
@@ -32,22 +33,22 @@ export class UserService {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        fullName: data.firstName && data.lastName 
-          ? `${data.firstName} ${data.lastName}` 
-          : undefined,
-        userType: data.userType as any || undefined,
+        fullName:
+          data.firstName && data.lastName
+            ? `${data.firstName} ${data.lastName}`
+            : undefined,
+        role: data.role ?? UserRole.PLAYER,
         registrationStatus: 'INCOMPLETE',
       },
       include: {
-        physicalAttributes: true,
-        footballProfile: {
+        playerProfile: {
           include: {
-            achievements: true,
+            physicalAttributes: true,
+            footballProfile: {
+              include: { achievements: true },
+            },
           },
         },
-        availability: true,
-        socialLinks: true,
-        privacySettings: true,
         media: {
           orderBy: { createdAt: 'desc' },
         },
@@ -57,22 +58,18 @@ export class UserService {
     return user;
   }
 
-  /**
-   * Get user by userId (Firebase UID)
-   */
   async getUserByUserId(userId: string) {
     const user = await prisma.user.findUnique({
       where: { userId },
       include: {
-        physicalAttributes: true,
-        footballProfile: {
+        playerProfile: {
           include: {
-            achievements: true,
+            physicalAttributes: true,
+            footballProfile: {
+              include: { achievements: true },
+            },
           },
         },
-        availability: true,
-        socialLinks: true,
-        privacySettings: true,
         media: {
           orderBy: { createdAt: 'desc' },
         },
@@ -90,20 +87,23 @@ export class UserService {
     return user;
   }
 
-  /**
-   * Get user by internal ID
-   */
   async getUserById(id: string) {
-    const user = await prisma.user.findUnique({
-      where: { id },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ id }, { userId: id }],
+      },
       include: {
-        physicalAttributes: true,
-        footballProfile: {
+        playerProfile: {
           include: {
-            achievements: true,
+            physicalAttributes: true,
+            footballProfile: {
+              include: { achievements: true },
+            },
           },
         },
-        media: true,
+        media: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -118,9 +118,6 @@ export class UserService {
     return user;
   }
 
-  /**
-   * Update user profile
-   */
   async updateProfile(userId: string, data: Partial<UserProfile>) {
     const user = await prisma.user.update({
       where: { userId },
@@ -129,81 +126,103 @@ export class UserService {
         fullName:
           data.firstName && data.lastName
             ? `${data.firstName} ${data.lastName}`
-            : undefined,
+            : data.fullName,
       },
       include: {
-        physicalAttributes: true,
-        footballProfile: true,
+        playerProfile: {
+          include: {
+            physicalAttributes: true,
+            footballProfile: true,
+          },
+        },
       },
     });
 
     return user;
   }
 
-  /**
-   * Update or create physical attributes
-   */
+  private async getOrCreatePlayerProfile(userId: string) {
+    const user = await prisma.user.findUnique({ where: { userId } });
+    if (!user) {
+      throw new AppError(
+        HTTP_STATUS.NOT_FOUND,
+        ERROR_CODES.NOT_FOUND,
+        'User not found'
+      );
+    }
+
+    if (user.role !== UserRole.PLAYER) {
+      throw new AppError(
+        HTTP_STATUS.FORBIDDEN,
+        ERROR_CODES.FORBIDDEN,
+        'Only PLAYER accounts can modify player profile sections'
+      );
+    }
+
+    const profile = await prisma.playerProfile.upsert({
+      where: { userId },
+      create: { userId },
+      update: {},
+    });
+
+    return profile;
+  }
+
   async updatePhysicalAttributes(
     userId: string,
     data: {
-      height?: number;
-      weight?: number;
-      wingspan?: number;
-      fitnessLevel?: number;
-      preferredFoot?: string;
+      heightCm?: number;
+      weightKg?: number;
+      wingspanCm?: number;
+      sprintSpeed?: number;
+      staminaScore?: number;
     }
   ) {
+    const profile = await this.getOrCreatePlayerProfile(userId);
+
     const attributes = await prisma.physicalAttributes.upsert({
-      where: { userId },
-      update: data as any,
+      where: { playerProfileId: profile.id },
+      update: data,
       create: {
-        userId,
-        ...(data as any),
+        playerProfileId: profile.id,
+        ...data,
       },
     });
 
     return attributes;
   }
 
-  /**
-   * Update or create football profile
-   */
   async updateFootballProfile(
     userId: string,
     data: {
-      primaryPosition?: string;
-      secondaryPositions?: string[];
-      currentClub?: string;
-      previousClubs?: string[];
+      dominantFoot?: 'LEFT' | 'RIGHT' | 'BOTH';
       playingStyle?: string[];
-      strongFoot?: string;
-      experience?: string;
+      strongestSkills?: string[];
+      weakFootRating?: number;
     }
   ) {
-    const profile = await prisma.footballProfile.upsert({
-      where: { userId },
-      update: data as any,
+    const profile = await this.getOrCreatePlayerProfile(userId);
+
+    const footballProfile = await prisma.footballProfile.upsert({
+      where: { playerProfileId: profile.id },
+      update: data,
       create: {
-        userId,
+        playerProfileId: profile.id,
         ...data,
-      } as any,
+      },
       include: {
         achievements: true,
       },
     });
 
-    return profile;
+    return footballProfile;
   }
 
-  /**
-   * Delete user (soft delete by updating status)
-   */
   async deleteUser(userId: string) {
     await prisma.user.update({
       where: { userId },
       data: {
         registrationStatus: 'INCOMPLETE',
-        // Add other soft delete fields as needed
       },
     });
 

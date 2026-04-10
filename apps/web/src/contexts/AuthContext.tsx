@@ -12,7 +12,6 @@ import {
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { exchangeSession } from '@/lib/session';
-import type { AuthUser, SessionResponse } from '../../../../shared/src/types/auth';
 import { setToken, clearToken, getToken } from '@/lib/token';
 
 interface AuthContextType {

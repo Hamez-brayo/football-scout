@@ -1,8 +1,13 @@
 import { Router } from 'express';
-import { authenticate, optionalAuth } from '@/middleware/auth';
+import { authenticate, requireUserType } from '@/middleware/auth';
 import { validateQuery, validateBody } from '@/middleware/validate';
 import { playerController } from '@/controllers/playerController';
-import { SearchFiltersSchema, PlayerProfileSchema } from '@vysion/shared';
+import {
+  CreateProfileSchema,
+  SearchFiltersSchema,
+  UpdateProfileSchema,
+  UserRole,
+} from '@vysion/shared';
 
 const router = Router();
 
@@ -13,7 +18,8 @@ const router = Router();
 router.post(
   '/profile',
   authenticate,
-  validateBody(PlayerProfileSchema),
+  requireUserType(UserRole.PLAYER),
+  validateBody(CreateProfileSchema),
   playerController.createPlayerProfile.bind(playerController)
 );
 
@@ -24,6 +30,7 @@ router.post(
 router.get(
   '/profile',
   authenticate,
+  requireUserType(UserRole.PLAYER),
   playerController.getPlayerProfile.bind(playerController)
 );
 
@@ -34,7 +41,8 @@ router.get(
 router.put(
   '/profile',
   authenticate,
-  validateBody(PlayerProfileSchema.partial()),
+  requireUserType(UserRole.PLAYER),
+  validateBody(UpdateProfileSchema),
   playerController.updatePlayerProfile.bind(playerController)
 );
 
@@ -44,7 +52,8 @@ router.put(
  */
 router.get(
   '/search',
-  optionalAuth,
+  authenticate,
+  requireUserType(UserRole.SCOUT),
   validateQuery(SearchFiltersSchema),
   playerController.searchPlayers.bind(playerController)
 );
@@ -53,7 +62,12 @@ router.get(
  * GET /api/players/:id
  * Get player by ID (optional auth)
  */
-router.get('/:id', optionalAuth, playerController.getPlayerById.bind(playerController));
+router.get(
+  '/:id',
+  authenticate,
+  requireUserType(UserRole.SCOUT),
+  playerController.getPlayerById.bind(playerController)
+);
 
 /**
  * GET /api/players/:id/stats
@@ -62,6 +76,7 @@ router.get('/:id', optionalAuth, playerController.getPlayerById.bind(playerContr
 router.get(
   '/:id/stats',
   authenticate,
+  requireUserType(UserRole.SCOUT),
   playerController.getPlayerStats.bind(playerController)
 );
 

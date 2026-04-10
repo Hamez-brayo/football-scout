@@ -6,15 +6,16 @@ export const API_ENDPOINTS = {
   // Authentication
   AUTH: {
     SIGN_UP: '/api/auth/signup',
-    SIGN_IN: '/api/auth/signin',
+    SIGN_IN: '/api/auth/local/login',
+    SESSION: '/api/auth/session',
+    ME: '/api/auth/me',
     SIGN_OUT: '/api/auth/signout',
     VERIFY_TOKEN: '/api/auth/verify',
-    REFRESH_TOKEN: '/api/auth/refresh',
   },
   
   // Users
   USERS: {
-    PROFILE: '/api/users/profile',
+    ME: '/api/users/me',
     UPDATE: '/api/users/profile',
     GET_BY_ID: (id: string) => `/api/users/${id}`,
     PHYSICAL_ATTRIBUTES: '/api/users/physical-attributes',
@@ -36,6 +37,22 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/api/media/${id}`,
     LIST: '/api/media',
   },
+
+  TRAINING: {
+    PROGRAMS: '/api/training/programs',
+    DRILLS: '/api/training/drills',
+    SUBMISSIONS: '/api/training/submissions',
+  },
+
+  STATS: {
+    BASE: '/api/stats',
+    PLAYER: (playerId: string) => `/api/stats/${playerId}`,
+  },
+
+  SCOUT: {
+    SEARCH: '/api/scout/search',
+    SHORTLIST: '/api/scout/shortlist',
+  },
   
   // Verification
   VERIFICATION: {
@@ -53,11 +70,6 @@ export const API_ENDPOINTS = {
     MARK_READ: (id: string) => `/api/messages/${id}/read`,
   },
   
-  // Scouts
-  SCOUTS: {
-    DASHBOARD: '/api/scouts/dashboard',
-    SEARCH_PLAYERS: '/api/scouts/search',
-  },
 };
 
 /**

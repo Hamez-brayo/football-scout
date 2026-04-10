@@ -16,7 +16,7 @@ export const config = {
   DATABASE_URL: process.env.DATABASE_URL!,
 
   // JWT
-  JWT_SECRET: process.env.JWT_SECRET || 'devsecret',
+  JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
 
   // Firebase
@@ -32,7 +32,12 @@ export const config = {
   ],
 
   // File Upload
-  MAX_FILE_SIZE_MB: parseInt(process.env.MAX_FILE_SIZE_MB || '500', 10),
+  MAX_FILE_SIZE_MB: parseInt(process.env.MEDIA_MAX_SIZE_MB || process.env.MAX_FILE_SIZE_MB || '500', 10),
+  MEDIA_MAX_SIZE_MB: parseInt(process.env.MEDIA_MAX_SIZE_MB || process.env.MAX_FILE_SIZE_MB || '500', 10),
+  MEDIA_ALLOWED_TYPES: (process.env.MEDIA_ALLOWED_TYPES || 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
   UPLOAD_DIR: process.env.UPLOAD_DIR || './uploads',
 
   // Logging
@@ -43,6 +48,10 @@ export const config = {
 const requiredEnvVars = [
   'DATABASE_URL',
 ];
+
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is required in production. Set JWT_SECRET in the environment before starting the API.');
+}
 
 const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
 

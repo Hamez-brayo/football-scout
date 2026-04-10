@@ -1,13 +1,10 @@
-/**
- * User Types and Interfaces
- */
-
-export enum UserType {
-  TALENT = 'TALENT',
+export enum UserRole {
+  PLAYER = 'PLAYER',
   SCOUT = 'SCOUT',
-  AGENT = 'AGENT',
-  CLUB = 'CLUB',
 }
+
+// Backward-compatible alias used by existing imports.
+export { UserRole as UserType };
 
 export enum RegistrationStatus {
   INCOMPLETE = 'INCOMPLETE',
@@ -18,19 +15,6 @@ export enum RegistrationStatus {
 export enum PlayingStatus {
   PLAYING = 'PLAYING',
   PROFESSIONAL = 'PROFESSIONAL',
-}
-
-export enum ExperienceLevel {
-  AMATEUR = 'AMATEUR',
-  ACADEMY = 'ACADEMY',
-  SEMI_PRO = 'SEMI_PRO',
-  PRO = 'PRO',
-}
-
-export enum PreferredFoot {
-  LEFT = 'LEFT',
-  RIGHT = 'RIGHT',
-  BOTH = 'BOTH',
 }
 
 export enum ProfessionalFocus {
@@ -51,107 +35,43 @@ export enum Position {
   LEFT_WINGER = 'LEFT_WINGER',
   RIGHT_WINGER = 'RIGHT_WINGER',
   STRIKER = 'STRIKER',
-  FORWARD = 'FORWARD',
 }
 
-export interface UserProfile {
-  id: string;
-  userId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  nickname?: string;
-  dateOfBirth?: string;
-  nationality?: string;
-  phone?: string;
-  languages: string[];
-  currentLocation?: string;
-  profilePhoto?: string;
-  coverPhoto?: string;
-  registrationStatus: RegistrationStatus;
-  userType?: UserType;
-  createdAt: Date;
-  updatedAt: Date;
+export enum ExperienceLevel {
+  AMATEUR = 'AMATEUR',
+  ACADEMY = 'ACADEMY',
+  SEMI_PRO = 'SEMI_PRO',
+  PRO = 'PRO',
 }
 
-export interface PhysicalAttributes {
-  id: string;
-  userId: string;
-  height?: number;
-  weight?: number;
-  wingspan?: number;
-  fitnessLevel: number;
-  preferredFoot?: PreferredFoot;
-  createdAt: Date;
-  updatedAt: Date;
+export enum PreferredFoot {
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+  BOTH = 'BOTH',
 }
 
-export interface FootballProfile {
-  id: string;
-  userId: string;
-  primaryPosition?: string;
-  secondaryPositions: string[];
-  currentClub?: string;
-  previousClubs: string[];
-  playingStyle: string[];
-  strongFoot?: PreferredFoot;
-  experience?: ExperienceLevel;
-  createdAt: Date;
-  updatedAt: Date;
+export enum MediaType {
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
 }
 
-/**
- * Player Profile Type (for scout discovery)
- */
-export interface PlayerProfile {
-  id: string;
-  userId: string;
-  fullName?: string;
-  age?: number;
-  nationality?: string;
-  position?: string;
-  preferredFoot?: PreferredFoot;
-  height?: number;
-  weight?: number;
-  speed?: number;
-  stamina?: number;
-  currentClub?: string;
-  verificationStatus: VerificationStatus;
-  profilePhoto?: string;
-  physicalAttributes?: PhysicalAttributes;
-  footballProfile?: FootballProfile;
-  createdAt: Date;
-  updatedAt: Date;
+export enum MediaStatus {
+  PENDING = 'PENDING',
+  READY = 'READY',
+  FAILED = 'FAILED',
 }
 
-export interface Achievement {
-  id: string;
-  footballProfileId: string;
-  title: string;
-  description?: string;
-  date?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+export enum DrillType {
+  TECHNICAL = 'TECHNICAL',
+  ATHLETIC = 'ATHLETIC',
 }
 
-export interface Media {
-  id: string;
-  userId: string;
-  type: 'image' | 'video';
-  url: string;
-  thumbnail?: string;
-  title?: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+export enum DrillSubmissionStatus {
+  PENDING = 'PENDING',
+  VERIFIED = 'VERIFIED',
 }
 
-/**
- * API Response Types
- */
-
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -168,42 +88,7 @@ export interface ApiError {
   timestamp: string;
 }
 
-/**
- * Authentication Types
- */
-
-export interface AuthUser {
-  id: string;
-  email: string;
-  displayName?: string;
-  photoURL?: string;
-}
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken?: string;
-  expiresIn: number;
-}
-
-/**
- * Search and Filter Types
- */
-
-export interface SearchFilters {
-  query?: string;
-  position?: Position;
-  nationality?: string;
-  ageMin?: number;
-  ageMax?: number;
-  heightMin?: number;
-  heightMax?: number;
-  speedMin?: number;
-  speedMax?: number;
-  experienceLevel?: ExperienceLevel;
-  currentClub?: string;
-  page?: number;
-  limit?: number;
-}
+export type ApiResponseEnvelope<T> = ApiResponse<T>;
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -213,9 +98,138 @@ export interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
-/**
- * Verification Types
- */
+export interface AuthUser {
+  id?: string;
+  userId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  role?: UserRole;
+  userType?: UserRole;
+  registrationStatus?: RegistrationStatus;
+  profilePhoto?: string;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken?: string;
+  expiresIn: number;
+}
+
+export interface JwtSessionPayload {
+  userId: string;
+  email: string;
+  role?: UserRole | null;
+}
+
+export interface SessionResponse extends ApiResponse<{ user: AuthUser; appToken?: string }> {}
+
+export interface SignUpRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role?: UserRole;
+}
+
+export interface SignInRequest {
+  email: string;
+  password: string;
+}
+
+export interface CreateSessionRequest {
+  idToken: string;
+  firstName?: string;
+  lastName?: string;
+  role?: UserRole;
+}
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  email: string;
+  role: UserRole;
+  registrationStatus: RegistrationStatus;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  dateOfBirth?: string;
+  nationality?: string;
+  phone?: string;
+  currentLocation?: string;
+  profilePhoto?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PlayerProfile {
+  id: string;
+  userId: string;
+  primaryPosition?: string;
+  secondaryPositions: string[];
+  currentClub?: string;
+  preferredFoot?: PreferredFoot;
+  experienceLevel?: ExperienceLevel;
+  isAvailable: boolean;
+  bio?: string;
+  physicalAttributes?: PhysicalAttributes;
+  footballProfile?: FootballProfile;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PhysicalAttributes {
+  id: string;
+  playerProfileId: string;
+  heightCm?: number;
+  weightKg?: number;
+  wingspanCm?: number;
+  sprintSpeed?: number;
+  staminaScore?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FootballProfile {
+  id: string;
+  playerProfileId: string;
+  dominantFoot?: PreferredFoot;
+  playingStyle: string[];
+  strongestSkills: string[];
+  weakFootRating?: number;
+  achievements: Achievement[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Achievement {
+  id: string;
+  footballProfileId: string;
+  title: string;
+  description?: string;
+  date?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MediaRecord {
+  id: string;
+  userId: string;
+  type: MediaType;
+  status: MediaStatus;
+  url: string;
+  thumbnailUrl?: string;
+  mimeType: string;
+  sizeBytes: number;
+  durationSec?: number;
+  title?: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type Media = MediaRecord;
 
 export enum VerificationStatus {
   UNVERIFIED = 'UNVERIFIED',
@@ -235,10 +249,6 @@ export interface VerificationRequest {
   updatedAt: Date;
 }
 
-/**
- * Messaging Types
- */
-
 export interface Message {
   id: string;
   conversationId: string;
@@ -254,4 +264,167 @@ export interface Conversation {
   participantIds: string[];
   lastMessage?: Message;
   updatedAt: Date;
+}
+
+export interface CreateProfileRequest {
+  primaryPosition?: string;
+  secondaryPositions?: string[];
+  currentClub?: string;
+  preferredFoot?: PreferredFoot;
+  experienceLevel?: ExperienceLevel;
+  isAvailable?: boolean;
+  bio?: string;
+  physicalAttributes?: Omit<PhysicalAttributes, 'id' | 'playerProfileId' | 'createdAt' | 'updatedAt'>;
+  footballProfile?: Omit<FootballProfile, 'id' | 'playerProfileId' | 'achievements' | 'createdAt' | 'updatedAt'>;
+}
+
+export type UpdateProfileRequest = Partial<CreateProfileRequest>;
+
+export interface SearchFilters {
+  query?: string;
+  position?: string;
+  nationality?: string;
+  ageMin?: number;
+  ageMax?: number;
+  heightMin?: number;
+  heightMax?: number;
+  speedMin?: number;
+  speedMax?: number;
+  experienceLevel?: ExperienceLevel;
+  currentClub?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface TrainingProgram {
+  id: string;
+  title: string;
+  level: string;
+  positionFocus: string;
+  description?: string;
+  createdById?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Drill {
+  id: string;
+  trainingProgramId: string;
+  title: string;
+  type: DrillType;
+  instructions: string;
+  videoUrl?: string;
+  displayOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DrillSubmission {
+  id: string;
+  playerId: string;
+  drillId: string;
+  videoUrl: string;
+  status: DrillSubmissionStatus;
+  verifiedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateTrainingProgramRequest {
+  title: string;
+  level: string;
+  positionFocus: string;
+  description?: string;
+}
+
+export interface CreateDrillRequest {
+  trainingProgramId: string;
+  title: string;
+  type: DrillType;
+  instructions: string;
+  videoUrl?: string;
+  displayOrder?: number;
+}
+
+export interface CreateDrillSubmissionRequest {
+  drillId: string;
+  videoUrl: string;
+}
+
+export interface MetricType {
+  id: string;
+  key: string;
+  displayName: string;
+  unit?: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PlayerStatEntry {
+  id: string;
+  playerId: string;
+  metricTypeId: string;
+  value: number;
+  recordedAt: Date;
+  source?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  metricType?: MetricType;
+}
+
+export interface CreatePlayerStatRequest {
+  playerId: string;
+  metricKey: string;
+  value: number;
+  recordedAt?: string;
+  source?: string;
+}
+
+export interface PlayerStatsQuery {
+  metricKey?: string;
+  from?: string;
+  to?: string;
+}
+
+export interface ShortlistEntry {
+  id: string;
+  scoutId: string;
+  playerId: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PlayerViewEntry {
+  id: string;
+  scoutId: string;
+  playerId: string;
+  viewedAt: Date;
+}
+
+export interface ShortlistMutationRequest {
+  playerId: string;
+  notes?: string;
+}
+
+export interface UploadServiceConfig {
+  maxFileSizeMb: number;
+  allowedMimeTypes: string[];
+  maxVideoDurationSec: number;
+}
+
+export interface UploadMediaInput {
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  durationSec?: number;
+  buffer?: Buffer;
+  sourcePath?: string;
+}
+
+export interface UploadService {
+  uploadMedia(file: UploadMediaInput, ownerId: string, type: 'image' | 'video'): Promise<MediaRecord>;
+  deleteMedia(mediaId: string): Promise<void>;
+  getSignedUrl(mediaId: string): Promise<string>;
 }
