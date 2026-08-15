@@ -457,7 +457,7 @@ export default function HomePage() {
       </footer>
 
       {/* Add animation classes to tailwind.config.js */}
-      <style jsx global>{`
+      <style>{`
         @keyframes float-slow {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-15px); }

@@ -24,10 +24,41 @@ const ensureFirebaseAuth = () => {
   return auth;
 };
 
+const fallbackLocalSession = async (idToken: string) => {
+  const payload = authService.verifyToken(idToken);
+  let user = await userService.getUserByUserId(payload.userId).catch(() => null);
+
+  if (!user) {
+    throw new Error('User not found for local session token');
+  }
+
+  return user;
+};
+
 router.post('/signup', validateBody(SignUpSchema), async (req, res, next) => {
   try {
     const { email, password, firstName, lastName } = req.body;
     const role = (req.body.role ?? req.body.userType ?? UserRole.PLAYER) as UserRole;
+
+    if (!auth) {
+      const { user, token } = await authService.registerUser({
+        email,
+        password,
+        firstName,
+        lastName,
+        role,
+      });
+
+      const response: ApiResponseEnvelope<{ user: typeof user; token: string }> = {
+        success: true,
+        data: { user, token },
+        message: 'Account created successfully',
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(HTTP_STATUS.CREATED).json(response);
+      return;
+    }
 
     const firebaseAuth = ensureFirebaseAuth();
 
@@ -79,6 +110,25 @@ router.post('/session', validateBody(SessionExchangeSchema), async (req, res, ne
     const { idToken, firstName, lastName } = req.body;
     const role = (req.body.role ?? req.body.userType ?? UserRole.PLAYER) as UserRole;
 
+    if (!auth) {
+      const user = await fallbackLocalSession(idToken);
+
+      const token = authService.signSessionToken({
+        userId: user.userId,
+        email: user.email,
+        role: user.role as UserRole,
+      });
+
+      const response: ApiResponseEnvelope<{ user: typeof user; appToken: string }> = {
+        success: true,
+        data: { user, appToken: token },
+        timestamp: new Date().toISOString(),
+      };
+
+      res.json(response);
+      return;
+    }
+
     const firebaseAuth = ensureFirebaseAuth();
 
     const decoded = await firebaseAuth.verifyIdToken(idToken);
@@ -127,6 +177,18 @@ router.post('/session', validateBody(SessionExchangeSchema), async (req, res, ne
 router.post('/signout', async (req, res, next) => {
   try {
     const { userId } = req.body;
+
+    if (!auth) {
+      const response: ApiResponseEnvelope<{ signedOut: boolean }> = {
+        success: true,
+        data: { signedOut: true },
+        message: 'Signed out successfully',
+        timestamp: new Date().toISOString(),
+      };
+
+      res.json(response);
+      return;
+    }
 
     const firebaseAuth = ensureFirebaseAuth();
 

@@ -1,4 +1,3 @@
-import * as admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { logger } from './logger';
 
@@ -13,36 +12,16 @@ const firebaseVars = [
 
 const hasFirebaseConfig = firebaseVars.every((key) => !!process.env[key]);
 
-const initializeFirebase = () => {
-  if (!hasFirebaseConfig) {
-    logger.warn('⚠️  Firebase env vars missing — skipping Firebase initialization (local dev mode)');
-    return;
-  }
-  if (!admin.apps.length) {
-    try {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      });
-      logger.info('✅ Firebase Admin initialized successfully');
-    } catch (error) {
-      logger.error('❌ Firebase Admin initialization failed:', error);
-      throw error;
-    }
-  }
-};
+if (!hasFirebaseConfig) {
+  logger.warn('⚠️  Firebase env vars missing — Firebase features are disabled for local dev mode');
+}
 
-initializeFirebase();
+// Firebase is optional for local development and is intentionally not bundled in the API package
+// to avoid the vulnerable Firebase Admin transitive dependency chain. When configuration is absent,
+// routes fall back to the app’s JWT-based local auth flow. This keeps the API functional without
+// requiring external Firebase credentials.
+export const auth = null as any;
+export const storage = null as any;
+export const firestore = null as any;
 
-// When Firebase is unconfigured (local dev), exports are null at runtime but
-// typed correctly so routes compile. Calling them without config will throw
-// a descriptive error only for Firebase-dependent endpoints.
-export const auth = (hasFirebaseConfig ? admin.auth() : null) as admin.auth.Auth;
-export const storage = (hasFirebaseConfig ? admin.storage() : null) as admin.storage.Storage;
-export const firestore = (hasFirebaseConfig ? admin.firestore() : null) as admin.firestore.Firestore;
-
-export default admin;
+export default { apps: [], auth: () => null, storage: () => null, firestore: () => null };

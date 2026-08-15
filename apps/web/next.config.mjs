@@ -1,5 +1,1 @@
-export default {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
+export default {};
