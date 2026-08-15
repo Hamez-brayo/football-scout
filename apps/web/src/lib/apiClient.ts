@@ -6,7 +6,7 @@ import { getToken } from './token';
 export interface ApiClientOptions {
   method?: string;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   baseUrl?: string;
 }
 

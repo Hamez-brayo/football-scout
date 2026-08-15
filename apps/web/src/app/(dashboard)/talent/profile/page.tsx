@@ -1,13 +1,28 @@
 'use client'
 
-import { useState } from 'react'
-import { User, Trophy, Calendar, MapPin, VideoCamera, ChartLine, Share, Gear } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { User, Trophy, Calendar, VideoCamera } from '@phosphor-icons/react'
 import { useProfile } from '@/hooks/useProfile'
 import Link from 'next/link'
 
+type ProfileUser = {
+  coverPhoto?: string;
+  profilePhoto?: string;
+  firstName?: string;
+  lastName?: string;
+  nickname?: string;
+  footballProfile?: {
+    primaryPosition?: string;
+  };
+  physicalAttributes?: {
+    preferredFoot?: 'left' | 'right' | 'both';
+  };
+  availability?: {
+    isAvailableForTrials?: boolean;
+  };
+};
+
 // Profile Header Component
-const ProfileHeader = ({ user }: { user: any }) => {
+const ProfileHeader = ({ user }: { user: ProfileUser }) => {
   return (
     <div className="relative">
       {/* Cover Photo */}
@@ -36,7 +51,7 @@ const ProfileHeader = ({ user }: { user: any }) => {
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-white">
                 {user.firstName} {user.lastName}
-                {user.nickname && <span className="text-gray-400"> "{user.nickname}"</span>}
+                {user.nickname && <span className="text-gray-400"> &quot;{user.nickname}&quot;</span>}
               </h1>
               <p className="text-gray-400">{user.footballProfile?.primaryPosition}</p>
               <div className="flex items-center space-x-2 mt-2">
@@ -58,7 +73,7 @@ const ProfileHeader = ({ user }: { user: any }) => {
 }
 
 // Section Component
-const Section = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
+const Section = ({ title, icon: Icon, children }: { title: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) => (
   <div className="bg-gray-800/50 rounded-lg p-6">
     <div className="flex items-center space-x-2 mb-4">
       <Icon className="h-5 w-5 text-gray-400" />

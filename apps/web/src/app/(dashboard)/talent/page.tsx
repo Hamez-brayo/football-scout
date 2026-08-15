@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import Link from 'next/link';
 import { 
   User,
   VideoCamera,
@@ -53,7 +52,7 @@ export default function TalentDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white">Welcome back, {user?.displayName}</h1>
-          <p className="text-gray-400 mt-1">Here's what's happening with your football career</p>
+          <p className="text-gray-400 mt-1">Here&apos;s what&apos;s happening with your football career</p>
         </div>
 
         {/* Stats Overview */}
@@ -245,7 +244,7 @@ export default function TalentDashboard() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-white">New highlight video uploaded</p>
-                        <p className="text-sm text-gray-400">Your video "Match Highlights vs City FC" is now live</p>
+                        <p className="text-sm text-gray-400">Your video &quot;Match Highlights vs City FC&quot; is now live</p>
                       </div>
                       <div className="flex-shrink-0 whitespace-nowrap text-sm text-gray-400">
                         2h ago
@@ -261,7 +260,7 @@ export default function TalentDashboard() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-white">Achievement unlocked</p>
-                        <p className="text-sm text-gray-400">You earned "Player of the Match" achievement</p>
+                        <p className="text-sm text-gray-400">You earned &quot;Player of the Match&quot; achievement</p>
                       </div>
                       <div className="flex-shrink-0 whitespace-nowrap text-sm text-gray-400">
                         1d ago

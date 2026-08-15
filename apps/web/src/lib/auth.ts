@@ -14,15 +14,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
-        session.user.id = user.id
-        // Fetch additional user data from our database
+        const sessionUser = session.user as typeof session.user & {
+          id?: string;
+          registrationStatus?: string;
+          userType?: string;
+        };
+        sessionUser.id = user.id;
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
           include: { talent: true }
-        })
+        });
         if (dbUser) {
-          session.user.registrationStatus = dbUser.registrationStatus
-          session.user.userType = dbUser.userType
+          sessionUser.registrationStatus = dbUser.registrationStatus;
+          sessionUser.userType = dbUser.userType;
         }
       }
       return session

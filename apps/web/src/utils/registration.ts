@@ -21,6 +21,7 @@ export const saveRegistrationData = (
       data,
       lastUpdated: Date.now()
     };
+    if (typeof window === 'undefined' || !window.localStorage) return false;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
     return true;
   } catch (error) {
@@ -31,6 +32,7 @@ export const saveRegistrationData = (
 
 export const loadRegistrationData = (): StoredRegistrationData | null => {
   try {
+    if (typeof window === 'undefined' || !window.localStorage) return null;
     const storedData = localStorage.getItem(STORAGE_KEY);
     if (!storedData) return null;
 
@@ -52,6 +54,7 @@ export const loadRegistrationData = (): StoredRegistrationData | null => {
 
 export const clearRegistrationData = () => {
   try {
+    if (typeof window === 'undefined' || !window.localStorage) return false;
     localStorage.removeItem(STORAGE_KEY);
     return true;
   } catch (error) {

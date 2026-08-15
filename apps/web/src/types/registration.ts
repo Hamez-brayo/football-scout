@@ -1,3 +1,6 @@
+import * as React from 'react';
+import { z } from 'zod';
+
 // User Types
 export type UserType = 'TALENT' | 'AGENT' | 'CLUB';
 
@@ -39,7 +42,7 @@ export interface TalentAchievements {
     assists?: number;
     appearances?: number;
     cleanSheets?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   }[];
 }
 
@@ -65,8 +68,8 @@ export interface RegistrationStep {
   description: string;
   isComplete: boolean;
   isVisible: boolean;
-  component?: React.ComponentType;
-  validationSchema?: any;
+  component?: React.ComponentType<Record<string, unknown>>;
+  validationSchema?: z.ZodTypeAny;
 }
 
 // Form Data
@@ -122,7 +125,7 @@ export interface RegistrationContextType {
 // Form Props
 export interface BaseFormProps {
   children: React.ReactNode;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: unknown) => Promise<void>;
   isValid?: boolean;
   showNavigation?: boolean;
 }
@@ -146,7 +149,7 @@ export interface FormSelectProps extends Omit<FormInputProps, 'type' | 'value' |
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export interface FormTextAreaProps extends Omit<FormInputProps, 'type'> {
+export interface FormTextAreaProps extends Omit<FormInputProps, 'type' | 'onChange'> {
   rows?: number;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }

@@ -84,7 +84,7 @@ export const talentRegistrationSchema = z.object({
 });
 
 // Helper function to validate a specific step
-export const validateStep = async (stepId: string, data: any) => {
+export const validateStep = async (stepId: string, data: unknown) => {
   try {
     switch (stepId) {
       case 'basic-info':
@@ -105,7 +105,7 @@ export const validateStep = async (stepId: string, data: any) => {
     return { success: true, errors: null };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const formattedErrors = error.errors.reduce((acc, err) => {
+      const formattedErrors = error.errors.reduce<Record<string, string>>((acc, err) => {
         const path = err.path.join('.');
         return { ...acc, [path]: err.message };
       }, {});
@@ -113,4 +113,4 @@ export const validateStep = async (stepId: string, data: any) => {
     }
     throw error;
   }
-}; 
+};

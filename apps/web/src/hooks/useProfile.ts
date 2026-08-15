@@ -37,7 +37,7 @@ export function useProfile() {
     }
   }
 
-  const updateProfile = async (updates: Partial<ProfileData>) => {
+  const updateProfile = async (updates: Record<string, unknown>) => {
     if (!user?.uid) {
       throw new Error('No user authenticated')
     }

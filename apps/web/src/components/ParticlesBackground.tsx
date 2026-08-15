@@ -4,55 +4,35 @@ import { useCallback, useState, useEffect } from "react";
 import { Particles } from "react-tsparticles";
 import { loadFull } from "tsparticles";
 
+type ParticlesComponentProps = {
+  id: string;
+  className?: string;
+  init?: (engine: unknown) => Promise<void>;
+  options?: Record<string, unknown>;
+};
+
 interface ParticlesBackgroundProps {
   className?: string;
 }
 
 export default function ParticlesBackground({ className = "fixed inset-0" }: ParticlesBackgroundProps) {
   const [mounted, setMounted] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Only load particles after component is mounted on client
   useEffect(() => {
     setMounted(true);
-    
-    // Check if user prefers dark mode
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(darkModeQuery.matches);
-    
-    // Listen for changes in color scheme preference
-    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-    darkModeQuery.addEventListener('change', handleChange);
-    
-    // Also check for dark class on html element
-    const checkTheme = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setIsDarkMode(isDark);
-    };
-
-    checkTheme();
-
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-    
-    return () => {
-      darkModeQuery.removeEventListener('change', handleChange);
-      observer.disconnect();
-    };
   }, []);
 
-  const particlesInit = useCallback(async (engine: any) => {
-    await loadFull(engine);
+  const particlesInit = useCallback(async (engine: unknown) => {
+    await loadFull(engine as never);
   }, []);
+
+  const ParticlesComp = Particles as unknown as (props: ParticlesComponentProps) => JSX.Element;
 
   if (!mounted) return null;
 
   return (
     <div className={`${className} pointer-events-auto`}>
-      <Particles
+      <ParticlesComp
         id={`tsparticles-${Math.random()}`}
         className="absolute inset-0"
         init={particlesInit}

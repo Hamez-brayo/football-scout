@@ -41,7 +41,7 @@ export default function AuthModal({ defaultMode = 'sign-in' }: AuthModalProps) {
         <div className="w-full text-sm text-center text-white/70">
           {mode === 'sign-in' ? (
             <>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Button
                 variant="link"
                 className="p-0 h-auto text-indigo-300 hover:text-indigo-100"

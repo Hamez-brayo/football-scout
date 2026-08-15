@@ -7,7 +7,6 @@ import TypingText from '@/components/TypingText';
 import HoverCard from '@/components/HoverCard';
 import ScrollReveal from '@/components/ScrollReveal';
 import ImageParallax from '@/components/ImageParallax';
-import FloatingIcons from '@/components/FloatingIcons';
 import ClientParticles from '@/components/ClientParticles';
 
 export default function HomePage() {
@@ -244,7 +243,7 @@ export default function HomePage() {
                       <div className="mt-8 text-center">
                         <blockquote>
                           <p className="text-xl font-medium text-gray-900 dark:text-white leading-relaxed sm:text-2xl sm:leading-relaxed">
-                            This platform has revolutionized our scouting process. We've discovered talent that would have gone unnoticed with traditional methods, and our recruitment efficiency has improved by <span className="text-indigo-600 dark:text-indigo-400 font-semibold">70%</span>.
+                            This platform has revolutionized our scouting process. We&apos;ve discovered talent that would have gone unnoticed with traditional methods, and our recruitment efficiency has improved by <span className="text-indigo-600 dark:text-indigo-400 font-semibold">70%</span>.
                           </p>
                         </blockquote>
                       </div>

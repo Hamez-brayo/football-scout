@@ -23,6 +23,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
 }
 
@@ -36,6 +37,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const lastIdTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     // Listen for both auth state and ID token changes (token refresh)
     const handleAuthChange = async (user: User | null) => {
       setUser(user);
@@ -65,8 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     const unsub1 = onAuthStateChanged(auth, handleAuthChange);
-    // @ts-ignore: onIdTokenChanged exists in Firebase v9+
-    const unsub2 = auth.onIdTokenChanged?.(handleAuthChange);
+    const authWithTokenEvents = auth as typeof auth & {
+      onIdTokenChanged?: (nextOrObserver: typeof handleAuthChange) => () => void;
+    };
+    const unsub2 = authWithTokenEvents.onIdTokenChanged?.(handleAuthChange);
     return () => {
       unsub1();
       if (unsub2) unsub2();
@@ -74,6 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Firebase auth is unavailable in this environment.');
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // onAuthStateChanged will handle session exchange and JWT storage
@@ -84,8 +96,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, displayName: string) => {
+    if (!auth) {
+      throw new Error('Firebase auth is unavailable in this environment.');
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user as User & {
+        updateProfile: (profile: { displayName: string }) => Promise<void>;
+      };
+
+      if (firebaseUser) {
+        await firebaseUser.updateProfile({ displayName });
+      }
       // onAuthStateChanged will handle session exchange and JWT storage
     } catch (error) {
       console.error('Sign up error:', error);
@@ -94,6 +117,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      throw new Error('Firebase auth is unavailable in this environment.');
+    }
+
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
@@ -105,6 +132,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!auth) {
+      return;
+    }
+
     try {
       clearToken();
       setTokenState(null);
@@ -130,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signOut,
     signInWithGoogle,
+    logout: signOut,
   };
 
   return (

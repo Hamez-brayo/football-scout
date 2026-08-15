@@ -5,13 +5,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
-import { 
+import {
   House,
   User,
   ChartLine,
-  Image,
   Trophy,
-  GearSix,
   X,
   List,
   VideoCamera,
@@ -47,7 +45,7 @@ export default function TalentLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { isComplete, missingFields, completionPercentage, sections } = useProfileCompletion();
+  const { isComplete, missingFields, completionPercentage } = useProfileCompletion();
 
   const handleLogout = async () => {
     try {

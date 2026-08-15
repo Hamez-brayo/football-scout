@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProfile } from '@/hooks/useProfile';
-import { User, Trophy, Calendar, MapPin, VideoCamera, ChartLine, Share, Gear, ArrowLeft } from '@phosphor-icons/react';
+import { User, Trophy, Calendar, VideoCamera, ArrowLeft, Share } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { MediaUpload } from '@/components/MediaUpload';
 import { useMedia } from '@/hooks/useMedia';
@@ -66,8 +66,8 @@ interface ProfileFormData {
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { profile, loading, error, updateProfile } = useProfile();
-  const { uploadMedia, isUploading: isMediaUploading } = useMedia();
+  const { profile, loading, updateProfile } = useProfile();
+  const { uploadMedia } = useMedia();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     basicInfo: {
@@ -119,55 +119,64 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     if (profile) {
+      const profileUser = profile.user as unknown as Record<string, unknown>;
+      const footballProfile = profile.footballProfile as unknown as Record<string, unknown> | undefined;
+      const availability = profile.availability as unknown as Record<string, unknown> | undefined;
+      const media = profile.media as unknown as Record<string, unknown> | undefined;
+      const socialLinks = profile.socialLinks as unknown as Record<string, unknown> | undefined;
+
       setFormData({
         basicInfo: {
-          firstName: profile.user.firstName || '',
-          lastName: profile.user.lastName || '',
-          nickname: profile.user.nickname || '',
-          dateOfBirth: profile.user.dateOfBirth || '',
-          nationality: profile.user.nationality || '',
-          languages: profile.user.languages || [],
-          currentLocation: profile.user.currentLocation || '',
+          firstName: String(profileUser.firstName ?? ''),
+          lastName: String(profileUser.lastName ?? ''),
+          nickname: String(profileUser.nickname ?? ''),
+          dateOfBirth: String(profileUser.dateOfBirth ?? ''),
+          nationality: String(profileUser.nationality ?? ''),
+          languages: Array.isArray(profileUser.languages) ? profileUser.languages.filter((value): value is string => typeof value === 'string') : [],
+          currentLocation: String(profileUser.currentLocation ?? ''),
+          bio: String((profileUser.bio as string | undefined) ?? ''),
         },
         physicalAttributes: {
-          height: profile.physicalAttributes?.height || 0,
-          weight: profile.physicalAttributes?.weight || 0,
-          fitnessLevel: profile.physicalAttributes?.fitnessLevel || 0,
-          preferredFoot: profile.physicalAttributes?.preferredFoot || 'right',
+          height: Number(profile.physicalAttributes?.height ?? 0),
+          weight: Number(profile.physicalAttributes?.weight ?? 0),
+          fitnessLevel: Number(profile.physicalAttributes?.fitnessLevel ?? 0),
+          preferredFoot: profile.physicalAttributes?.preferredFoot === 'left' || profile.physicalAttributes?.preferredFoot === 'both' ? profile.physicalAttributes.preferredFoot : 'right',
         },
         footballProfile: {
-          primaryPosition: profile.footballProfile?.primaryPosition || '',
-          secondaryPositions: profile.footballProfile?.secondaryPositions || [],
-          currentClub: profile.footballProfile?.currentClub || '',
-          previousClubs: profile.footballProfile?.previousClubs || [],
-          playingStyle: profile.footballProfile?.playingStyle || [],
-          strongFoot: profile.footballProfile?.strongFoot || 'right',
-          experience: profile.footballProfile?.experience || '',
-          achievements: profile.footballProfile?.achievements?.map(achievement => ({
-            id: achievement.id || '',
-            title: achievement.title || '',
-            description: achievement.description || '',
-            date: achievement.date || '',
-          })) || [],
+          primaryPosition: String(footballProfile?.primaryPosition ?? ''),
+          secondaryPositions: Array.isArray(footballProfile?.secondaryPositions) ? footballProfile.secondaryPositions.filter((value): value is string => typeof value === 'string') : [],
+          currentClub: String(footballProfile?.currentClub ?? ''),
+          previousClubs: Array.isArray(footballProfile?.previousClubs) ? footballProfile.previousClubs.filter((value): value is string => typeof value === 'string') : [],
+          playingStyle: Array.isArray(footballProfile?.playingStyle) ? footballProfile.playingStyle.filter((value): value is string => typeof value === 'string') : [],
+          strongFoot: footballProfile?.strongFoot === 'left' || footballProfile?.strongFoot === 'both' ? footballProfile.strongFoot : 'right',
+          experience: String(footballProfile?.experience ?? ''),
+          achievements: Array.isArray(footballProfile?.achievements)
+            ? (footballProfile.achievements as Array<Record<string, unknown>>).map((achievement) => ({
+                id: String(achievement.id ?? ''),
+                title: String(achievement.title ?? ''),
+                description: String(achievement.description ?? ''),
+                date: String(achievement.date ?? ''),
+              }))
+            : [],
         },
         availability: {
-          isAvailableForTrials: profile.availability?.isAvailableForTrials || false,
-          preferredRegions: profile.availability?.preferredRegions || [],
-          willingToRelocate: profile.availability?.willingToRelocate || false,
-          available: profile.availability?.available || false,
+          isAvailableForTrials: Boolean(availability?.isAvailableForTrials),
+          preferredRegions: Array.isArray(availability?.preferredRegions) ? availability.preferredRegions.filter((value): value is string => typeof value === 'string') : [],
+          willingToRelocate: Boolean(availability?.willingToRelocate),
+          available: Boolean(availability?.available),
         },
         media: {
-          profilePhoto: profile.media?.profilePhoto || '',
-          coverPhoto: profile.media?.coverPhoto || '',
-          highlightVideo: profile.media?.highlightVideo || '',
-          matchFootage: profile.media?.matchFootage || [],
+          profilePhoto: String(media?.profilePhoto ?? ''),
+          coverPhoto: String(media?.coverPhoto ?? ''),
+          highlightVideo: String(media?.highlightVideo ?? ''),
+          matchFootage: Array.isArray(media?.matchFootage) ? media.matchFootage.filter((value): value is string => typeof value === 'string') : [],
         },
         socialLinks: {
-          twitter: profile.socialLinks?.twitter || '',
-          facebook: profile.socialLinks?.facebook || '',
-          instagram: profile.socialLinks?.instagram || '',
-          linkedin: profile.socialLinks?.linkedin || '',
-          youtube: profile.socialLinks?.youtube || '',
+          twitter: String(socialLinks?.twitter ?? ''),
+          facebook: String(socialLinks?.facebook ?? ''),
+          instagram: String(socialLinks?.instagram ?? ''),
+          linkedin: String(socialLinks?.linkedin ?? ''),
+          youtube: String(socialLinks?.youtube ?? ''),
         },
       });
     }
@@ -177,7 +186,7 @@ export default function EditProfilePage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await updateProfile(formData);
+      await updateProfile(formData as unknown as Record<string, unknown>);
       router.push('/talent/profile');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -186,7 +195,7 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleInputChange = (section: keyof ProfileFormData, field: string, value: any) => {
+  const handleInputChange = (section: keyof ProfileFormData, field: string, value: string | number | boolean | string[]) => {
     setFormData(prev => ({
       ...prev,
       [section]: {
@@ -541,9 +550,9 @@ export default function EditProfilePage() {
                 <label htmlFor="notice" className={labelClasses}>Notice Period</label>
                 <input
                   type="text"
-                  id="notice"
-                  value={formData.availability.notice}
-                  onChange={(e) => handleInputChange('availability', 'notice', e.target.value)}
+                  id="notes"
+                  value={formData.availability.notes || ''}
+                  onChange={(e) => handleInputChange('availability', 'notes', e.target.value)}
                   className={inputClasses}
                   placeholder="e.g., 2 weeks notice required"
                 />

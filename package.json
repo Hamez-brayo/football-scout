@@ -4,7 +4,7 @@
   "description": "Football Talent Scouting Platform - Mobile-first cross-platform ecosystem",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "apps/web",
     "services/*",
     "packages/*",
     "database"
@@ -52,7 +52,7 @@
     },
     "homepage": "https://github.com/Hamez-brayo/vysion-analytics#readme",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.2.4"
   },
   "engines": {
     "node": ">=20.0.0",

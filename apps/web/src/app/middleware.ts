@@ -13,13 +13,6 @@ const AUTH_PATHS = [
   '/sign-up',
 ];
 
-// Paths that are always accessible
-const PUBLIC_PATHS = [
-  '/',
-  '/about',
-  '/contact',
-];
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
