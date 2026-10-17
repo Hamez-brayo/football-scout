@@ -26,7 +26,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 git clone git@github.com:Hamez-brayo/football-scout.git
-cd vysion-analytics
+cd football-scout
 ```
 
 ### 2. Install Dependencies
