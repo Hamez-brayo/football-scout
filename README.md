@@ -88,7 +88,7 @@ Our platform provides:
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:Hamez-brayo/vysion-analytics.git
+git clone git@github.com:Hamez-brayo/football-scout.git
 cd vysion-analytics
 
 # 2. Install dependencies
