@@ -88,8 +88,8 @@ Our platform provides:
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:Hamez-brayo/vysion-analytics.git
-cd vysion-analytics
+git clone git@github.com:Hamez-brayo/football-scout.git
+cd football-scout
 
 # 2. Install dependencies
 npm install

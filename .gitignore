@@ -1,7 +1,27 @@
-node_modules
-.expo
-*.log
+# Dependencies and generated output
+node_modules/
+**/node_modules/
+.expo/
+**/.expo/
+dist/
+**/dist/
+build/
+**/build/
+coverage/
+**/coverage/
+
+# Environment files: commit templates only
 .env
-dist
-build
-coverage
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Logs, local tooling, and secrets
+*.log
+.DS_Store
+.vscode/
+*.pem
+service-account*.json
+firebase-adminsdk*.json
