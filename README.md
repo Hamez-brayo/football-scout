@@ -89,7 +89,7 @@ Our platform provides:
 ```bash
 # 1. Clone repository
 git clone git@github.com:Hamez-brayo/football-scout.git
-cd vysion-analytics
+cd football-scout
 
 # 2. Install dependencies
 npm install
