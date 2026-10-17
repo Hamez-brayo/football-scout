@@ -25,7 +25,7 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone git@github.com:Hamez-brayo/vysion-analytics.git
+git clone git@github.com:Hamez-brayo/football-scout.git
 cd vysion-analytics
 ```
 
