@@ -1,65 +1,49 @@
-# Football Talent Scouting Platform
-
-# Vysion Analytics - Football Talent Scouting Platform
+# Vysion — The Football Professional Network
 
 > **⚡ Version 2.0** - Complete rebuild with mobile-first architecture
 
 ## 📌 Overview  
-**Vysion Analytics** is a comprehensive digital ecosystem connecting undiscovered football talent with professional scouts, clubs, and agents worldwide. Build your professional player profile, upload match highlights, get verified, and connect with opportunities.
+**Vysion** connects players and football professionals through profiles, organisations, connections, a football feed and opportunities.
 
 ### 🌟 What's New in v2.0
 - ✅ **Mobile-First** - React Native + Expo app for iOS & Android
-- ✅ **Clean Architecture** - Modular, scalable, production-ready
+- ✅ **Clean Architecture** - Modular API, services and shared validation
 - ✅ **Shared Packages** - Reusable types, schemas, utilities
 - ✅ **Modern Tech Stack** - TypeScript, Prisma, Firebase, NativeWind
 - ✅ **Better DX** - Comprehensive docs, coding standards, examples
 
-## 🎯 Problem Statement
-Football scouting faces several challenges:
+## Product direction
 
-- **Expensive & Inefficient** – Traditional scouting methods require extensive travel and manual assessments.
-- **Lack of Exposure** – Talented players, especially in underrepresented regions, struggle to gain recognition.
-- **Unstandardized Evaluation** – No universal system exists to fairly assess young or amateur players.
+Vysion is a mobile professional network for football. Players, scouts, coaches,
+agents and club professionals can establish their identity, showcase their work,
+build relationships and find opportunities.
 
-## 💡 Solution
-Our platform provides:
+The football network implementation covers:
 
-- **Player Profiles** – Digital CVs with player stats, videos, and endorsements.
-- **AI & Video Analysis** – Automated performance insights from uploaded match footage.
-- **Verification System** – Multi-layered validation using club authentication, coach endorsements, and AI-based assessments.
-- **Club & Scout Portal** – A centralized database for clubs and scouts to efficiently discover talent.
+- Football profiles with professional background, expertise, team history,
+  achievements and footage links.
+- Independent club and agency pages, owned by their creators, with member links.
+- Connection requests and text messaging between accepted connections.
+- A chronological football feed for match footage, training, achievements,
+  team updates and recruitment.
+- Opportunities for trials, player recruitment, representation and football jobs.
 
-## ⚙️ Features
+See the [network API contract](docs/api/network.md) and
+[rollout and acceptance guide](docs/engineering/football-network-release.md).
+Network availability requires the prepared database migration to be reviewed and
+applied to an explicitly approved target. Page ownership and self-selected roles
+are not verified professional credentials.
 
-### 1️⃣ Player Profiles
-- Personal details (name, age, nationality, position, preferred foot, etc.)
-- Physical attributes (height, weight, speed, stamina, etc.)
-- Match statistics & performance ratings
-- Highlight reels & video uploads
-- Verification status (Coach-verified, Club-verified, AI-verified)
-
-### 2️⃣ AI-Powered Verification
-- Face & ID matching with live video submissions
-- Video skill challenges for authenticity
-- Club & coach endorsements for credibility
-- AI-based stat validation (cross-referencing match videos with reported data)
-
-### 3️⃣ Scout & Club Access
-- Advanced search & filtering of players by region, position, and skill level
-- Direct messaging system for scouts and verified players
-- Subscription-based premium access for scouts & clubs
-
-### 4️⃣ Community Engagement & Gamification
-- Weekly skill challenges to showcase abilities
-- Leaderboards for top-performing players
-- User reporting system to enhance profile credibility
+Footage currently uses member-supplied HTTPS links. AI video analysis, drill
+assessment, Academy training plans, hosted uploads, real-time chat, payments and
+recommendations remain future work.
 
 ## 🏗️ Tech Stack
 ### Mobile App
-- **Framework**: React Native + Expo SDK 50+
-- **Routing**: Expo Router (file-based navigation)
-- **Styling**: NativeWind (Tailwind for React Native)
-- **State**: Zustand
+- **Framework**: React Native 0.81 + Expo SDK 54
+- **Routing**: React Navigation (native stack)
+- **Styling**: React Native StyleSheet and shared UI components
+- **State**: Auth Context, TanStack Query and Zustand
 - **Forms**: React Hook Form + Zod validation
 
 ### Backend API
@@ -70,17 +54,14 @@ Our platform provides:
 - **Logging**: Winston
 
 ### Shared Infrastructure
-- **Authentication**: Firebase Auth (Email, Google, Apple)
+- **Authentication**: Firebase Auth (email/password client flow)
 - **Shared Code**: `@vysion/shared` package
 - **Future AI**: Python microservices for video analysis
 
-## 🚀 Roadmap
+## Roadmap
 
-- [ ] **MVP Launch** – Core profile creation & verification system
-- [ ] **AI Video Analysis** – Automated stat validation from match footage
-- [ ] **Club & Scout Marketplace** – Advanced search & filtering for clubs
-- [ ] **Mobile App** – iOS & Android support
-- [ ] **Partnerships** – Collaborate with local academies & clubs
+The current priority is the football professional network. See [ROADMAP.md](ROADMAP.md)
+for rollout gates and later development areas.
 
 ## 📌 Getting Started
 
@@ -88,8 +69,8 @@ Our platform provides:
 
 ```bash
 # 1. Clone repository
-git clone git@github.com:Hamez-brayo/vysion-analytics.git
-cd vysion-analytics
+git clone https://github.com/Hamez-brayo/football-scout.git
+cd football-scout
 
 # 2. Install dependencies
 npm install
@@ -99,11 +80,10 @@ cp services/api/.env.example services/api/.env
 cp apps/mobile/.env.example apps/mobile/.env
 # Edit .env files with your credentials
 
-# 4. Set up database
-cd database
-npm run migrate
-npm run seed
-cd ..
+# 4. Review the rollout guide before applying migrations to an approved database.
+# Do not run migrations or seeds against an unverified destination.
+npm run db:generate
+npm run build:shared
 
 # 5. Start development servers
 npm run dev

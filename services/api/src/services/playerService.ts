@@ -1,3 +1,4 @@
+import { networkService, profileSelect, safeProfile, visibleProfile } from '../network/service';
 import { prisma } from '@/config/database';
 import { AppError } from '@/middleware/errorHandler';
 import { HTTP_STATUS, ERROR_CODES, PAGINATION } from '@vysion/shared';
@@ -31,6 +32,7 @@ export class PlayerService {
     const where: any = {
       userType: 'TALENT',
       registrationStatus: 'COMPLETE',
+      AND: [visibleProfile],
     };
 
     if (query) {
@@ -74,18 +76,7 @@ export class PlayerService {
       where,
       skip,
       take,
-      include: {
-        physicalAttributes: true,
-        footballProfile: {
-          include: {
-            achievements: true,
-          },
-        },
-        media: {
-          take: 3,
-          orderBy: { createdAt: 'desc' },
-        },
-      },
+      select: { ...profileSelect, physicalAttributes: { select: { height: true, weight: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -111,7 +102,7 @@ export class PlayerService {
     const total = await prisma.user.count({ where });
 
     return {
-      items: players,
+      items: players.map((player) => safeProfile(player, '')),
       total,
       page,
       limit: take,
@@ -123,90 +114,65 @@ export class PlayerService {
    * Get player by ID (public view)
    */
   async getPlayerById(id: string) {
-    const player = await prisma.user.findFirst({
-      where: {
-        id,
-        userType: 'TALENT',
-      },
-      include: {
-        physicalAttributes: true,
-        footballProfile: {
-          include: {
-            achievements: true,
-          },
-        },
-        availability: true,
-        socialLinks: true,
-        media: {
-          orderBy: { createdAt: 'desc' },
-        },
-      },
-    });
-
-    if (!player) {
-      throw new AppError(
-        HTTP_STATUS.NOT_FOUND,
-        ERROR_CODES.NOT_FOUND,
-        'Player not found'
-      );
-    }
-
-    return player;
+    const profile = await networkService.profile(id, '');
+    if (profile.userType !== 'TALENT') throw new AppError(404, 'NOT_FOUND', 'Player not found');
+    return profile;
   }
 
   /**
    * Get player statistics
    */
   async getPlayerStats(playerId: string) {
-    const player = await this.getPlayerById(playerId);
-
-    // TODO: Implement actual stats calculation
-    // This is a placeholder for future AI-based stat analysis
-
+    // Visibility is checked before fetching internal completeness inputs and aggregates.
+    await this.getPlayerById(playerId);
+    const player = await prisma.user.findFirst({
+      where: { id: playerId, userType: 'TALENT', AND: [visibleProfile] },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        dateOfBirth: true,
+        nationality: true,
+        currentLocation: true,
+        profilePhoto: true,
+        position: true,
+        currentClub: true,
+        physicalAttributes: { select: { height: true, weight: true } },
+        footballProfile: {
+          select: {
+            primaryPosition: true,
+            experience: true,
+            _count: { select: { achievements: true } },
+          },
+        },
+        privacySettings: { select: { mediaVisibility: true } },
+        _count: { select: { media: true } },
+      },
+    });
+    if (!player) throw new AppError(404, 'NOT_FOUND', 'Player not found');
+    const fields = [
+      player.firstName,
+      player.lastName,
+      player.dateOfBirth,
+      player.nationality,
+      player.currentLocation,
+      player.profilePhoto,
+      player.position,
+      player.currentClub,
+      player.physicalAttributes?.height,
+      player.physicalAttributes?.weight,
+      player.footballProfile?.primaryPosition,
+      player.footballProfile?.experience,
+    ];
     return {
       playerId: player.id,
-      profileCompleteness: this.calculateProfileCompleteness(player),
-      mediaCount: player.media?.length || 0,
-      achievementsCount: player.footballProfile?.achievements?.length || 0,
-      // Add more stats as needed
+      profileCompleteness: Math.round((fields.filter(Boolean).length / fields.length) * 100),
+      mediaCount:
+        player.privacySettings && player.privacySettings.mediaVisibility !== 'public'
+          ? 0
+          : player._count.media,
+      achievementsCount: player.footballProfile?._count.achievements ?? 0,
     };
-  }
-
-  /**
-   * Calculate profile completeness percentage
-   */
-  private calculateProfileCompleteness(player: any): number {
-    const requiredFields = [
-      'firstName',
-      'lastName',
-      'dateOfBirth',
-      'nationality',
-      'currentLocation',
-      'profilePhoto',
-      'position',
-      'currentClub',
-    ];
-
-    const profileFields = [
-      'physicalAttributes.height',
-      'physicalAttributes.weight',
-      'footballProfile.primaryPosition',
-      'footballProfile.experience',
-    ];
-
-    let filledFields = 0;
-    const totalFields = requiredFields.length + profileFields.length;
-
-    requiredFields.forEach((field) => {
-      if (player[field]) filledFields++;
-    });
-
-    profileFields.forEach((field) => {
-      const [obj, prop] = field.split('.');
-      if (player[obj]?.[prop]) filledFields++;
-    });
-
-    return Math.round((filledFields / totalFields) * 100);
   }
 
   /**
@@ -218,18 +184,14 @@ export class PlayerService {
     });
 
     if (!user) {
-      throw new AppError(
-        HTTP_STATUS.NOT_FOUND,
-        ERROR_CODES.NOT_FOUND,
-        'User not found'
-      );
+      throw new AppError(HTTP_STATUS.NOT_FOUND, ERROR_CODES.NOT_FOUND, 'User not found');
     }
 
     if (user.userType !== 'TALENT') {
       throw new AppError(
         HTTP_STATUS.FORBIDDEN,
         ERROR_CODES.FORBIDDEN,
-        'Only talent users can create player profiles'
+        'Only talent users can create player profiles',
       );
     }
 
@@ -237,7 +199,9 @@ export class PlayerService {
     const updatedUser = await prisma.user.update({
       where: { userId },
       data: {
-        fullName: profileData.fullName || `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim(),
+        fullName:
+          profileData.fullName ||
+          `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim(),
         position: profileData.position,
         currentClub: profileData.currentClub,
         preferredFoot: profileData.preferredFoot,
@@ -283,7 +247,7 @@ export class PlayerService {
       });
     }
 
-    return this.getPlayerById(user.id);
+    return this.getPlayerProfile(userId);
   }
 
   /**
@@ -306,22 +270,19 @@ export class PlayerService {
     });
 
     if (!user) {
-      throw new AppError(
-        HTTP_STATUS.NOT_FOUND,
-        ERROR_CODES.NOT_FOUND,
-        'User not found'
-      );
+      throw new AppError(HTTP_STATUS.NOT_FOUND, ERROR_CODES.NOT_FOUND, 'User not found');
     }
 
     if (user.userType !== 'TALENT') {
       throw new AppError(
         HTTP_STATUS.FORBIDDEN,
         ERROR_CODES.FORBIDDEN,
-        'Only talent users can access player profiles'
+        'Only talent users can access player profiles',
       );
     }
 
-    return user;
+    const { password: _password, ...safe } = user;
+    return safe;
   }
 
   /**
@@ -333,18 +294,14 @@ export class PlayerService {
     });
 
     if (!user) {
-      throw new AppError(
-        HTTP_STATUS.NOT_FOUND,
-        ERROR_CODES.NOT_FOUND,
-        'User not found'
-      );
+      throw new AppError(HTTP_STATUS.NOT_FOUND, ERROR_CODES.NOT_FOUND, 'User not found');
     }
 
     if (user.userType !== 'TALENT') {
       throw new AppError(
         HTTP_STATUS.FORBIDDEN,
         ERROR_CODES.FORBIDDEN,
-        'Only talent users can update player profiles'
+        'Only talent users can update player profiles',
       );
     }
 
@@ -398,7 +355,7 @@ export class PlayerService {
       });
     }
 
-    return this.getPlayerById(user.id);
+    return this.getPlayerProfile(userId);
   }
 }
 

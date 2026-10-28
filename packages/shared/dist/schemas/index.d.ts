@@ -157,19 +157,19 @@ export declare const SignUpSchema: z.ZodObject<{
     password: z.ZodString;
     firstName: z.ZodString;
     lastName: z.ZodString;
-    userType: z.ZodOptional<z.ZodEnum<["TALENT", "SCOUT", "AGENT", "CLUB"]>>;
+    userType: z.ZodOptional<z.ZodEnum<["TALENT", "SCOUT", "COACH", "AGENT", "CLUB"]>>;
 }, "strip", z.ZodTypeAny, {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
-    userType?: "TALENT" | "SCOUT" | "AGENT" | "CLUB" | undefined;
+    userType?: "TALENT" | "COACH" | "SCOUT" | "AGENT" | "CLUB" | undefined;
 }, {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
-    userType?: "TALENT" | "SCOUT" | "AGENT" | "CLUB" | undefined;
+    userType?: "TALENT" | "COACH" | "SCOUT" | "AGENT" | "CLUB" | undefined;
 }>;
 export declare const SignInSchema: z.ZodObject<{
     email: z.ZodString;

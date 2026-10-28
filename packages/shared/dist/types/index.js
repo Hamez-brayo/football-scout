@@ -7,6 +7,7 @@ exports.VerificationStatus = exports.Position = exports.ProfessionalFocus = expo
 var UserType;
 (function (UserType) {
     UserType["TALENT"] = "TALENT";
+    UserType["COACH"] = "COACH";
     UserType["SCOUT"] = "SCOUT";
     UserType["AGENT"] = "AGENT";
     UserType["CLUB"] = "CLUB";

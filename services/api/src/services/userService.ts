@@ -1,3 +1,4 @@
+import { networkService } from '../network/service';
 import { prisma } from '@/config/database';
 import { AppError } from '@/middleware/errorHandler';
 import { HTTP_STATUS, ERROR_CODES } from '@vysion/shared';
@@ -54,7 +55,8 @@ export class UserService {
       },
     });
 
-    return user;
+    const { password: _password, ...safe } = user;
+    return safe;
   }
 
   /**
@@ -87,35 +89,15 @@ export class UserService {
       );
     }
 
-    return user;
+    const { password: _password, ...safe } = user;
+    return safe;
   }
 
   /**
    * Get user by internal ID
    */
   async getUserById(id: string) {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      include: {
-        physicalAttributes: true,
-        footballProfile: {
-          include: {
-            achievements: true,
-          },
-        },
-        media: true,
-      },
-    });
-
-    if (!user) {
-      throw new AppError(
-        HTTP_STATUS.NOT_FOUND,
-        ERROR_CODES.NOT_FOUND,
-        'User not found'
-      );
-    }
-
-    return user;
+    return networkService.profile(id, '');
   }
 
   /**
@@ -137,7 +119,8 @@ export class UserService {
       },
     });
 
-    return user;
+    const { password: _password, ...safe } = user;
+    return safe;
   }
 
   /**

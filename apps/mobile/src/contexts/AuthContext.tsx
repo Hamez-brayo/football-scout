@@ -27,45 +27,50 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // onIdTokenChanged is preferable over onAuthStateChanged because it fires on 
-    // token refresh, sign in, sign out. Ensures we never submit a stale token.
+    // A late lookup must never restore or sign out a superseded identity.
+    let generation = 0;
+    let activeUid: string | null = null;
     const unsubscribe = onIdTokenChanged(auth, async (fbUser) => {
+      const current = ++generation;
+      const isCurrent = () => current === generation && auth.currentUser === fbUser;
+      if (activeUid !== (fbUser?.uid ?? null) || !fbUser) {
+        setUser(null);
+        setFirebaseUser(null);
+        setAuthToken(null);
+        queryClient.clear();
+      }
+      activeUid = fbUser?.uid ?? null;
+      setIsLoading(true);
       try {
-        if (!fbUser) {
-          // Logged out
+        if (!fbUser) return;
+        const appUser = await AuthService.getBackendUser(fbUser);
+        if (!isCurrent()) return;
+        if (appUser) {
+          setFirebaseUser(fbUser);
+          setUser(appUser);
+        } else {
           setFirebaseUser(null);
           setUser(null);
           setAuthToken(null);
-          queryClient.clear(); // Clear application server state
-          setIsLoading(false);
-          return;
-        }
-
-        const token = await fbUser.getIdToken();
-        setAuthToken(token); // keep client in sync
-        setFirebaseUser(fbUser);
-
-        // Fetch application user data from backend
-        // We sync Identity (Firebase) with Data (Backend)
-        const appUser = await AuthService.getBackendUser(fbUser);
-        
-        if (appUser) {
-          setUser(appUser);
-        } else {
-          // A Firebase user exists but a backend record does not!
-          // We force logout or they enter a "limbo" / wizard onboarding state
-          // For now, logout immediately to prevent corrupted session forms
-          console.warn('Backend user missing for identity:', fbUser.uid);
+          queryClient.clear();
           await AuthService.logout();
         }
       } catch (error) {
+        if (!isCurrent()) return;
+        setFirebaseUser(null);
+        setUser(null);
+        setAuthToken(null);
+        queryClient.clear();
         console.error('Session sync error:', error);
       } finally {
-        setIsLoading(false);
+        if (isCurrent()) setIsLoading(false);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      generation++;
+      unsubscribe();
+    };
   }, [queryClient]);
 
   const login = useCallback(async (email: string, password: string) => {

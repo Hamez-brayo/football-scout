@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import networkRoutes from '../network/routes';
 import authRoutes from './auth';
 import userRoutes from './users';
 import playerRoutes from './players';
@@ -16,6 +17,7 @@ router.get('/health', (req, res) => {
 });
 
 // Mount routes
+router.use('/network', networkRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/players', playerRoutes);
