@@ -1,6 +1,6 @@
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
+  signInWithCustomToken,
   signOut,
   type User as FirebaseUser,
 } from 'firebase/auth';
@@ -35,21 +35,10 @@ export const AuthService = {
     await signInWithEmailAndPassword(auth, email, password);
   },
 
-  /**
-   * Register via Firebase.
-   * Creates Firebase identity, then calls backend to construct the application record.
-   */
+  /** Register both records through the backend, then exchange its Firebase custom token. */
   async register(payload: RegisterInput): Promise<void> {
-    // 1. Create Firebase Identity
-    const credential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
-    
-    // 2. Obtain fresh token to authenticate the backend request
-    const token = await credential.user.getIdToken();
-    setAuthToken(token);
-
-    // 3. Register user in backend DB using the token 
-    // Uses the API route for registration, assuming backend extracts uid from token
-    await authApi.register(payload);
+    const { token } = await authApi.register(payload);
+    await signInWithCustomToken(auth, token);
   },
 
   /**
@@ -62,16 +51,18 @@ export const AuthService = {
 
   /**
    * Resolve backend application data for a given Firebase User
-   * If metadata is missing, we could implement a forced fix.
+   * Ignore results from an identity that changed while the request was pending.
    */
   async getBackendUser(firebaseUser: FirebaseUser): Promise<AuthUser | null> {
     try {
       const token = await firebaseUser.getIdToken();
+      if (auth.currentUser !== firebaseUser) return null;
       setAuthToken(token);
-      return await authApi.me();
+      const user = await authApi.me();
+      return auth.currentUser === firebaseUser ? user : null;
     } catch (error) {
       console.warn('Failed to fetch backend user for firebase UID: ', firebaseUser.uid, error);
       return null;
     }
-  }
+  },
 };

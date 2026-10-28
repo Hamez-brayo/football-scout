@@ -34,12 +34,12 @@ export const authApi = {
     lastName: string;
     userType: string;
   }): Promise<AuthApiResponse['data']> {
-    const response = await apiClient.post<AuthApiResponse>('/auth/register', payload);
+    const response = await apiClient.post<AuthApiResponse>('/auth/signup', payload);
     return response.data.data;
   },
 
   async me(): Promise<AuthUser> {
-    const response = await apiClient.get<MeApiResponse>('/auth/me');
+    const response = await apiClient.get<MeApiResponse>('/users/me');
     return response.data.data;
   },
 };

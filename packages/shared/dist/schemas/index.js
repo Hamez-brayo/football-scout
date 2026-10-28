@@ -72,7 +72,7 @@ exports.SignUpSchema = zod_1.z.object({
     password: zod_1.z.string().min(8, 'Password must be at least 8 characters'),
     firstName: zod_1.z.string().min(2).max(50),
     lastName: zod_1.z.string().min(2).max(50),
-    userType: zod_1.z.enum(['TALENT', 'SCOUT', 'AGENT', 'CLUB']).optional(),
+    userType: zod_1.z.enum(['TALENT', 'SCOUT', 'COACH', 'AGENT', 'CLUB']).optional(),
 });
 exports.SignInSchema = zod_1.z.object({
     email: zod_1.z.string().email('Invalid email address'),

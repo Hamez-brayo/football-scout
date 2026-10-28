@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SignUpSchema } from '@vysion/shared';
 import { z } from 'zod';
+import { Choices } from './network/NetworkUI';
 
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Container, Typography, Input, Button } from '@/src/components/ui';
@@ -15,7 +16,7 @@ type SignUpForm = z.infer<typeof SignUpSchema>;
 
 const RegisterScreen = ({ navigation }: Props) => {
   const { register } = useAuth();
-  
+
   const {
     control,
     handleSubmit,
@@ -29,7 +30,7 @@ const RegisterScreen = ({ navigation }: Props) => {
       lastName: '',
       email: '',
       password: '',
-      userType: 'TALENT', // Default to talent for now
+      userType: 'TALENT',
     },
   });
 
@@ -123,7 +124,19 @@ const RegisterScreen = ({ navigation }: Props) => {
             />
           )}
         />
-        
+
+        <Typography variant="body">Your football role</Typography>
+        <Controller
+          control={control}
+          name="userType"
+          render={({ field: { value, onChange } }) => (
+            <Choices
+              values={['TALENT', 'SCOUT', 'COACH', 'AGENT', 'CLUB']}
+              value={value || 'TALENT'}
+              onChange={onChange}
+            />
+          )}
+        />
         {errors.root?.serverError && (
           <Typography variant="caption" color="#ef4444" accessibilityRole="alert">
             {errors.root.serverError.message}

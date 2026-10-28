@@ -3,6 +3,7 @@
  */
 export declare enum UserType {
     TALENT = "TALENT",
+    COACH = "COACH",
     SCOUT = "SCOUT",
     AGENT = "AGENT",
     CLUB = "CLUB"

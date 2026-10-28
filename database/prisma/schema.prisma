@@ -11,6 +11,8 @@ generator client {
 
 enum UserType {
   TALENT
+  SCOUT
+  COACH
   AGENT
   CLUB
 }
@@ -58,7 +60,7 @@ model User {
   userId            String            @unique
   email             String            @unique
   password          String?           // nullable — Firebase users have no local password
-  
+
   // Basic Info
   firstName         String?
   lastName          String?
@@ -71,24 +73,24 @@ model User {
   currentLocation   String?
   contactEmail      String?
   contactPhone      String?
-  
+
   // Media
   profilePhoto      String?
   coverPhoto        String?
   documents         String[]          @default([])
   videos            String[]          @default([])
   mediaUrls         String[]          @default([])
-  
+
   // Status and Type
   registrationStatus RegistrationStatus @default(INCOMPLETE)
   userType          UserType?
   verificationStatus VerificationStatus @default(UNVERIFIED)
-  
+
   // Journey Info
   playingStatus     PlayingStatus?
   experienceLevel   ExperienceLevel?
   professionalFocus ProfessionalFocus?
-  
+
   // Path Specific
   position          String?           // For TALENT
   currentClub       String?           // For TALENT
@@ -99,7 +101,18 @@ model User {
   clubName          String?           // For CLUB
   clubRole          String?           // For CLUB
   department        String?           // For CLUB
-  
+
+  headline String?
+  biography String?
+  expertise String[] @default([])
+  memberOrganisations NetworkOrganisation[] @relation("OrgMembers")
+  organisations NetworkOrganisation[]
+  sentConnections NetworkConnection[] @relation("Requester")
+  receivedConnections NetworkConnection[] @relation("Recipient")
+  networkMessages NetworkMessage[]
+  networkPosts NetworkPost[]
+  opportunities NetworkOpportunity[]
+
   // Relations
   physicalAttributes PhysicalAttributes?
   footballProfile    FootballProfile?
@@ -107,7 +120,7 @@ model User {
   socialLinks       SocialLinks?
   privacySettings   PrivacySettings?
   media             Media[]
-  
+
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 }
@@ -202,4 +215,73 @@ model Media {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-} 
+}
+model NetworkOrganisation {
+  id String @id @default(cuid())
+  name String
+  type String
+  description String?
+  location String?
+  website String?
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id])
+  members User[] @relation("OrgMembers")
+  opportunities NetworkOpportunity[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NetworkConnection {
+  id String @id @default(cuid())
+  pairKey String @unique
+  requesterId String
+  recipientId String
+  requester User @relation("Requester", fields: [requesterId], references: [id])
+  recipient User @relation("Recipient", fields: [recipientId], references: [id])
+  status String @default("PENDING")
+  messages NetworkMessage[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([requesterId, createdAt])
+  @@index([recipientId, createdAt])
+}
+
+model NetworkMessage {
+  id String @id @default(cuid())
+  connectionId String
+  connection NetworkConnection @relation(fields: [connectionId], references: [id])
+  senderId String
+  sender User @relation(fields: [senderId], references: [id])
+  body String
+  createdAt DateTime @default(now())
+  @@index([connectionId, createdAt])
+}
+
+model NetworkPost {
+  id String @id @default(cuid())
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  body String
+  category String
+  mediaUrl String?
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+
+model NetworkOpportunity {
+  id String @id @default(cuid())
+  publisherId String
+  publisher User @relation(fields: [publisherId], references: [id])
+  organisationId String?
+  organisation NetworkOrganisation? @relation(fields: [organisationId], references: [id])
+  title String
+  type String
+  description String
+  requirements String
+  location String
+  applicationUrl String
+  expiresAt DateTime
+  status String @default("OPEN")
+  createdAt DateTime @default(now())
+  @@index([status, expiresAt, createdAt])
+}

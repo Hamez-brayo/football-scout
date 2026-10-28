@@ -77,7 +77,7 @@ export const SignUpSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
-  userType: z.enum(['TALENT', 'SCOUT', 'AGENT', 'CLUB']).optional(),
+  userType: z.enum(['TALENT', 'SCOUT', 'COACH', 'AGENT', 'CLUB']).optional(),
 });
 
 export const SignInSchema = z.object({
