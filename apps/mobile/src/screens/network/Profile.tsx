@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import { ExperienceLevel, NetworkProfileSchema, type NetworkProfile } from '@vysion/shared';
 import { NetworkService as api } from '../../services/NetworkService';
 import {
   Action,
+  Avatar,
+  Eyebrow,
+  palette,
   Card,
   Choices,
   Copy,
@@ -17,15 +21,48 @@ export function ProfileView({ profile: p }: { profile: NetworkProfile | null }) 
   if (!p) return <Copy>Private profile</Copy>;
   return (
     <>
+      <View
+        style={{
+          backgroundColor: palette.navy,
+          borderRadius: 14,
+          padding: 20,
+          gap: 12,
+        }}
+      >
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#456D5C',
+            borderRadius: 4,
+            padding: 12,
+          }}
+        >
+          <View
+            style={{
+              height: 26,
+              width: 26,
+              borderWidth: 1,
+              borderColor: '#456D5C',
+              borderRadius: 13,
+              alignSelf: 'center',
+            }}
+          />
+        </View>
+        <Avatar name={p.fullName || 'Member'} />
+      </View>
+      <Eyebrow>PROFESSIONAL PROFILE</Eyebrow>
       <Title>{p.fullName || `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Member'}</Title>
       <Copy>
         {p.userType} · {p.headline || 'Football professional'}
       </Copy>
-      <Copy>{p.biography}</Copy>
+      <Copy>Self-declared profile · roles, affiliations and achievements are not verified.</Copy>
+      <Title>About</Title>
+      <Copy>{p.biography || 'This professional has not added their story yet.'}</Copy>
       <Copy>{[p.currentLocation, p.position, p.currentClub].filter(Boolean).join(' · ')}</Copy>
       <Copy>{p.expertise.join(' · ')}</Copy>
       {p.footballProfile && (
         <>
+          <Title>Playing experience</Title>
           <Copy>
             Football: {p.footballProfile.primaryPosition} · {p.footballProfile.currentClub}
           </Copy>
@@ -41,6 +78,8 @@ export function ProfileView({ profile: p }: { profile: NetworkProfile | null }) 
           ))}
         </>
       )}
+      <Title>Featured footage</Title>
+      {!p.videos.length && <Copy>No highlights shared yet.</Copy>}
       {p.videos.map((url, i) => (
         <ExternalLink key={url} url={url} label={`Watch video ${i + 1}`} />
       ))}

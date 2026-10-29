@@ -2,13 +2,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (
+  process.env.NODE_ENV === 'production' &&
+  (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim().length < 32)
+) {
+  throw new Error('JWT_SECRET must contain at least 32 characters in production');
+}
+
 export const config = {
   // Server
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3002', 10),
-  HOST:
-    process.env.HOST ||
-    (process.env.NODE_ENV === 'development' ? '0.0.0.0' : '127.0.0.1'),
+  HOST: process.env.HOST || (process.env.NODE_ENV === 'development' ? '0.0.0.0' : '127.0.0.1'),
   API_VERSION: process.env.API_VERSION || 'v1',
   API_PREFIX: process.env.API_PREFIX || '/api',
 
@@ -29,6 +34,9 @@ export const config = {
   CORS_ORIGINS: process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:3000',
     'http://localhost:19006',
+    ...(process.env.NODE_ENV === 'development'
+      ? ['http://localhost:8081', 'http://127.0.0.1:8081']
+      : []),
   ],
 
   // File Upload
@@ -40,16 +48,12 @@ export const config = {
 } as const;
 
 // Validate required environment variables
-const requiredEnvVars = [
-  'DATABASE_URL',
-];
+const requiredEnvVars = ['DATABASE_URL'];
 
 const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
 
 if (missingEnvVars.length > 0) {
-  throw new Error(
-    `Missing required environment variables: ${missingEnvVars.join(', ')}`
-  );
+  throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
 }
 
 export default config;

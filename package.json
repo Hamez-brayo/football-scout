@@ -30,29 +30,31 @@
     "clean": "Remove-Item -Recurse -Force node_modules, apps/*/node_modules, packages/*/node_modules, database/node_modules -ErrorAction SilentlyContinue",
     "fresh": "npm run clean; npm install"
   },
-    "keywords": [
-      "football",
-      "scouting",
-      "talent",
-      "analytics",
-      "react-native",
-      "expo",
-      "nodejs",
-      "prisma",
-      "firebase"
-    ],
-    "author": "Vysion Analytics Team",
-    "license": "MIT",
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/Hamez-brayo/vysion-analytics.git"
-    },
-    "bugs": {
-      "url": "https://github.com/Hamez-brayo/vysion-analytics/issues"
-    },
-    "homepage": "https://github.com/Hamez-brayo/vysion-analytics#readme",
+  "keywords": [
+    "football",
+    "scouting",
+    "talent",
+    "analytics",
+    "react-native",
+    "expo",
+    "nodejs",
+    "prisma",
+    "firebase"
+  ],
+  "author": "Vysion Analytics Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hamez-brayo/vysion-analytics.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hamez-brayo/vysion-analytics/issues"
+  },
+  "homepage": "https://github.com/Hamez-brayo/vysion-analytics#readme",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "esbuild": "0.25.4",
+    "playwright": "1.62.1"
   },
   "engines": {
     "node": ">=20.0.0",

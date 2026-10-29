@@ -1,6 +1,5 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
 type ExpoExtra = {
@@ -28,7 +27,7 @@ let auth: Auth;
 
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
-  // Default getAuth is typically sufficient in Expo projects
+  // Browser builds retain Firebase browser persistence defaults.
   auth = getAuth(app);
 } else {
   app = getApps()[0];

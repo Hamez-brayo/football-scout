@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import { NetworkPostSchema, type NetworkPost } from '@vysion/shared';
 import { NetworkService as api } from '../../services/NetworkService';
 import {
   Action,
+  Avatar,
+  Eyebrow,
   Card,
   Choices,
   Copy,
@@ -21,7 +24,9 @@ export function Feed({ me, onProfile }: { me: string; onProfile: (id: string) =>
   return (
     <>
       <Card>
+        <Eyebrow>FROM THE TOUCHLINE TO THE TIMELINE</Eyebrow>
         <Title>Share with football</Title>
+        <Copy>A career milestone, a training session, a new perspective. What's your story?</Copy>
         <Field disabled={m.busy} label="Post" value={body} onChange={setBody} multiline />
         <Choices
           disabled={m.busy}
@@ -57,6 +62,11 @@ export function Feed({ me, onProfile }: { me: string; onProfile: (id: string) =>
           }}
         />
       </Card>
+      <View style={{ gap: 5, paddingVertical: 6 }}>
+        <Eyebrow>COMMUNITY UPDATES</Eyebrow>
+        <Title>Around the network</Title>
+        <Copy>Latest posts · media opens in its original source</Copy>
+      </View>
       <PagedList<NetworkPost>
         path="/posts"
         version={version}
@@ -86,14 +96,19 @@ function PostCard({
   const m = useMutation();
   return (
     <Card>
-      <Action
-        title={post.author?.fullName || 'Private profile'}
-        disabled={!post.author}
-        onPress={() => onProfile(post.authorId)}
-      />
-      <Copy>
-        {post.category.replace(/_/g, ' ')} · {new Date(post.createdAt).toLocaleString()}
-      </Copy>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Avatar name={post.author?.fullName || 'Member'} />
+        <View style={{ flex: 1, gap: 5 }}>
+          <Action
+            title={post.author?.fullName || 'Private profile'}
+            disabled={!post.author}
+            onPress={() => onProfile(post.authorId)}
+          />
+          <Copy>{post.author?.headline || 'Football community'}</Copy>
+        </View>
+      </View>
+      <Eyebrow>{post.category.replace(/_/g, ' ')}</Eyebrow>
+      <Copy>{new Date(post.createdAt).toLocaleString()}</Copy>
       <Copy>{post.body}</Copy>
       {post.mediaUrl && <ExternalLink url={post.mediaUrl} label="View media" />}
       {post.authorId === me && (

@@ -2,33 +2,44 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Linking } from 'react-native';
 import type { NetworkPage } from '@vysion/shared';
 import { NetworkService as api } from '../../services/NetworkService';
+export const palette = {
+  navy: '#102B2A',
+  emerald: '#087F5B',
+  mint: '#E4F4EC',
+  canvas: '#F2F5F2',
+  border: '#DCE5DF',
+  muted: '#58706B',
+};
 export const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 18,
+    borderRadius: 20,
+    padding: 20,
     gap: 10,
     borderWidth: 1,
-    borderColor: '#dbe5ef',
+    borderColor: palette.border,
     marginBottom: 12,
   },
-  title: { fontSize: 22, fontWeight: '700', color: '#122b49' },
-  text: { fontSize: 15, lineHeight: 23, color: '#334155' },
+  title: { fontSize: 22, fontWeight: '700', color: palette.navy },
+  text: { fontSize: 15, lineHeight: 23, color: '#3D5550' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   button: {
-    backgroundColor: '#e8f1ff',
+    backgroundColor: palette.mint,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    borderRadius: 9,
+    borderRadius: 12,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  buttonText: { color: '#1455a5', fontWeight: '600' },
+  buttonText: { color: '#086144', fontWeight: '600' },
   input: {
     borderWidth: 1,
-    borderColor: '#b5c7da',
-    borderRadius: 8,
+    borderColor: '#A8BDB2',
+    borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    color: '#122b49',
+    color: palette.navy,
     backgroundColor: '#fff',
     minHeight: 46,
   },
@@ -44,6 +55,41 @@ export const Title = ({ children }: { children: React.ReactNode }) => (
 export const Card = ({ children }: { children: React.ReactNode }) => (
   <View style={styles.card}>{children}</View>
 );
+export function Avatar({ name }: { name: string }) {
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        backgroundColor: palette.mint,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text style={{ color: palette.emerald, fontSize: 20, fontWeight: '800' }}>
+        {name.trim().slice(0, 1).toUpperCase() || 'V'}
+      </Text>
+    </View>
+  );
+}
+export function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <Text
+      style={{
+        color: palette.emerald,
+        fontSize: 11,
+        fontWeight: '800',
+        letterSpacing: 1.4,
+        textTransform: 'uppercase',
+      }}
+    >
+      {children}
+    </Text>
+  );
+}
 export function Action({
   title,
   onPress,
@@ -59,7 +105,11 @@ export function Action({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.button, disabled && { opacity: 0.45 }]}
+      style={({ pressed }) => [
+        styles.button,
+        pressed && { backgroundColor: '#CBE9D9' },
+        disabled && { opacity: 0.45 },
+      ]}
     >
       <Text style={styles.buttonText}>{title}</Text>
     </Pressable>
@@ -215,7 +265,12 @@ export function PagedList<T extends { id: string }>({
         </>
       ) : (
         <>
-          {!data?.items.length && <Copy>No results yet.</Copy>}
+          {!data?.items.length && (
+            <Card>
+              <Title>Nothing here yet</Title>
+              <Copy>No results yet. Refresh to check for new activity.</Copy>
+            </Card>
+          )}
           {data?.items.map((item) => (
             <View key={item.id}>{render(item)}</View>
           ))}

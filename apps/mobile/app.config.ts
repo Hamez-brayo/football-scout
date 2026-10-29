@@ -42,7 +42,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
     firebaseAppId: process.env.FIREBASE_APP_ID,
     // API
-    apiUrl: process.env.API_URL || 'http://localhost:3002/api',
+    apiUrl: process.env.API_URL,
     // EAS
     eas: {
       projectId: process.env.EAS_PROJECT_ID || 'your-project-id',

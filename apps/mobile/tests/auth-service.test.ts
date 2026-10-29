@@ -17,22 +17,37 @@ jest.mock('firebase/auth', () => ({
 jest.mock('../src/config/firebase', () => ({ auth: firebaseAuth }));
 jest.mock('../src/api/client', () => ({
   __esModule: true,
-  default: { post: (...args: unknown[]) => post(...args), get: (...args: unknown[]) => get(...args) },
+  default: {
+    post: (...args: unknown[]) => post(...args),
+    get: (...args: unknown[]) => get(...args),
+  },
   setAuthToken: (token: unknown) => setToken(token),
 }));
 import { AuthService } from '../src/services/AuthService';
 import { authApi } from '../src/api/auth';
 const payload = {
-  email: 'coach@example.test', password: 'test-password', firstName: 'A', lastName: 'Coach',
+  email: 'coach@example.test',
+  password: 'test-password',
+  firstName: 'A',
+  lastName: 'Coach',
   userType: 'SCOUT',
 };
-const user = { userId: 'firebase-uid', email: payload.email, userType: 'SCOUT' };
-const identity = { uid: user.userId, getIdToken: async () => 'test-id-token' } as User;
+const user = {
+  userId: 'firebase-uid',
+  email: payload.email,
+  userType: 'SCOUT',
+};
+const identity = {
+  uid: user.userId,
+  getIdToken: async () => 'test-id-token',
+} as User;
 describe('mobile Firebase bridge', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     firebaseAuth.currentUser = identity;
-    post.mockResolvedValue({ data: { data: { user, token: 'test-custom-token' } } });
+    post.mockResolvedValue({
+      data: { data: { user, token: 'test-custom-token' } },
+    });
     get.mockResolvedValue({ data: { data: user } });
     createIdentity.mockResolvedValue({ user: identity });
   });
@@ -51,9 +66,13 @@ describe('mobile Firebase bridge', () => {
   });
   it('does not install an ID token resolved after logout', async () => {
     let resolveToken!: (token: string) => void;
-    const stale = { uid: 'old', getIdToken: () => new Promise<string>((resolve) => {
-      resolveToken = resolve;
-    }) } as User;
+    const stale = {
+      uid: 'old',
+      getIdToken: () =>
+        new Promise<string>((resolve) => {
+          resolveToken = resolve;
+        }),
+    } as User;
     firebaseAuth.currentUser = stale;
     const pending = AuthService.getBackendUser(stale);
     firebaseAuth.currentUser = null;
@@ -64,12 +83,24 @@ describe('mobile Firebase bridge', () => {
   });
   it('does not return a profile resolved after an account switch', async () => {
     let resolveProfile!: (value: unknown) => void;
-    get.mockImplementationOnce(() => new Promise((resolve) => { resolveProfile = resolve; }));
+    get.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveProfile = resolve;
+        }),
+    );
     const pending = AuthService.getBackendUser(identity);
     await Promise.resolve();
     firebaseAuth.currentUser = { uid: 'other' } as User;
     resolveProfile({ data: { data: user } });
     expect(await pending).toBeNull();
+  });
+  it('preserves API failure classification so session sync can offer a retry', async () => {
+    const unavailable = Object.assign(new Error('Backend unavailable'), {
+      statusCode: 503,
+    });
+    get.mockRejectedValueOnce(unavailable);
+    await expect(AuthService.getBackendUser(identity)).rejects.toBe(unavailable);
   });
   it('keeps login on Firebase', async () => {
     await AuthService.login(payload.email, payload.password);

@@ -5,7 +5,7 @@ import { authService } from '@/services/authService';
 import { HTTP_STATUS, SUCCESS_MESSAGES, ERROR_CODES } from '@vysion/shared';
 import { SignUpSchema, SignInSchema } from '@vysion/shared';
 import { validateBody } from '@/middleware/validate';
-import { authenticateJwt } from '@/middleware/auth';
+import { authenticate, authenticateJwt, type AuthRequest } from '@/middleware/auth';
 
 const router = Router();
 
@@ -111,13 +111,10 @@ router.post('/verify-token', async (req, res, next) => {
  * POST /api/auth/signout
  * Revoke refresh tokens
  */
-router.post('/signout', async (req, res, next) => {
+router.post('/signout', authenticate, async (req: AuthRequest, res, next) => {
   try {
-    const { userId } = req.body;
-
-    if (userId) {
-      await auth.revokeRefreshTokens(userId);
-    }
+    // Never accept a caller-supplied identity for account-wide token revocation.
+    await auth.revokeRefreshTokens(req.user!.userId);
 
     res.json({
       success: true,

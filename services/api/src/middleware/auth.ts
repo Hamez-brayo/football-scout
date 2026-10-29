@@ -101,14 +101,28 @@ export const authenticate = async (
       return;
     }
 
-    res.status(HTTP_STATUS.UNAUTHORIZED).json({
-      success: false,
-      error: {
-        code: ERROR_CODES.INVALID_TOKEN,
-        message: 'Invalid authentication token',
-      },
-      timestamp: new Date().toISOString(),
-    });
+    const invalidIdentityCodes = [
+      'auth/argument-error',
+      'auth/invalid-argument',
+      'auth/invalid-id-token',
+      'auth/id-token-revoked',
+      'auth/user-disabled',
+      'auth/user-not-found',
+    ];
+    if (invalidIdentityCodes.includes(error.code)) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        error: {
+          code: ERROR_CODES.INVALID_TOKEN,
+          message: 'Invalid authentication token',
+        },
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Database and Firebase infrastructure outages must remain recoverable server errors.
+    next(error);
   }
 };
 

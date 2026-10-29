@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { onIdTokenChanged, type User as FirebaseUser } from 'firebase/auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { AuthService, type RegisterInput } from '@/src/services/AuthService';
@@ -11,6 +19,8 @@ type AuthContextValue = {
   firebaseUser: FirebaseUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  sessionError: string | null;
+  retrySession: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
@@ -23,6 +33,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const syncSession = useRef<() => Promise<void>>(async () => {});
+  const retrySession = useCallback(() => syncSession.current(), []);
+
   // Grab the query client to clear the cache upon auth state change/logout
   const queryClient = useQueryClient();
 
@@ -30,11 +44,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // A late lookup must never restore or sign out a superseded identity.
     let generation = 0;
     let activeUid: string | null = null;
-    const unsubscribe = onIdTokenChanged(auth, async (fbUser) => {
+    let hasBackendUser = false;
+    const synchronize = async (fbUser: FirebaseUser | null) => {
       const current = ++generation;
       const isCurrent = () => current === generation && auth.currentUser === fbUser;
       const identityChanged = activeUid !== (fbUser?.uid ?? null);
       if (identityChanged || !fbUser) {
+        hasBackendUser = false;
+        setSessionError(null);
         setUser(null);
         setFirebaseUser(null);
         setAuthToken(null);
@@ -42,15 +59,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       activeUid = fbUser?.uid ?? null;
       // Refreshing the same identity must preserve the mounted screen and its drafts.
-      if (current === 1 || identityChanged) setIsLoading(true);
+      if (!hasBackendUser) setIsLoading(true);
       try {
         if (!fbUser) return;
         const appUser = await AuthService.getBackendUser(fbUser);
         if (!isCurrent()) return;
         if (appUser) {
+          hasBackendUser = true;
+          setSessionError(null);
           setFirebaseUser(fbUser);
           setUser(appUser);
         } else {
+          hasBackendUser = false;
           setFirebaseUser(null);
           setUser(null);
           setAuthToken(null);
@@ -59,24 +79,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         if (!isCurrent()) return;
-        setFirebaseUser(null);
-        setUser(null);
-        setAuthToken(null);
-        queryClient.clear();
-        console.error('Session sync error:', error);
+        const status = (error as { statusCode?: number })?.statusCode;
+        const code = (error as { code?: string })?.code;
+        const invalidIdentity =
+          [401, 403, 404].includes(status ?? 0) ||
+          ['auth/user-disabled', 'auth/user-token-expired', 'auth/invalid-user-token'].includes(
+            code ?? '',
+          );
+        if (invalidIdentity) {
+          hasBackendUser = false;
+          setFirebaseUser(null);
+          setUser(null);
+          setAuthToken(null);
+          queryClient.clear();
+          try {
+            await AuthService.logout();
+          } catch {
+            if (isCurrent()) setSessionError('Unable to finish signing out. Please retry.');
+          }
+        } else {
+          // Keep a previously confirmed account mounted so drafts survive an API outage.
+          setSessionError(error instanceof Error ? error.message : 'Unable to sync your session.');
+        }
       } finally {
         if (isCurrent()) setIsLoading(false);
       }
-    });
+    };
+    syncSession.current = () => synchronize(auth.currentUser);
+    const unsubscribe = onIdTokenChanged(auth, synchronize);
 
     return () => {
       generation++;
+      syncSession.current = async () => {};
       unsubscribe();
     };
   }, [queryClient]);
 
   const login = useCallback(async (email: string, password: string) => {
-    // We let onIdTokenChanged handle the state propagation! 
+    // We let onIdTokenChanged handle the state propagation!
     // Calling login just issues the command to Firebase.
     await AuthService.login(email, password);
   }, []);
@@ -95,11 +135,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       firebaseUser,
       isAuthenticated: !!user && !!firebaseUser,
       isLoading,
+      sessionError,
+      retrySession,
       login,
       register,
       logout,
     }),
-    [user, firebaseUser, isLoading, login, register, logout]
+    [user, firebaseUser, isLoading, sessionError, retrySession, login, register, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

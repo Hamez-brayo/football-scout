@@ -18,9 +18,9 @@ export type RegisterInput = {
 };
 
 /**
- * AuthService controls interaction with Firebase identity 
+ * AuthService controls interaction with Firebase identity
  * and backend application data.
- * 
+ *
  * Flow:
  * 1. Firebase resolves identity
  * 2. Token intercepts and gets sent to backend
@@ -54,15 +54,11 @@ export const AuthService = {
    * Ignore results from an identity that changed while the request was pending.
    */
   async getBackendUser(firebaseUser: FirebaseUser): Promise<AuthUser | null> {
-    try {
-      const token = await firebaseUser.getIdToken();
-      if (auth.currentUser !== firebaseUser) return null;
-      setAuthToken(token);
-      const user = await authApi.me();
-      return auth.currentUser === firebaseUser ? user : null;
-    } catch (error) {
-      console.warn('Failed to fetch backend user for firebase UID: ', firebaseUser.uid, error);
-      return null;
-    }
+    const token = await firebaseUser.getIdToken();
+    if (auth.currentUser !== firebaseUser) return null;
+    setAuthToken(token);
+    // Preserve failure status: an unavailable API is not an invalid Firebase identity.
+    const user = await authApi.me();
+    return auth.currentUser === firebaseUser ? user : null;
   },
 };

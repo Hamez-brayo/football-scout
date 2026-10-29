@@ -33,7 +33,11 @@ const extractPrivateIpv4 = (hostLikeValue: string | null | undefined): string | 
     return null;
   }
 
-  const normalized = hostLikeValue.trim().replace(/^https?:\/\//, '').split('/')[0] || '';
+  const normalized =
+    hostLikeValue
+      .trim()
+      .replace(/^https?:\/\//, '')
+      .split('/')[0] || '';
   const host = normalized.includes(':') ? normalized.split(':')[0] : normalized;
 
   if (!host || host.includes('[') || host.includes(']')) {
@@ -72,9 +76,28 @@ const detectLanApiBaseUrl = (): string => {
   return LOCALHOST_API_BASE_URL;
 };
 
-export const API_BASE_URL = detectLanApiBaseUrl();
+const configuredApiBaseUrl = (): string => {
+  const value: unknown = Constants.expoConfig?.extra?.apiUrl;
+  if (value === undefined || value === null || value === '') return detectLanApiBaseUrl();
+  try {
+    if (typeof value !== 'string') throw new Error();
+    const url = new URL(value.trim());
+    if (
+      !['http:', 'https:'].includes(url.protocol) ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash
+    )
+      throw new Error();
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    // Do not echo the input: a mistaken configuration may contain credentials.
+    throw new Error('API_URL must be an HTTP(S) URL without credentials, query or fragment.');
+  }
+};
 
-console.info(`[api] Using API base URL: ${API_BASE_URL}`);
+export const API_BASE_URL = configuredApiBaseUrl();
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -143,7 +166,7 @@ const createApiError = (error: unknown): AppApiError => {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(createApiError(error))
+  (error) => Promise.reject(createApiError(error)),
 );
 
 export const setAuthToken = (token: string | null) => {
