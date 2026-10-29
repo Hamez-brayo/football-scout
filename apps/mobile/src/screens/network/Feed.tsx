@@ -22,13 +22,19 @@ export function Feed({ me, onProfile }: { me: string; onProfile: (id: string) =>
     <>
       <Card>
         <Title>Share with football</Title>
-        <Field label="Post" value={body} onChange={setBody} multiline />
+        <Field disabled={m.busy} label="Post" value={body} onChange={setBody} multiline />
         <Choices
+          disabled={m.busy}
           values={['MATCH_FOOTAGE', 'TRAINING', 'ACHIEVEMENT', 'TEAM_UPDATE', 'RECRUITMENT']}
           value={category}
           onChange={setCategory}
         />
-        <Field label="Optional HTTPS media link" value={media} onChange={setMedia} />
+        <Field
+          disabled={m.busy}
+          label="Optional HTTPS media link"
+          value={media}
+          onChange={setMedia}
+        />
         {m.status}
         <Action
           title="Publish post"

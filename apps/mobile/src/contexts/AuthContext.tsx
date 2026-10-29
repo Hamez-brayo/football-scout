@@ -33,14 +33,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const unsubscribe = onIdTokenChanged(auth, async (fbUser) => {
       const current = ++generation;
       const isCurrent = () => current === generation && auth.currentUser === fbUser;
-      if (activeUid !== (fbUser?.uid ?? null) || !fbUser) {
+      const identityChanged = activeUid !== (fbUser?.uid ?? null);
+      if (identityChanged || !fbUser) {
         setUser(null);
         setFirebaseUser(null);
         setAuthToken(null);
         queryClient.clear();
       }
       activeUid = fbUser?.uid ?? null;
-      setIsLoading(true);
+      // Refreshing the same identity must preserve the mounted screen and its drafts.
+      if (current === 1 || identityChanged) setIsLoading(true);
       try {
         if (!fbUser) return;
         const appUser = await AuthService.getBackendUser(fbUser);

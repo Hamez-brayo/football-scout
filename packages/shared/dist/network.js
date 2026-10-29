@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NetworkOpportunitySchema = exports.NetworkPostSchema = exports.NetworkOrganisationSchema = exports.NetworkProfileSchema = exports.NetworkPaginationSchema = exports.NetworkHttpsSchema = void 0;
+exports.NetworkOpportunitySchema = exports.NetworkPostSchema = exports.NetworkOrganisationSchema = exports.NetworkProfileSchema = exports.NetworkOpportunityQuerySchema = exports.NetworkPaginationSchema = exports.NetworkHttpsSchema = void 0;
 const zod_1 = require("zod");
+const types_1 = require("./types");
 const text = (max) => zod_1.z.string().trim().min(1).max(max);
 exports.NetworkHttpsSchema = zod_1.z
     .string()
@@ -14,6 +15,9 @@ exports.NetworkHttpsSchema = zod_1.z
 exports.NetworkPaginationSchema = zod_1.z.object({
     page: zod_1.z.coerce.number().int().min(1).max(10000).default(1),
     limit: zod_1.z.coerce.number().int().min(1).max(100).default(20),
+});
+exports.NetworkOpportunityQuerySchema = exports.NetworkPaginationSchema.extend({
+    organisationId: text(100).optional(),
 });
 exports.NetworkProfileSchema = zod_1.z
     .object({
@@ -32,6 +36,7 @@ exports.NetworkProfileSchema = zod_1.z
         .object({
         primaryPosition: text(80).optional(),
         currentClub: text(120).optional(),
+        experience: zod_1.z.nativeEnum(types_1.ExperienceLevel).nullable().optional(),
         previousClubs: zod_1.z.array(text(120)).max(30).optional(),
         achievements: zod_1.z
             .array(zod_1.z.object({ title: text(150), description: text(1000).optional() }).strict())

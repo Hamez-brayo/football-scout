@@ -32,10 +32,10 @@ GET/POST /connections, PATCH /connections/:id;
 GET/POST /connections/:id/messages; GET/POST /posts, DELETE /posts/:id;
 GET/POST /opportunities, PATCH /opportunities/:id (close).
 Use shared DTOs for mobile. Lists return {items, page, limit, hasMore} in standard data envelope.
-- [ ] Add failing schema/service/route tests for core happy paths and Review Focus.
-- [ ] Implement additive models, safe selectors and focused service/controller/routes.
-- [ ] Generate client without contacting database; validate schema and type-check/build.
-- [ ] Run API tests and document endpoints, migration requirement and results; commit.
+- [x] Add failing schema/service/route tests for core happy paths and Review Focus.
+- [x] Implement additive models, safe selectors and focused service/controller/routes.
+- [x] Generate client without contacting database; validate schema and type-check/build.
+- [x] Run API tests and document endpoints, migration requirement and results; commit.
 
 ### Task 2: Mobile network experience
 Files: apps/mobile/src/screens/HomeScreen.tsx; src/screens/network/*;
@@ -44,17 +44,19 @@ Consumes: shared DTOs and /api/network contract from task 1, existing apiClient 
 Produces: accessible Feed, People, Organisations, Opportunities and Messages navigation;
 self profile editing, profile detail/connect; accept/decline requests and connected chats;
 post composer/delete; organisation create/edit/detail; opportunity create/detail/close.
-- [ ] Add failing tests for API client/query/form behavior where practical.
-- [ ] Implement real persistent flows and explicit empty/loading/error/retry states.
-- [ ] Type-check mobile; run test suite; export Expo web bundle as a compilation check.
-- [ ] Commit and provide report with manual-device verification limitations.
+- [x] Add failing tests for API client/query/form behavior where practical.
+- [x] Implement real persistent flows and explicit empty/loading/error/retry states.
+- [x] Type-check mobile; run test suite; export Expo web bundle as a compilation check.
+- [x] Commit and provide report with manual-device verification limitations.
 
 ### Task 3: Independent review, verification and delivery
-- [ ] WRENCH repairs the confirmed mobile authentication bridge: Firebase signup/custom-token
+- [x] WRENCH repairs the confirmed mobile authentication bridge: Firebase signup/custom-token
   sign-in and Firebase-protected /users/me replace mobile calls to local-JWT endpoints.
   Keep legacy JWT endpoints intact and reproduce the mismatch with isolated regression tests.
-- [ ] BREAKER runs relevant build/type-check/test commands and inspects integration.
-- [ ] AUDITOR independently reviews whole diff; SENTINEL reviews auth/privacy and writes.
-- [ ] FORGE fixes blocking findings; reviewers verify corrections.
-- [ ] AIRLIFT documents exact migration/release/rollback steps without executing.
-- [ ] Commit, push feature branch and open PR with checks and remaining blockers.
+- [x] BREAKER runs relevant build/type-check/test commands and inspects integration.
+- [x] AUDITOR independently reviews whole diff; SENTINEL reviews auth/privacy and writes.
+- [x] FORGE fixes blocking findings; reviewers verify corrections.
+- [x] AIRLIFT documents exact migration/release/rollback steps without executing.
+- [x] Commit, push feature branch and open PR with checks and remaining blockers.
+
+Implementation/checklist complete at source level. Migration, live Firebase/PostgreSQL and device acceptance remain unexecuted; see docs/engineering/football-network-verification.md.

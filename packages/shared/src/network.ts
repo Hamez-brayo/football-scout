@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ExperienceLevel } from './types';
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 export const NetworkHttpsSchema = z
@@ -12,6 +13,9 @@ export const NetworkHttpsSchema = z
 export const NetworkPaginationSchema = z.object({
   page: z.coerce.number().int().min(1).max(10000).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+export const NetworkOpportunityQuerySchema = NetworkPaginationSchema.extend({
+  organisationId: text(100).optional(),
 });
 export const NetworkProfileSchema = z
   .object({
@@ -30,6 +34,7 @@ export const NetworkProfileSchema = z
       .object({
         primaryPosition: text(80).optional(),
         currentClub: text(120).optional(),
+        experience: z.nativeEnum(ExperienceLevel).nullable().optional(),
         previousClubs: z.array(text(120)).max(30).optional(),
         achievements: z
           .array(z.object({ title: text(150), description: text(1000).optional() }).strict())
@@ -94,6 +99,7 @@ export interface NetworkProfile {
   footballProfile: {
     primaryPosition: string | null;
     currentClub: string | null;
+    experience: ExperienceLevel | null;
     previousClubs: string[];
     achievements: { id: string; title: string; description: string | null }[];
   } | null;

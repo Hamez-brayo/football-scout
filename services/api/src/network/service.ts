@@ -2,6 +2,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import {
   NetworkHttpsSchema,
   NetworkPaginationSchema,
+  NetworkOpportunityQuerySchema,
   NetworkProfileInput,
   NetworkOrganisationInput,
   NetworkPostInput,
@@ -32,6 +33,7 @@ export const profileSelect = {
     select: {
       primaryPosition: true,
       currentClub: true,
+      experience: true,
       previousClubs: true,
       achievements: {
         select: { id: true, title: true, description: true },
@@ -408,8 +410,10 @@ export class NetworkService {
     return { id };
   }
   async opportunities(actor: string, query: unknown) {
-    const pagination = this.pagination(query);
+    const filters = NetworkOpportunityQuerySchema.parse(query);
+    const pagination = this.pagination(filters);
     const rows = await this.db.networkOpportunity.findMany({
+      where: filters.organisationId ? { organisationId: filters.organisationId } : {},
       select: opportunitySelect,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       skip: pagination.skip,

@@ -151,7 +151,13 @@ function Chat({ connection: c, me }: { connection: NetworkConnection; me: string
         onPress={() => setPage((p) => p - 1)}
       />
       <Action title="Refresh conversation" onPress={() => setVersion((v) => v + 1)} />
-      <Field label="Message (up to 2000 characters)" value={body} onChange={setBody} multiline />
+      <Field
+        disabled={m.busy}
+        label="Message (up to 2000 characters)"
+        value={body}
+        onChange={setBody}
+        multiline
+      />
       {m.status}
       <Action
         title="Send message"

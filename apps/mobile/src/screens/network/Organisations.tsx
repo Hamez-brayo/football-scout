@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NetworkOrganisationSchema, type NetworkOrganisation } from '@vysion/shared';
 import { NetworkService as api } from '../../services/NetworkService';
+import { Opportunities } from './Opportunities';
 import {
   Action,
   Card,
@@ -67,7 +68,7 @@ export function Organisations({ me, onProfile }: { me: string; onProfile: (id: s
   );
 }
 function OrganisationDetail({
-  org,
+  org: initialOrg,
   me,
   refresh,
   onProfile,
@@ -77,6 +78,7 @@ function OrganisationDetail({
   refresh: () => void;
   onProfile: (id: string) => void;
 }) {
+  const [org, setOrg] = useState(initialOrg);
   const [edit, setEdit] = useState(false);
   const m = useMutation();
   const [joined, setJoined] = useState(org.members.some((p) => p.id === me));
@@ -96,7 +98,6 @@ function OrganisationDetail({
   return (
     <Card>
       <Title>{org.name}</Title>
-      <Copy>Organisation ID: {org.id}</Copy>
       <Copy>
         {org.type} · {org.location}
       </Copy>
@@ -119,7 +120,11 @@ function OrganisationDetail({
         disabled={m.busy}
         onPress={() => {
           void m.run(async () => {
-            await api.write('patch', `/organisations/${org.id}/membership`, { joined: true });
+            setOrg(
+              await api.write<NetworkOrganisation>('patch', `/organisations/${org.id}/membership`, {
+                joined: true,
+              }),
+            );
             setJoined(true);
           });
         }}
@@ -129,7 +134,11 @@ function OrganisationDetail({
         disabled={m.busy}
         onPress={() => {
           void m.run(async () => {
-            await api.write('patch', `/organisations/${org.id}/membership`, { joined: false });
+            setOrg(
+              await api.write<NetworkOrganisation>('patch', `/organisations/${org.id}/membership`, {
+                joined: false,
+              }),
+            );
             setJoined(false);
           });
         }}
@@ -137,6 +146,8 @@ function OrganisationDetail({
       <Copy>{joined ? 'Your membership is joined.' : 'You can join this page.'}</Copy>
       {org.ownerId === me && <Action title="Edit organisation" onPress={() => setEdit(true)} />}
       {m.status}
+      <Title>Opportunities</Title>
+      <Opportunities key={org.id} me={me} organisationId={org.id} />
     </Card>
   );
 }
@@ -150,11 +161,17 @@ function OrganisationForm({ org, onSaved }: { org?: NetworkOrganisation; onSaved
   return (
     <Card>
       <Title>{org ? 'Edit organisation' : 'Create organisation'}</Title>
-      <Field label="Name" value={name} onChange={setName} />
-      <Choices values={['CLUB', 'AGENCY']} value={type} onChange={setType} />
-      <Field label="Description" value={description} onChange={setDescription} multiline />
-      <Field label="Location" value={location} onChange={setLocation} />
-      <Field label="HTTPS website" value={website} onChange={setWebsite} />
+      <Field disabled={m.busy} label="Name" value={name} onChange={setName} />
+      <Choices disabled={m.busy} values={['CLUB', 'AGENCY']} value={type} onChange={setType} />
+      <Field
+        disabled={m.busy}
+        label="Description"
+        value={description}
+        onChange={setDescription}
+        multiline
+      />
+      <Field disabled={m.busy} label="Location" value={location} onChange={setLocation} />
+      <Field disabled={m.busy} label="HTTPS website" value={website} onChange={setWebsite} />
       {m.status}
       <Action
         title="Save organisation"

@@ -141,11 +141,7 @@ function People({ onProfile }: { onProfile: (id: string) => void }) {
   return (
     <>
       <Title>Find football professionals</Title>
-      <Field
-        label="Search people (name, headline or expertise)"
-        value={search}
-        onChange={setSearch}
-      />
+      <Field label="Search people (name or headline)" value={search} onChange={setSearch} />
       <Action title="Search" onPress={() => setQuery(search.trim().slice(0, 120))} />
       <PagedList<NetworkProfile>
         path={`/profiles?search=${encodeURIComponent(query)}`}
