@@ -36,6 +36,24 @@ describe('auth observer async isolation', () => {
     AuthProvider({ children: null });
     effect();
   });
+  it('keeps same-UID token refresh nonblocking while still blocking identity changes', async () => {
+    firebaseAuth.currentUser = oldIdentity;
+    getUser.mockResolvedValue({ userId: 'old' });
+    await listener(oldIdentity);
+    expect(setters[2]).toHaveBeenCalledWith(true);
+    setters[2].mockClear();
+    // Firebase may supply a new User object for the same persisted identity.
+    const refreshed = { ...oldIdentity } as User;
+    firebaseAuth.currentUser = refreshed;
+    await listener(refreshed);
+    expect(setters[2]).not.toHaveBeenCalledWith(true);
+    expect(setters[0]).toHaveBeenLastCalledWith({ userId: 'old' });
+    expect(setters[1]).toHaveBeenLastCalledWith(refreshed);
+    setters[2].mockClear();
+    firebaseAuth.currentUser = newIdentity;
+    await listener(newIdentity);
+    expect(setters[2]).toHaveBeenCalledWith(true);
+  });
   it('cannot restore an old profile after logout', async () => {
     let resolve!: (value: unknown) => void;
     getUser.mockImplementationOnce(() => new Promise((done) => { resolve = done; }));

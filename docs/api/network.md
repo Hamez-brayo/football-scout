@@ -14,7 +14,7 @@ All list endpoints return `data:{items,page,limit,hasMore}`. Query `page` defaul
 | --- | --- | --- |
 | GET /me | — | NetworkProfile |
 | PATCH /me | NetworkProfileInput | NetworkProfile |
-| GET /profiles | optional `search` (max 120), page/limit | page of NetworkProfile |
+| GET /profiles | optional `search` (max 120; first/last name or headline), page/limit | page of NetworkProfile |
 | GET /profiles/:id | — | NetworkProfile |
 | GET /organisations | page/limit | page of NetworkOrganisation |
 | POST /organisations | NetworkOrganisationInput | NetworkOrganisation (201) |
@@ -29,13 +29,16 @@ All list endpoints return `data:{items,page,limit,hasMore}`. Query `page` defaul
 | GET /posts | page/limit | page of NetworkPost |
 | POST /posts | NetworkPostInput | NetworkPost (201) |
 | DELETE /posts/:id | — | `{id}` |
-| GET /opportunities | page/limit | page of NetworkOpportunity |
+| GET /opportunities | optional `organisationId` (trimmed, 1–100 chars), page/limit | page of NetworkOpportunity |
 | POST /opportunities | NetworkOpportunityInput | `{id}` (201; refresh list) |
 | PATCH /opportunities/:id | `{status:'CLOSED'}` | `{id,status,actionable:false,applicationUrl:null}` |
 
 Profile fields: firstName, lastName, headline, biography, expertise[], currentLocation, position,
 currentClub, profilePhoto (HTTPS/null), videos[] (HTTPS), userType (TALENT/SCOUT/COACH/AGENT/CLUB).
-Optional `football:{primaryPosition,currentClub,previousClubs[],achievements:[{title,description?}]}`.
+Optional `football:{primaryPosition,currentClub,experience,previousClubs[],achievements:[{title,description?}]}`.
+Experience reuses the existing nullable AMATEUR/ACADEMY/SEMI_PRO/PRO enum. It is returned in
+`footballProfile.experience`; PATCH accepts these values or null to clear, and omission preserves it.
+No additional experience migration is needed.
 Achievements in PATCH replace the achievement list; omitted fields remain unchanged.
 Organisation: `{name,type:'CLUB'|'AGENCY',description?,location?,website?}`; nullable optional fields
 can be cleared. Owner is always server assigned and immutable; page ownership is not verified affiliation. Members may self join/leave via the membership endpoint;
@@ -43,6 +46,8 @@ member profiles are bounded to 50 on the page and do not confer edit/publish aut
 Post: `{body,category,mediaUrl?}`. Categories MATCH_FOOTAGE, TRAINING, ACHIEVEMENT, TEAM_UPDATE, RECRUITMENT.
 Opportunity: `{title,type,description,requirements,location,applicationUrl,expiresAt,organisationId?}`.
 Types TRIAL, PLAYER_RECRUITMENT, REPRESENTATION, FOOTBALL_JOB. Expiry must be a future ISO datetime.
+Opportunity discovery may be scoped to one organisation via `organisationId`, validated before querying
+and filtered on the server before pagination. The same visibility, expiry and close rules apply.
 
 Only recipient can accept/decline a pending connection. Declined connections cannot be re-requested
 in this version. A unique canonical unordered pair prevents concurrent/reverse duplicates.

@@ -192,3 +192,42 @@ describe('persistent network service boundaries', () => {
     );
   });
 });
+
+test('organisation opportunity scope filters before pagination and excludes another club', async () => {
+  const openings = [
+    { id: 'other-newest', organisationId: 'other' },
+    { id: 'club-new', organisationId: 'club' },
+    { id: 'club-old', organisationId: 'club' },
+  ].map((opening) => ({
+    ...opening,
+    publisher: profile,
+    organisation: null,
+    status: 'OPEN',
+    expiresAt: new Date('2099-01-01'),
+    applicationUrl: 'https://example.com',
+  }));
+  findMany.mockImplementation(async (args) => {
+    const { where, skip, take } = args as {
+      where?: { organisationId?: string };
+      skip: number;
+      take: number;
+    };
+    return openings
+      .filter((o) => !where?.organisationId || o.organisationId === where.organisationId)
+      .slice(skip, skip + take);
+  });
+  const first = await service.opportunities('b', { organisationId: 'club', limit: 1 });
+  expect(first.items.map((o) => o.id)).toEqual(['club-new']);
+  expect(first.hasMore).toBe(true);
+  const second = await service.opportunities('b', { organisationId: 'club', limit: 1, page: 2 });
+  expect(second.items.map((o) => o.id)).toEqual(['club-old']);
+  expect(second.hasMore).toBe(false);
+});
+
+test.each(['', 'a'.repeat(101), ['club', 'other']])(
+  'rejects invalid opportunity organisation scope %s before querying',
+  async (organisationId) => {
+    await expect(service.opportunities('a', { organisationId })).rejects.toThrow();
+    expect(findMany).not.toHaveBeenCalled();
+  },
+);

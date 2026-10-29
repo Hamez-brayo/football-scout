@@ -8,6 +8,7 @@ const prismaMock = {
   networkOrganisation: { findUnique, update: organisationUpdate },
 };
 jest.mock('../src/config/database', () => ({ prisma: prismaMock }));
+import { NetworkProfileSchema } from '../../../packages/shared/src/network';
 import { NetworkService } from '../src/network/service';
 import { PlayerService } from '../src/services/playerService';
 import { UserService } from '../src/services/userService';
@@ -130,4 +131,59 @@ test('legacy stats suppress media totals when media visibility is private', asyn
   });
   const result = await new PlayerService().getPlayerStats('a');
   expect(result.mediaCount).toBe(0);
+});
+
+test('network profile reads existing experience through the safe selector', async () => {
+  const footballProfile = {
+    primaryPosition: null,
+    currentClub: null,
+    previousClubs: [],
+    achievements: [],
+    experience: 'PRO',
+  };
+  // Simulate the projection: unselected persisted fields must not appear by accident.
+  findUnique.mockImplementation(async (args) => {
+    const select = (args as { select: { footballProfile: { select: Record<string, boolean> } } })
+      .select.footballProfile.select;
+    return {
+      ...profile,
+      footballProfile: Object.fromEntries(
+        Object.entries(footballProfile).filter(([key]) => select[key]),
+      ),
+    };
+  });
+  const result = await new NetworkService().profile('a', 'a');
+  expect(result.footballProfile).toHaveProperty('experience', 'PRO');
+});
+
+test.each(['AMATEUR', 'ACADEMY', 'SEMI_PRO', 'PRO', null])(
+  'network experience %s validates and updates existing storage',
+  async (experience) => {
+    const input = NetworkProfileSchema.parse({ football: { experience } });
+    findUnique.mockResolvedValue({ ...profile, footballProfile: { experience } });
+    update.mockResolvedValue({ id: 'a' });
+    const result = await new NetworkService().updateProfile('a', input);
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          footballProfile: {
+            upsert: {
+              create: { experience, achievements: undefined },
+              update: { experience, achievements: undefined },
+            },
+          },
+        },
+      }),
+    );
+    expect(result.footballProfile).toHaveProperty('experience', experience);
+  },
+);
+
+test('network experience rejects unsupported enums and unknown football fields', () => {
+  expect(NetworkProfileSchema.safeParse({ football: { experience: 'EXPERT' } }).success).toBe(
+    false,
+  );
+  expect(
+    NetworkProfileSchema.safeParse({ football: { experience: 'PRO', years: 4 } }).success,
+  ).toBe(false);
 });

@@ -70,11 +70,13 @@ export function Field({
   value,
   onChange,
   multiline = false,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   multiline?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <View style={{ gap: 5 }}>
@@ -82,7 +84,9 @@ export function Field({
       <TextInput
         accessibilityLabel={label}
         value={value}
-        onChangeText={onChange}
+        editable={!disabled}
+        accessibilityState={{ disabled }}
+        onChangeText={disabled ? undefined : onChange}
         multiline={multiline}
         autoCapitalize="sentences"
         style={[styles.input, multiline && { minHeight: 90, textAlignVertical: 'top' }]}
@@ -94,10 +98,12 @@ export function Choices({
   values,
   value,
   onChange,
+  disabled = false,
 }: {
   values: readonly string[];
   value: string;
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <View style={styles.row}>
@@ -105,6 +111,7 @@ export function Choices({
         <Action
           key={v}
           title={`${v === value ? '✓ ' : ''}${v.replace(/_/g, ' ')}`}
+          disabled={disabled}
           onPress={() => onChange(v)}
         />
       ))}

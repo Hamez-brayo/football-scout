@@ -31,7 +31,7 @@ Use two consenting test accounts and an unrelated third account, plus a club/age
 
 | Area | Check |
 | --- | --- |
-| Profiles | Edit headline, bio, expertise and football information; reload and confirm persistence. Search by name/role. |
+| Profiles | Edit headline, bio, expertise and football information; reload and confirm persistence. Search by name/headline. |
 | Privacy | Confirm private profile/media settings hide the information from other users and nested responses. Inspect responses for password/contact/document leakage. |
 | Organisations | Create club and agency pages; reload detail and edit as owner. Confirm other accounts cannot edit or publish as that page. |
 | Connections | Send request, confirm incoming/outgoing state; accept and decline as recipient. Confirm sender/outsider cannot accept. Reject self/duplicate requests. |

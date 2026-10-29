@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NetworkProfileSchema, type NetworkProfile } from '@vysion/shared';
+import { ExperienceLevel, NetworkProfileSchema, type NetworkProfile } from '@vysion/shared';
 import { NetworkService as api } from '../../services/NetworkService';
 import {
   Action,
@@ -28,6 +28,9 @@ export function ProfileView({ profile: p }: { profile: NetworkProfile | null }) 
         <>
           <Copy>
             Football: {p.footballProfile.primaryPosition} · {p.footballProfile.currentClub}
+          </Copy>
+          <Copy>
+            Experience: {p.footballProfile.experience?.replace(/_/g, ' ') || 'Not listed'}
           </Copy>
           <Copy>Previous clubs: {p.footballProfile.previousClubs.join(', ') || 'None listed'}</Copy>
           {p.footballProfile.achievements.map((a) => (
@@ -89,6 +92,7 @@ export function ProfileEditor({
     currentClub: p.currentClub || '',
     primaryPosition: p.footballProfile?.primaryPosition || '',
     footballClub: p.footballProfile?.currentClub || '',
+    experience: p.footballProfile?.experience || 'NOT_SPECIFIED',
     previousClubs: p.footballProfile?.previousClubs.join('\n') || '',
     achievements:
       p.footballProfile?.achievements
@@ -99,6 +103,7 @@ export function ProfileEditor({
   const m = useMutation();
   const field = (key: keyof typeof form, label: string, multiline = false) => (
     <Field
+      disabled={m.busy}
       label={label}
       value={form[key]}
       onChange={(value) => setForm((f) => ({ ...f, [key]: value }))}
@@ -115,6 +120,7 @@ export function ProfileEditor({
       {field('firstName', 'First name')}
       {field('lastName', 'Last name')}
       <Choices
+        disabled={m.busy}
         values={['TALENT', 'SCOUT', 'COACH', 'AGENT', 'CLUB']}
         value={form.userType}
         onChange={(value) => setForm((f) => ({ ...f, userType: value }))}
@@ -127,6 +133,13 @@ export function ProfileEditor({
       {field('currentClub', 'Current club')}
       {field('primaryPosition', 'Football primary position')}
       {field('footballClub', 'Football club')}
+      <Copy>Experience</Copy>
+      <Choices
+        disabled={m.busy}
+        values={['NOT_SPECIFIED', ...Object.values(ExperienceLevel)]}
+        value={form.experience}
+        onChange={(value) => setForm((f) => ({ ...f, experience: value }))}
+      />
       {field('previousClubs', 'Previous clubs', true)}
       {field('achievements', 'Achievements', true)}
       {field('videos', 'HTTPS footage links', true)}
@@ -148,6 +161,7 @@ export function ProfileEditor({
               currentClub: form.currentClub || null,
               videos: lines(form.videos),
               football: {
+                experience: form.experience === 'NOT_SPECIFIED' ? null : form.experience,
                 ...(form.primaryPosition ? { primaryPosition: form.primaryPosition } : {}),
                 ...(form.footballClub ? { currentClub: form.footballClub } : {}),
                 previousClubs: lines(form.previousClubs),

@@ -8,7 +8,7 @@ import {
 import { NetworkService as api } from '../../services/NetworkService';
 import { Action, Card, Choices, Copy, Field, PagedList, Title, useMutation } from './NetworkUI';
 import { canApply } from './logic';
-export function Opportunities({ me }: { me: string }) {
+export function Opportunities({ me, organisationId }: { me: string; organisationId?: string }) {
   const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<NetworkOpportunity | null>(null);
   const [version, setVersion] = useState(0);
@@ -41,9 +41,13 @@ export function Opportunities({ me }: { me: string }) {
     );
   return (
     <>
-      <Action title="Publish opportunity" onPress={() => setCreating(true)} />
+      {!organisationId && <Action title="Publish opportunity" onPress={() => setCreating(true)} />}
       <PagedList<NetworkOpportunity>
-        path="/opportunities"
+        path={
+          organisationId
+            ? `/opportunities?organisationId=${encodeURIComponent(organisationId)}`
+            : '/opportunities'
+        }
         version={version}
         render={(o) => (
           <Card>
@@ -125,6 +129,7 @@ function OpportunityForm({ onSaved, me }: { onSaved: () => void; me: string }) {
   const m = useMutation();
   const field = (key: keyof typeof form, label: string, multiline = false) => (
     <Field
+      disabled={m.busy}
       label={label}
       value={form[key]}
       onChange={(v) => setForm((f) => ({ ...f, [key]: v }))}
@@ -136,6 +141,7 @@ function OpportunityForm({ onSaved, me }: { onSaved: () => void; me: string }) {
       <Title>Publish opportunity</Title>
       {field('title', 'Title')}
       <Choices
+        disabled={m.busy}
         values={['TRIAL', 'PLAYER_RECRUITMENT', 'REPRESENTATION', 'FOOTBALL_JOB']}
         value={form.type}
         onChange={(v) => setForm((f) => ({ ...f, type: v }))}
@@ -147,6 +153,7 @@ function OpportunityForm({ onSaved, me }: { onSaved: () => void; me: string }) {
       {field('expiresAt', 'Expiry in UTC (2026-12-31T23:59:00Z)')}
       <Title>Publish as</Title>
       <Action
+        disabled={m.busy}
         title={form.organisationId ? 'Publish individually' : '✓ Individual profile'}
         onPress={() => setForm((f) => ({ ...f, organisationId: '' }))}
       />
@@ -156,6 +163,7 @@ function OpportunityForm({ onSaved, me }: { onSaved: () => void; me: string }) {
         render={(org) =>
           org.ownerId === me ? (
             <Action
+              disabled={m.busy}
               title={`${form.organisationId === org.id ? '✓ ' : ''}${org.name}`}
               onPress={() => setForm((f) => ({ ...f, organisationId: org.id }))}
             />

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ExperienceLevel } from './types';
 export declare const NetworkHttpsSchema: z.ZodEffects<z.ZodString, string, string>;
 export declare const NetworkPaginationSchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodNumber>;
@@ -9,6 +10,20 @@ export declare const NetworkPaginationSchema: z.ZodObject<{
 }, {
     page?: number | undefined;
     limit?: number | undefined;
+}>;
+export declare const NetworkOpportunityQuerySchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodNumber>;
+    limit: z.ZodDefault<z.ZodNumber>;
+} & {
+    organisationId: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    page: number;
+    limit: number;
+    organisationId?: string | undefined;
+}, {
+    page?: number | undefined;
+    limit?: number | undefined;
+    organisationId?: string | undefined;
 }>;
 export declare const NetworkProfileSchema: z.ZodObject<{
     firstName: z.ZodOptional<z.ZodString>;
@@ -25,6 +40,7 @@ export declare const NetworkProfileSchema: z.ZodObject<{
     football: z.ZodOptional<z.ZodObject<{
         primaryPosition: z.ZodOptional<z.ZodString>;
         currentClub: z.ZodOptional<z.ZodString>;
+        experience: z.ZodOptional<z.ZodNullable<z.ZodNativeEnum<typeof ExperienceLevel>>>;
         previousClubs: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         achievements: z.ZodOptional<z.ZodArray<z.ZodObject<{
             title: z.ZodString;
@@ -40,6 +56,7 @@ export declare const NetworkProfileSchema: z.ZodObject<{
         primaryPosition?: string | undefined;
         currentClub?: string | undefined;
         previousClubs?: string[] | undefined;
+        experience?: ExperienceLevel | null | undefined;
         achievements?: {
             title: string;
             description?: string | undefined;
@@ -48,6 +65,7 @@ export declare const NetworkProfileSchema: z.ZodObject<{
         primaryPosition?: string | undefined;
         currentClub?: string | undefined;
         previousClubs?: string[] | undefined;
+        experience?: ExperienceLevel | null | undefined;
         achievements?: {
             title: string;
             description?: string | undefined;
@@ -69,6 +87,7 @@ export declare const NetworkProfileSchema: z.ZodObject<{
         primaryPosition?: string | undefined;
         currentClub?: string | undefined;
         previousClubs?: string[] | undefined;
+        experience?: ExperienceLevel | null | undefined;
         achievements?: {
             title: string;
             description?: string | undefined;
@@ -90,6 +109,7 @@ export declare const NetworkProfileSchema: z.ZodObject<{
         primaryPosition?: string | undefined;
         currentClub?: string | undefined;
         previousClubs?: string[] | undefined;
+        experience?: ExperienceLevel | null | undefined;
         achievements?: {
             title: string;
             description?: string | undefined;
@@ -179,6 +199,7 @@ export interface NetworkProfile {
     footballProfile: {
         primaryPosition: string | null;
         currentClub: string | null;
+        experience: ExperienceLevel | null;
         previousClubs: string[];
         achievements: {
             id: string;
