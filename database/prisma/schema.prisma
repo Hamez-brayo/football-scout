@@ -112,6 +112,7 @@ model User {
   networkMessages NetworkMessage[]
   networkPosts NetworkPost[]
   opportunities NetworkOpportunity[]
+  trainingAttempts TrainingAttempt[]
 
   // Relations
   physicalAttributes PhysicalAttributes?
@@ -215,6 +216,23 @@ model Media {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model TrainingAttempt {
+  id          String   @id @default(cuid())
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  drillId     String
+  videoUrl    String?
+  notes       String?
+  resultValue Float?
+  resultUnit  String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId, createdAt])
+  @@index([ownerId, isPublic, createdAt])
 }
 model NetworkOrganisation {
   id String @id @default(cuid())
