@@ -113,6 +113,7 @@ model User {
   networkPosts NetworkPost[]
   opportunities NetworkOpportunity[]
   trainingAttempts TrainingAttempt[]
+  playerSearchEnabled Boolean @default(false)
 
   // Relations
   physicalAttributes PhysicalAttributes?
@@ -124,6 +125,8 @@ model User {
 
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+
+  @@index([userType, playerSearchEnabled])
 }
 
 model PhysicalAttributes {

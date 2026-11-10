@@ -22,6 +22,7 @@ import { Organisations } from './network/Organisations';
 import { Opportunities } from './network/Opportunities';
 import { Messages } from './network/Messages';
 import { Training, PublicEvidence } from './training/Training';
+import { PlayerSearchConsent } from './network/PlayerSearchConsent';
 type Section = 'Training' | 'Feed' | 'People' | 'Organisations' | 'Opportunities' | 'Messages' | 'Profile';
 export default function HomeScreen() {
   const { logout } = useAuth();
@@ -176,6 +177,7 @@ export default function HomeScreen() {
                 <Card>
                   <ProfileView profile={me} />
                 </Card>
+                {me.userType === 'TALENT' && <PlayerSearchConsent key={me.id} />}
                 <ProfileEditor
                   profile={me}
                   onSaved={(p) => {

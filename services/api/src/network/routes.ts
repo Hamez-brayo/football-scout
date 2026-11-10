@@ -38,6 +38,16 @@ router.patch(
   handle((req, actor) => service.updateProfile(actor, NetworkProfileSchema.parse(req.body))),
 );
 router.get(
+  '/me/player-search',
+  handle((_req, actor) => service.playerSearchPreference(actor)),
+);
+router.patch(
+  '/me/player-search',
+  handle((req, actor) => service.setPlayerSearchPreference(
+    actor, z.object({ enabled: z.boolean() }).strict().parse(req.body).enabled,
+  )),
+);
+router.get(
   '/profiles',
   handle((req, actor) =>
     service.profiles(

@@ -117,6 +117,9 @@ const opportunitySelect = {
 export const visibleProfile: Prisma.UserWhereInput = {
   OR: [{ privacySettings: null }, { privacySettings: { profileVisibility: 'public' } }],
 };
+const eligibleForProfileSearch: Prisma.UserWhereInput = {
+  OR: [{ userType: null }, { userType: { not: 'TALENT' } }, { playerSearchEnabled: true }],
+};
 const missing = () => new AppError(404, 'NOT_FOUND', 'Resource not found');
 const forbidden = () => new AppError(403, 'FORBIDDEN', 'Insufficient permissions');
 
@@ -142,12 +145,28 @@ export class NetworkService {
     if (!result) throw missing();
     return result;
   }
+  async playerSearchPreference(actor: string) {
+    const user = await this.db.user.findUnique({
+      where: { id: actor }, select: { userType: true, playerSearchEnabled: true },
+    });
+    if (!user) throw missing();
+    if (user.userType !== 'TALENT') throw forbidden();
+    return { enabled: user.playerSearchEnabled };
+  }
+  async setPlayerSearchPreference(actor: string, enabled: boolean) {
+    const result = await this.db.user.updateMany({
+      where: { id: actor, userType: 'TALENT' }, data: { playerSearchEnabled: enabled },
+    });
+    if (!result.count) throw forbidden();
+    return { enabled };
+  }
   async profiles(actor: string, query: unknown, search?: string) {
     const pagination = this.pagination(query);
     const rows = await this.db.user.findMany({
       where: {
         AND: [
           visibleProfile,
+          eligibleForProfileSearch,
           ...(search
             ? [
                 {

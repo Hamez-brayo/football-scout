@@ -31,6 +31,7 @@ export class PlayerService {
     // Build where clause
     const where: any = {
       userType: 'TALENT',
+      playerSearchEnabled: true,
       registrationStatus: 'COMPLETE',
       AND: [visibleProfile],
     };
