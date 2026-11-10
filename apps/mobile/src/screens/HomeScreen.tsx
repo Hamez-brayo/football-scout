@@ -21,7 +21,8 @@ import { ProfileDetail, ProfileEditor, ProfileView } from './network/Profile';
 import { Organisations } from './network/Organisations';
 import { Opportunities } from './network/Opportunities';
 import { Messages } from './network/Messages';
-type Section = 'Feed' | 'People' | 'Organisations' | 'Opportunities' | 'Messages' | 'Profile';
+import { Training, PublicEvidence } from './training/Training';
+type Section = 'Training' | 'Feed' | 'People' | 'Organisations' | 'Opportunities' | 'Messages' | 'Profile';
 export default function HomeScreen() {
   const { logout } = useAuth();
   const { width } = useWindowDimensions();
@@ -135,7 +136,7 @@ export default function HomeScreen() {
                     ? 'Make your next move.'
                     : section === 'Messages'
                       ? 'Keep the conversation going.'
-                      : 'Your football story.'}
+                      : section === 'Training' ? 'Develop your game.' : 'Your football story.'}
           </Text>
           <Copy>
             {section === 'Feed'
@@ -160,9 +161,11 @@ export default function HomeScreen() {
           <>
             <Action title={`Back to ${section}`} onPress={() => setProfile(null)} />
             <ProfileDetail key={profile} id={profile} me={me} />
+            <PublicEvidence key={profile} id={profile} />
           </>
         ) : (
           <View key={section} style={{ gap: 12 }}>
+            {section === 'Training' && <Training />}
             {section === 'Feed' && <Feed me={me.id} onProfile={openProfile} />}
             {section === 'People' && <People onProfile={openProfile} />}
             {section === 'Organisations' && <Organisations me={me.id} onProfile={openProfile} />}
@@ -199,6 +202,7 @@ export default function HomeScreen() {
         {(
           [
             ['Feed', '◉', 'Feed'],
+            ['Training', '⚽', 'Training'],
             ['People', '◎', 'Network'],
             ['Opportunities', '◇', 'Opportunities'],
             ['Messages', '▤', 'Messages'],
