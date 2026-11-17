@@ -18,7 +18,8 @@ exact-SHA leases. This preserves unique work without consuming branch slots.
 
 - SCOUT/ARCHIVIST: completed independent read-only ancestry and documentation audit.
 - ORACLE: owns remote mutation, snapshot register, audit tool and final checks.
-- ARCHIVIST: implements the project agent profile and bounded governance docs.
+- ARCHIVIST: completed the read-only audit; made no profile/documentation edits.
+- ORACLE: implemented the profile and bounded governance documentation after takeover.
 - AUDITOR/SENTINEL: independently review source, authorization and recovery safety.
 
 Current execution status: **six retired branches archived and removed; existing retained tips unchanged**.
@@ -58,7 +59,9 @@ Completed checks so far:
 - Live audit after retirement, before governance push: passed, five of six slots.
 - Standalone TypeScript strict check: passed; rerun after final source changes.
 - Root environment index removal: passed; local file still present, values unread.
-- Independent final profile/documentation review: pending at this checkpoint.
+- Independent final AUDITOR/SENTINEL profile/documentation review: approved for PR
+  delivery, not merge approval; reviewer independently reran seven passing tests.
+  Independent remote checks were sandbox-blocked; remote outcomes above are ORACLE evidence.
 
 Application runtime suites/builds are not applicable: application source and
 manifests are unchanged. Governance tooling is tested separately. Offline refs
@@ -86,13 +89,12 @@ Codex configuration or model defaults were changed.
 Local TOML schema, all relative Markdown links, cross-branch pilot references,
 archive/inventory invariants and local environment-file preservation passed.
 Profile/documentation publication is through a separate governance PR to main;
-no permission to merge is inferred. Full independent final review remains pending
-at this delivery checkpoint; the PR stays draft until that review is recorded.
+no permission to merge is inferred. Independent final review completed with no blocking findings; the reviewer
+independently reran seven passing tests. PR delivery is supported, not merge approval.
 The earlier independent pre-execution review found no blocker in the preservation
 strategy subject to the remote checks, all of which were completed.
 
-Next owner: AUDITOR/SENTINEL for final source review, then the human for merge
-approval. Current application development remains on `feature/iphone-windows-pilot`.
+Next owner: the human for PR review and explicit merge approval. Current application development remains on `feature/iphone-windows-pilot`.
 Once the governance PR is merged and no PR depends on its head, retire that
 branch under the same policy to free a slot. No application services were changed;
 the existing local pilot API still returned HTTP 200 during closeout.
