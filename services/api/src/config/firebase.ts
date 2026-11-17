@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import dotenv from 'dotenv';
 import { logger } from './logger';
+import { localAuthEmulator } from './localPilot';
 
 dotenv.config();
 
@@ -12,10 +13,21 @@ const firebaseVars = [
 ];
 
 const hasFirebaseConfig = firebaseVars.every((key) => !!process.env[key]);
+const useLocalEmulator = localAuthEmulator();
 
 const initializeFirebase = () => {
+  if (useLocalEmulator) {
+    if (!admin.apps.length)
+      admin.initializeApp({ projectId: 'demo-vysion-pilot' });
+    logger.info(
+      'Local pilot: Firebase Auth emulator enabled; disposable accounts only',
+    );
+    return;
+  }
   if (!hasFirebaseConfig) {
-    logger.warn('⚠️  Firebase env vars missing — skipping Firebase initialization (local dev mode)');
+    logger.warn(
+      '⚠️  Firebase env vars missing — skipping Firebase initialization (local dev mode)',
+    );
     return;
   }
   if (!admin.apps.length) {
@@ -41,8 +53,14 @@ initializeFirebase();
 // When Firebase is unconfigured (local dev), exports are null at runtime but
 // typed correctly so routes compile. Calling them without config will throw
 // a descriptive error only for Firebase-dependent endpoints.
-export const auth = (hasFirebaseConfig ? admin.auth() : null) as admin.auth.Auth;
-export const storage = (hasFirebaseConfig ? admin.storage() : null) as admin.storage.Storage;
-export const firestore = (hasFirebaseConfig ? admin.firestore() : null) as admin.firestore.Firestore;
+export const auth = (
+  useLocalEmulator || hasFirebaseConfig ? admin.auth() : null
+) as admin.auth.Auth;
+export const storage = (
+  !useLocalEmulator && hasFirebaseConfig ? admin.storage() : null
+) as admin.storage.Storage;
+export const firestore = (
+  !useLocalEmulator && hasFirebaseConfig ? admin.firestore() : null
+) as admin.firestore.Firestore;
 
 export default admin;

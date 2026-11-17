@@ -1,6 +1,7 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import Constants from 'expo-constants';
+import { connectLocalPilot } from './localPilot';
 
 type ExpoExtra = {
   firebaseApiKey?: string;
@@ -33,6 +34,8 @@ if (getApps().length === 0) {
   app = getApps()[0];
   auth = getAuth(app);
 }
+
+connectLocalPilot(auth, extra, typeof __DEV__ !== 'undefined' && __DEV__);
 
 export { auth };
 export default app;

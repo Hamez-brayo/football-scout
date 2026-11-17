@@ -3,6 +3,7 @@ import * as FirebaseAuth from 'firebase/auth';
 import type { Auth, Persistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { connectLocalPilot } from './localPilot';
 
 type ExpoExtra = {
   firebaseApiKey?: string;
@@ -26,7 +27,7 @@ const firebaseConfig = {
 
 const app: FirebaseApp = getApps()[0] ?? initializeApp(firebaseConfig);
 
-// Firebase 10 exposes this helper only in its React Native runtime entry point.
+// Firebase exposes this helper only in its React Native runtime entry point.
 // Metro resolves that entry here; browser builds use firebase.ts instead.
 const { getReactNativePersistence } = FirebaseAuth as typeof FirebaseAuth & {
   getReactNativePersistence: (storage: typeof AsyncStorage) => Persistence;
@@ -48,6 +49,8 @@ try {
     throw error;
   auth = FirebaseAuth.getAuth(app);
 }
+
+connectLocalPilot(auth, extra, typeof __DEV__ !== 'undefined' && __DEV__);
 
 export { auth };
 export default app;

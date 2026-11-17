@@ -10,12 +10,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/images/icon.png',
   scheme: 'vysion',
   userInterfaceStyle: 'automatic',
-  splash: {
-    image: './assets/images/splash.png',
-    resizeMode: 'contain',
-    backgroundColor: '#1e40af',
-  },
-  assetBundlePatterns: ['**/*'],
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.vysion.analytics',
@@ -32,7 +26,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     output: 'single',
     favicon: './assets/favicon.png',
   },
-  plugins: [],
+  plugins: [
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/images/splash.png',
+        resizeMode: 'contain',
+        backgroundColor: '#1e40af',
+      },
+    ],
+  ],
   extra: {
     // Firebase — loaded from .env
     firebaseApiKey: process.env.FIREBASE_API_KEY,
@@ -43,6 +46,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     firebaseAppId: process.env.FIREBASE_APP_ID,
     // API
     apiUrl: process.env.API_URL,
+    ...(process.env.VYSION_LOCAL_PILOT === '1'
+      ? {
+          localPilot: true,
+          firebaseApiKey: 'demo-vysion-pilot-key',
+          firebaseAuthDomain: 'demo-vysion-pilot.firebaseapp.com',
+          firebaseProjectId: 'demo-vysion-pilot',
+          firebaseAppId: 'demo-vysion-pilot-app',
+          authEmulatorUrl: `http://${process.env.PILOT_HOST || '127.0.0.1'}:9099`,
+        }
+      : {}),
     // EAS
     eas: {
       projectId: process.env.EAS_PROJECT_ID || 'your-project-id',

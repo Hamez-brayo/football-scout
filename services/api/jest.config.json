@@ -1,7 +1,9 @@
 {
   "preset": "ts-jest",
   "testEnvironment": "node",
-  "testMatch": ["<rootDir>/tests/**/*.test.ts"],
+  "testMatch": [
+    "**/tests/**/*.test.ts"
+  ],
   "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@vysion/shared$": "<rootDir>/../../packages/shared/src"
@@ -12,7 +14,9 @@
       {
         "tsconfig": {
           "rootDir": ".",
-          "types": ["node"]
+          "types": [
+            "node"
+          ]
         }
       }
     ]
