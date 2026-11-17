@@ -10,7 +10,7 @@ const { NetworkService } = require('../src/network/service') as typeof import('.
 const { PlayerService } = require('../src/services/playerService') as typeof import('../src/services/playerService');
 const service = new NetworkService(mockDatabase as never);
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => { jest.resetAllMocks(); });
 
 describe('player search consent', () => {
   test('only the current player can read and change their own setting', async () => {

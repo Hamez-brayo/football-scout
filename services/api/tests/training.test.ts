@@ -14,7 +14,7 @@ const db = {
   user: { findUnique },
 } as unknown as PrismaClient;
 const service = new TrainingService(db);
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => { jest.resetAllMocks(); });
 
 describe('training evidence privacy', () => {
   test('creates private records for the authenticated owner and rejects spoofing', async () => {
