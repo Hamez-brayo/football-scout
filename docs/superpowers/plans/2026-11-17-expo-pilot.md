@@ -17,14 +17,14 @@ unimplemented product features and device acceptance separately from builds.
 
 - [x] Reproduce and repair test discovery/callback failures; run API/mobile tests
   and compilation; commit only focused tests/configuration and checkpoint.
-- [ ] Align `apps/mobile/package.json` and lockfile with SDK 58 using Expo's
+- [x] Align `apps/mobile/package.json` and lockfile with SDK 58 using Expo's
   bundled native module versions; run Expo dependency check and web/iOS export.
-- [ ] Add guarded local emulator configuration in mobile and API, with failing
+- [x] Add guarded local emulator configuration in mobile and API, with failing
   then passing regression tests for valid local setup and production rejection.
-- [ ] Add `scripts/pilot.mjs`, Firebase emulator config and launch instructions.
+- [x] Add `scripts/pilot.mjs`, Firebase emulator config and launch instructions.
   Validate destinations, keep `.pilot` data ignored, separate schema setup from
   ordinary startup. Provision only the approved cluster and database.
-- [ ] Build, launch and test real registration/login/profile/training persistence
+- [x] Build, launch and test real registration/login/profile/training persistence
   in a browser at desktop/mobile widths. Leave server running for iPhone scan.
-- [ ] Obtain independent review, fix blockers, record exact evidence and commit
+- [x] Obtain independent review, fix blockers, record exact evidence and commit
   a final checkpoint. No merge proposal while required checks remain incomplete.

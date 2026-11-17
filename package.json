@@ -54,10 +54,11 @@
   "devDependencies": {
     "concurrently": "^9.1.2",
     "esbuild": "0.25.4",
+    "firebase-tools": "15.36.0",
     "playwright": "1.62.1"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0",
     "npm": ">=10.0.0"
   }
 }
