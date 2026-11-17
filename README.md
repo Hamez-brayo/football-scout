@@ -91,6 +91,15 @@ npm run dev
 
 **📖 Detailed Guide**: See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
 
+## Working on this repository
+
+Start with [the documentation map](docs/README.md) and
+[repository governance / ARCHIVIST](docs/engineering/repository-governance.md).
+`main` remains the default integration branch. Current personal pilot work is on
+`feature/iphone-windows-pilot`; follow its linked launch guide in the document map.
+GitHub has a maximum of main plus five other branches. Historical work is
+recoverable from the verified archive tags in the branch inventory.
+
 ## 🤝 Contributing
 We welcome contributions! Please submit a pull request or reach out to discuss ideas.
 

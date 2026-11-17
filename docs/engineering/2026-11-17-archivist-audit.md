@@ -66,9 +66,33 @@ are labelled stale and cannot certify a live `--check` result. A benign Node
 module-type warning is expected when using native TypeScript from this CommonJS
 repository; no application module-mode change was introduced to suppress it.
 
-The final governance push adds the sixth permitted branch. Verify with
-`node scripts/archivist-audit.ts --check` after pushing; never add a seventh.
+The governance checkpoint `8191f05` was pushed, adding the sixth permitted branch.
+A fresh live `node scripts/archivist-audit.ts --check --json` passed with six heads
+and actual default main. All existing retained SHAs were unchanged. Never add a seventh.
 The cap is a documented workflow and on-demand audit, not a server-side GitHub
 protection rule or a claim of automatic scheduled enforcement.
 
 Resume with the inventory and [governance handbook](repository-governance.md).
+
+
+## ARCHIVIST integration checkpoint
+
+The delegated ARCHIVIST completed the independent read-only inventory. ORACLE
+consolidated the standalone project agent profile, governance handbook, session
+handoff and PR templates, documentation map and source-truth notes. This is an
+on-demand role/profile, not an autonomous scheduled GitHub service. No personal
+Codex configuration or model defaults were changed.
+
+Local TOML schema, all relative Markdown links, cross-branch pilot references,
+archive/inventory invariants and local environment-file preservation passed.
+Profile/documentation publication is through a separate governance PR to main;
+no permission to merge is inferred. Full independent final review remains pending
+at this delivery checkpoint; the PR stays draft until that review is recorded.
+The earlier independent pre-execution review found no blocker in the preservation
+strategy subject to the remote checks, all of which were completed.
+
+Next owner: AUDITOR/SENTINEL for final source review, then the human for merge
+approval. Current application development remains on `feature/iphone-windows-pilot`.
+Once the governance PR is merged and no PR depends on its head, retire that
+branch under the same policy to free a slot. No application services were changed;
+the existing local pilot API still returned HTTP 200 during closeout.
