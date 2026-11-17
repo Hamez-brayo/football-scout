@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "repository": "Hamez-brayo/football-scout",
+  "auditDate": "2026-11-17",
+  "defaultBranch": "main",
+  "maximumOtherBranches": 5,
+  "executionStatus": "six retired branches archived, remotely verified, and removed",
+  "retained": [
+    {
+      "name": "main",
+      "purpose": "Default integration branch; human-approved PR merges only",
+      "shaAtAudit": "02d5a8e1ff9f16f1d424cb5b9761958656d9ff16"
+    },
+    {
+      "name": "feature/iphone-windows-pilot",
+      "purpose": "Current application development and personal pilot tests",
+      "pr": 9,
+      "shaAtAudit": "e3b392bd1ff7af63800cea175d78c07c31c3e149"
+    },
+    {
+      "name": "feature/player-development-network",
+      "purpose": "Temporary dependency/base of PR 9",
+      "shaAtAudit": "cb804d9e2c67c87c8d7e658d3ac546b602cd1625"
+    },
+    {
+      "name": "codex/minimal-ci",
+      "purpose": "Pending CI proposal; check evidence before adopting",
+      "pr": 4,
+      "shaAtAudit": "854981f9be316a010c59218d9d527bbc297cefed"
+    },
+    {
+      "name": "feature/strategic-product-checkpoint",
+      "purpose": "Pending product-direction documentation",
+      "pr": 8,
+      "shaAtAudit": "1c1ee77d691d16877486700b105e12cc0455f6ba"
+    },
+    {
+      "name": "chore/archivist-governance",
+      "purpose": "ARCHIVIST profile, governance and cleanup record"
+    }
+  ],
+  "archived": [
+    {
+      "name": "chore/ai-engineering-governance",
+      "sourceSha": "410e9969ac1515594468d8cdcb018b84705604dc",
+      "tag": "archive/2026-11-17/chore/ai-engineering-governance",
+      "mergedIntoMain": true,
+      "pr": 3,
+      "reason": "Already merged into main",
+      "remoteTagVerified": true,
+      "sourceBranchRemoved": true
+    },
+    {
+      "name": "chore/repository-workflow-hardening",
+      "sourceSha": "2e042a84168dba84403ac18bc93f9d8b86818dd5",
+      "tag": "archive/2026-11-17/chore/repository-workflow-hardening",
+      "mergedIntoMain": false,
+      "pr": 2,
+      "reason": "Historical unmerged implementation preserved for selective recovery",
+      "remoteTagVerified": true,
+      "sourceBranchRemoved": true
+    },
+    {
+      "name": "feature/football-professional-network",
+      "sourceSha": "c4084f57606de706b91d3a7d5f8b2786c54687fa",
+      "tag": "archive/2026-11-17/feature/football-professional-network",
+      "mergedIntoMain": true,
+      "pr": 5,
+      "reason": "Already merged into main",
+      "remoteTagVerified": true,
+      "sourceBranchRemoved": true
+    },
+    {
+      "name": "feature/interactive-ui-foundation",
+      "sourceSha": "7797b53db1d9fbba99c4f4eabad8c531168fb365",
+      "tag": "archive/2026-11-17/feature/interactive-ui-foundation",
+      "mergedIntoMain": true,
+      "pr": 7,
+      "reason": "Already merged into main",
+      "remoteTagVerified": true,
+      "sourceBranchRemoved": true
+    },
+    {
+      "name": "fix/football-network-final-review-15a0193",
+      "sourceSha": "5ef70f17b7ece1d03d6b58c9e5565b78016c98df",
+      "tag": "archive/2026-11-17/fix/football-network-final-review-15a0193",
+      "mergedIntoMain": true,
+      "pr": 6,
+      "reason": "Already merged into main",
+      "remoteTagVerified": true,
+      "sourceBranchRemoved": true
+    },
+    {
+      "name": "remediation/auth-unification",
+      "sourceSha": "453c25e05fbbbfac5a025218e761176e1def1fd6",
+      "tag": "archive/2026-11-17/remediation/auth-unification",
+      "mergedIntoMain": false,
+      "pr": 1,
+      "reason": "Historical unmerged implementation preserved for selective recovery",
+      "remoteTagVerified": true,
+      "sourceBranchRemoved": true
+    }
+  ],
+  "archivedPullRequest": {
+    "number": 2,
+    "state": "closed",
+    "merged": false,
+    "reason": "Archived with verified recovery tag"
+  }
+}
