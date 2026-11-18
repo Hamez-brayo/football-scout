@@ -1,5 +1,11 @@
 # Vysion Analytics - Architecture Documentation
 
+> Current-source note (17 November 2026): several examples below are historical
+> or planned. The API is `services/api/src/server.ts`, mobile loads `App.tsx` and
+> `src/navigation/AppNavigator.tsx` with React Navigation (not Expo Router), and
+> the separate Next.js app is `apps/web`. Check current manifests for SDK/Node
+> versions and [the document map](docs/README.md) for active pilot evidence.
+
 ## 🏗️ System Architecture Overview
 
 Vysion Analytics is a mobile-first, cross-platform Football Talent Scouting Platform designed with modularity, scalability, and maintainability at its core.

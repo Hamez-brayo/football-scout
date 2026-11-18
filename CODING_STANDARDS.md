@@ -467,12 +467,20 @@ export const errorHandler = (
 
 ## 🌿 Git Workflow
 
-### Branch Naming
-- `main` - Production-ready code
-- `develop` - Development branch
-- `feature/player-profile` - New features
-- `bugfix/login-error` - Bug fixes
-- `hotfix/security-patch` - Urgent fixes
+### Branch workflow and naming
+
+- `main` is the default reviewed integration branch; deployment is separately authorized.
+- Keep at most five other remote branches, including temporary PR dependency branches.
+- Use focused `feature/<topic>`, `bugfix/<topic>`, `hotfix/<topic>` or `chore/<topic>` branches.
+- No permanent `develop` branch is needed for the current pilot/small-team workflow.
+- Base pilot fixes on the active pilot, not older main; document stacked PR dependencies.
+- Use PRs, independent review and explicit human merge approval. Never push directly to main.
+- Retire merged branches after dependency checks. Preserve authorized historical work in
+  verified annotated archive tags before deleting its branch, never by renaming it to another branch.
+- Leave small coherent commits and a durable session handoff; unverified checkpoints must say so.
+
+See the [governance handbook](docs/engineering/repository-governance.md) for the
+current branch map, live audit command, permissions and recovery procedure.
 
 ### Commit Messages
 Use conventional commits:
