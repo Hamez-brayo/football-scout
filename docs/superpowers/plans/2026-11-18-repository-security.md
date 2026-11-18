@@ -38,19 +38,19 @@ Files: `docs/engineering/repository-security.md`, dated health audit,
 `docs/templates/repository-health-review.md`, documentation map and handbook.
 
 - [x] Audit main lock and copied pilot lock with npm's advisory registry; preserve raw results in ignored scratch.
-- [ ] Consolidate live branch/PR/CI evidence and actual agent participation.
-- [ ] Check links/diff and obtain independent documentation review.
-- [ ] Commit/push the reviewed documentation to governance PR #10 without merging.
+- [x] Consolidate live branch/PR/CI evidence and actual agent participation.
+- [x] Check links/diff and obtain independent documentation review.
+- [x] Commit/push the reviewed documentation to governance PR #10; the owner subsequently explicitly approved its merge and archived branch retirement.
 
 ## Task 3: Focused dependency remediation
 
 Files: affected package manifests/locks, web source only when compatibility fixes
 are necessary, and a dated verification/handoff record.
 
-- [ ] Create a dedicated local feature branch after the governance checkpoint; do not publish a seventh head.
-- [ ] Verify patched Next.js 15 candidate and compatible auth/YAML patches against official registry/advisories.
-- [ ] Establish install/build baseline with safe isolated configuration; do not contact databases or production APIs.
-- [ ] Make bounded dependency changes and regenerate locks without forceful blanket updates.
+- [x] Create a dedicated local feature branch after the governance checkpoint; do not publish a seventh head.
+- [x] Verify patched Next.js 15 candidate and compatible auth/YAML patches against official registry/advisories.
+- [x] Establish install/build baseline with safe isolated configuration; do not contact databases or production APIs. Existing lint/discovery/lock failures are documented, not waived.
+- [x] Make initial bounded dependency changes and regenerate locks without forceful blanket updates. An unverified recovery checkpoint records remaining findings and lint compatibility work.
 - [ ] Re-audit, build web, run relevant shared/API/mobile checks and inspect regressions. Record all remaining findings.
 - [ ] Obtain independent AUDITOR/SENTINEL review; prepare focused PR delivery when a branch slot is available.
 - [ ] Record exact branch/HEAD, outcomes, pending device retest and next owner; request only the concrete human decision still required.

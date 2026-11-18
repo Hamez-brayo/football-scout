@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vysion web application
 
-## Getting Started
+This Next.js app is the `web` npm workspace. Run the following commands from the
+repository root. This checkpoint uses Node 24.14.0 and npm 11.9.0. The root
+manifest declares broader engine ranges; dependencies have additional minimums
+(for example, the existing React Native workspace requires Node >=20.19.4).
 
-First, run the development server:
+## Install and run
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm run dev --workspace=web
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). App Router source lives in
+`apps/web/src/app`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The root `package-lock.json` is the only lockfile for all npm workspaces. Do not
+create a separate lockfile in `apps/web` or install with a different package
+manager. For dependency updates, use npm from the repository root and review the
+root lockfile diff. Lifecycle scripts are disabled in the install command above;
+any additional setup, such as Prisma client generation, is a separate explicit
+step under the [repository governance rules](../../AGENTS.md).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Validate
 
-## Learn More
+```sh
+npm run lint --workspace=web
+npm run build --workspace=web
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+These commands cover the web app. The root build and type-check commands cover
+other workspaces and do not validate this app. There is no dedicated web test or
+type-check script. Existing source errors can still block lint and production
+builds; dependency updates do not establish runtime or deployment readiness.
