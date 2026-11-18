@@ -20,7 +20,8 @@ bypass list does not remove administrative control of repository settings.
 
 Required status checks are not configured yet. Main has no workflow directory;
 the draft [CI proposal #4](https://github.com/Hamez-brayo/football-scout/pull/4)
-has historical failed Actions checks. Integrate and run suitable CI first, then
+has historical jobs blocked by an account billing lock. GitHub labels their
+conclusions failure, but no hosted build commands ran. Integrate and run suitable CI first, then
 require its exact reported check names and verify the result. Do not select
 invented checks or describe local tests as GitHub merge gates.
 

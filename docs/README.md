@@ -9,6 +9,8 @@
 - [Engineering rules](../AGENTS.md) and [coding standards](../CODING_STANDARDS.md).
 - [Main protection and repository security reviews](engineering/repository-security.md)
   and the [health review template](templates/repository-health-review.md).
+- [18 November repository health assessment](engineering/2026-11-18-repository-health-audit.md):
+  security findings, CI blockers, evidence limits and assigned next actions.
 - [Architecture](../ARCHITECTURE.md): observe the current-source note before using
   historical examples. Actual entry points are mobile `App.tsx`/React Navigation
   and API `services/api/src/server.ts`.
