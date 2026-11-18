@@ -7,6 +7,8 @@
 - [Current branch inventory](engineering/branch-inventory.json) and
   [17 November cleanup evidence](engineering/2026-11-17-archivist-audit.md).
 - [Engineering rules](../AGENTS.md) and [coding standards](../CODING_STANDARDS.md).
+- [Main protection and repository security reviews](engineering/repository-security.md)
+  and the [health review template](templates/repository-health-review.md).
 - [Architecture](../ARCHITECTURE.md): observe the current-source note before using
   historical examples. Actual entry points are mobile `App.tsx`/React Navigation
   and API `services/api/src/server.ts`.

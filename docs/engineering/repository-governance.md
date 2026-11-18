@@ -71,8 +71,10 @@ machine-readable evidence. Network/format failures are blocked checks, not passe
 `--offline` is a labelled local tracking snapshot; combining it with `--check`
 is refused. The tool never fetches, edits, commits, pushes or deletes anything.
 
-The cap is enforced by workflow discipline and this on-demand check. No GitHub
-ruleset, automatic cleanup workflow or required status check was configured.
+The cap is enforced by workflow discipline and this on-demand check. The
+[main protection ruleset](repository-security.md) added on 18 November protects
+main; it does not enforce the branch count. No automatic cleanup workflow or
+required CI status check is configured by this governance change.
 If all slots are occupied, finish/archive authorized inactive work or use the
 appropriate existing task branch. Do not delete active work to create a slot.
 
