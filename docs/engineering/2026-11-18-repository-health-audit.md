@@ -136,6 +136,29 @@ ARCHIVIST. ORACLE's separately authorized settings work is reported above.
 | API/mobile tests, root build/type-check, web build | Current application state | Not run by ARCHIVIST | Read-only governance audit; no services/database operations. Existing PR validation is historical and branch-specific. |
 | Application runtime tests for this new Markdown report | Documentation-only addition | Skipped | No runtime code changed; review document facts, references and diff instead. |
 
+### ORACLE baseline follow-up before dependency edits
+
+- `npm ci --ignore-scripts --no-audit --no-fund`: passed in the isolated
+  governance worktree, installing 1,861 packages. No lifecycle scripts ran.
+- `npm run build --workspace=web`: initially blocked by sandbox denial of the
+  existing Google Fonts request. Network-enabled retry compiled with Next.js
+  15.2.4, then failed lint with 43 error lines and 13 warnings. Existing issues
+  include unused imports/variables, explicit `any`, unescaped JSX text, an empty
+  interface, and the global Prisma `var`. Type validation and a successful final
+  build are not established. No lint rule was disabled.
+- `npm ls next eslint --all`: failed with `ELSPROBLEMS`. Installed web Next.js
+  15.2.4, eslint-config-next 15.2.4 and ESLint 9.23.0 disagree with the manifest's
+  Next/config 14.0.4 and ESLint `^8`. A stale nested web lock is present, in
+  addition to the root workspace lock. Correcting dependency/lock consistency
+  is part of the focused security patch, not evidence the legacy app works.
+- Strict standalone TypeScript check of the governance audit tool and tests:
+  passed. GitGuardian's check on `89c05e8` also reported success; that check is
+  not a dependency, application build, or comprehensive secret-history audit.
+
+Raw baseline install/build logs remain under ignored
+`.archivist/security-audit/`. These are fresh ORACLE results, separate from
+ARCHIVIST's read-only inventory and the older PR #4 observations.
+
 Root `npm test` prints guidance and is not an application test suite. Root build
 covers shared/API; root type-check covers shared/API/mobile. Both exclude the web
 app. API/mobile committed tests now exist on the inspected governance tree, so
