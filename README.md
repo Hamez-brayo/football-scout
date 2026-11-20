@@ -14,9 +14,10 @@
 
 ## Product direction
 
-Vysion is a mobile professional network for football. Players, scouts, coaches,
-agents and club professionals can establish their identity, showcase their work,
-build relationships and find opportunities.
+Vysion is a player-first football ecosystem connecting training, measurable progress,
+talent discovery and professional relationships. The [product vision and roadmap](docs/product/vision.md)
+records the 10 November 2026 strategic checkpoint, the capabilities evidenced in source,
+and the conditions for introducing AI-assisted assessment.
 
 The football network implementation covers:
 
