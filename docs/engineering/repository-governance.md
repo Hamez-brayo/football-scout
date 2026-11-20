@@ -14,9 +14,11 @@ current small-team pilot workflow.
 | `feature/player-development-network` | Temporary base/dependency of PR #9; retain until its review chain is resolved |
 | `codex/minimal-ci` | Pending CI proposal, PR #4; inspect actual checks before adoption |
 | `feature/strategic-product-checkpoint` | Pending product-direction documentation, PR #8 |
-| `chore/archivist-governance` | Agent/profile, governance tooling and cleanup delivery |
+| `bugfix/web-dependency-security` | Dependency/tooling remediation and health follow-up, draft PR #11 |
 
-This table is a dated working map, not six permanent branches. Current pilot fixes
+This table was refreshed on 20 November 2026. Governance PR #10 is merged and its
+branch was archived and retired; see the [current health review](2026-11-20-repository-health-review.md).
+This is a working map, not six permanent branches. Current pilot fixes
 start from the pilot branch and target it through a focused PR; branching those
 fixes from older main would omit the pilot dependencies. New independent work
 starts from freshly checked origin/main. Preserve stacked PR bases until no open

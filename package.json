@@ -27,6 +27,7 @@
     "db:studio": "cd database && npm run studio",
     "db:seed": "cd database && npm run seed",
     "test": "echo \"Run tests in individual packages\"",
+    "test:dependency-compatibility": "node --test scripts/dependency-compatibility.test.ts",
     "clean": "Remove-Item -Recurse -Force node_modules, apps/*/node_modules, packages/*/node_modules, database/node_modules -ErrorAction SilentlyContinue",
     "fresh": "npm run clean; npm install"
   },
@@ -56,8 +57,11 @@
     "esbuild": "0.25.4",
     "playwright": "1.62.1"
   },
+  "overrides": {
+    "shell-quote@^1.8.0": "1.12.0"
+  },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=22.18.0",
     "npm": ">=10.0.0"
   }
 }

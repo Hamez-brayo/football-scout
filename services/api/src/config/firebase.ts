@@ -1,4 +1,7 @@
-import * as admin from 'firebase-admin';
+import { cert, getApp, getApps, initializeApp } from 'firebase-admin/app';
+import { getAuth, type Auth } from 'firebase-admin/auth';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import { getStorage, type Storage } from 'firebase-admin/storage';
 import dotenv from 'dotenv';
 import { logger } from './logger';
 
@@ -16,33 +19,32 @@ const hasFirebaseConfig = firebaseVars.every((key) => !!process.env[key]);
 const initializeFirebase = () => {
   if (!hasFirebaseConfig) {
     logger.warn('⚠️  Firebase env vars missing — skipping Firebase initialization (local dev mode)');
-    return;
+    return null;
   }
-  if (!admin.apps.length) {
-    try {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-      });
-      logger.info('✅ Firebase Admin initialized successfully');
-    } catch (error) {
-      logger.error('❌ Firebase Admin initialization failed:', error);
-      throw error;
+  try {
+    if (getApps().length) {
+      return getApp();
     }
+    const app = initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    });
+    logger.info('✅ Firebase Admin initialized successfully');
+    return app;
+  } catch (error) {
+    logger.error('❌ Firebase Admin initialization failed:', error);
+    throw error;
   }
 };
 
-initializeFirebase();
+const app = initializeFirebase();
 
-// When Firebase is unconfigured (local dev), exports are null at runtime but
-// typed correctly so routes compile. Calling them without config will throw
-// a descriptive error only for Firebase-dependent endpoints.
-export const auth = (hasFirebaseConfig ? admin.auth() : null) as admin.auth.Auth;
-export const storage = (hasFirebaseConfig ? admin.storage() : null) as admin.storage.Storage;
-export const firestore = (hasFirebaseConfig ? admin.firestore() : null) as admin.firestore.Firestore;
-
-export default admin;
+// Preserve the existing client types for consumers; unconfigured local mode
+// still exports null at runtime and cannot serve Firebase-dependent endpoints.
+export const auth = (app ? getAuth(app) : null) as Auth;
+export const storage = (app ? getStorage(app) : null) as Storage;
+export const firestore = (app ? getFirestore(app) : null) as Firestore;

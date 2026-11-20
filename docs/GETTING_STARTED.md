@@ -6,7 +6,7 @@ Welcome to Vysion Analytics! This guide will help you set up the development env
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** 20+ and npm
+- **Node.js** >=22.18.0 and npm >=10 (verified locally with Node 24.14.0/npm 11.9.0)
 - **PostgreSQL** 14+ (for database)
 - **Git** (for version control)
 - **Expo CLI** (for mobile development)
