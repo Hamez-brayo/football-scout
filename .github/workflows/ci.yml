@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: ${{ matrix.check }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: Shared and API build
+            command: npm run build
+          - check: Shared, API and mobile types
+            command: npm run type-check
+          - check: Web build
+            command: npm run build --workspace=web
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      # Generate types only; this does not connect to or modify a database.
+      - name: Generate Prisma client
+        run: npm run generate --workspace=@vysion/database
+      # Consumers resolve @vysion/shared through its dist declarations.
+      - name: Build shared package
+        run: npm run build:shared
+      - name: Run check
+        run: ${{ matrix.command }}
+      # Jest scripts exist, but no test files/configuration are committed yet.
+      # Root npm test is a guidance message, so it is not a CI quality gate.
