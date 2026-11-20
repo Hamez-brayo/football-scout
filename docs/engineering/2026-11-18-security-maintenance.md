@@ -1,5 +1,9 @@
 # Security maintenance checkpoint — 18 November 2026
 
+> Historical checkpoint: final 20 November remediation and check results are in
+> the [health review and handoff](2026-11-20-repository-health-review.md).
+> The unverified statuses below describe the earlier checkpoint, not the final PR.
+
 ## Scope and current owner
 
 ORACLE coordinates dependency remediation and repository quality assessment.

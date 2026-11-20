@@ -51,6 +51,6 @@ are necessary, and a dated verification/handoff record.
 - [x] Verify patched Next.js 15 candidate and compatible auth/YAML patches against official registry/advisories.
 - [x] Establish install/build baseline with safe isolated configuration; do not contact databases or production APIs. Existing lint/discovery/lock failures are documented, not waived.
 - [x] Make initial bounded dependency changes and regenerate locks without forceful blanket updates. An unverified recovery checkpoint records remaining findings and lint compatibility work.
-- [ ] Re-audit, build web, run relevant shared/API/mobile checks and inspect regressions. Record all remaining findings.
-- [ ] Obtain independent AUDITOR/SENTINEL review; prepare focused PR delivery when a branch slot is available.
-- [ ] Record exact branch/HEAD, outcomes, pending device retest and next owner; request only the concrete human decision still required.
+- [x] Re-audit, build web, run relevant shared/API/mobile checks and inspect regressions. Remaining vulnerability and legacy web failures are recorded in the 20 November handoff; no application merge is proposed.
+- [x] Obtain independent AUDITOR/SENTINEL review; prepare draft PR #11 within six-head capacity. Reviews permit a draft checkpoint, not an application merge.
+- [x] Record branch/HEAD, outcomes, pending device retest and next owner in the [20 November handoff](../../engineering/2026-11-20-repository-health-review.md). Required web/security/CI gates remain red, so no merge approval is requested.

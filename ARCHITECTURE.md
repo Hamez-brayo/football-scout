@@ -96,7 +96,7 @@ vysion-analytics/
 - **UI Components**: Custom component library
 
 ### Backend (Node.js + Express)
-- **Runtime**: Node.js 20+ with TypeScript
+- **Runtime**: Node.js >=22.18.0 with TypeScript (check the current root manifest)
 - **Framework**: Express.js
 - **ORM**: Prisma with PostgreSQL
 - **Authentication**: Firebase Admin SDK

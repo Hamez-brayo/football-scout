@@ -1,9 +1,9 @@
 # Vysion web application
 
 This Next.js app is the `web` npm workspace. Run the following commands from the
-repository root. This checkpoint uses Node 24.14.0 and npm 11.9.0. The root
-manifest declares broader engine ranges; dependencies have additional minimums
-(for example, the existing React Native workspace requires Node >=20.19.4).
+repository root. Use Node >=22.18.0 and npm >=10; this checkpoint was tested
+with Node 24.14.0 and npm 11.9.0. Firebase Admin 14 requires Node >=22 and the
+dependency contract tests use native TypeScript support enabled in Node 22.18.
 
 ## Install and run
 

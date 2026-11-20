@@ -19,8 +19,8 @@ and manifests: some architecture examples describe older paths or planned featur
 - `packages/shared`: `@vysion/shared` types, Zod schemas, constants, and utilities.
 - `database/prisma/schema.prisma`: PostgreSQL schema; migrations and seed are nearby.
 - Root `package.json`: npm workspaces for `apps/*`, `services/*`, `packages/*`,
-  and `database`; read current engine constraints. Main declares Node >=20/npm >=10;
-  the SDK 58 pilot branch has newer Node requirements.
+  and `database`; read current engine constraints. This security branch declares
+  Node >=22.18/npm >=10; the separate SDK 58 pilot has its own runtime constraints.
 
 ## Roles and handoffs
 

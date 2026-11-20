@@ -4,13 +4,15 @@
 
 - [Repository governance and ARCHIVIST](engineering/repository-governance.md): branch
   limit, active work map, agent invocation, cleanup/recovery and session checkpoints.
-- [Current branch inventory](engineering/branch-inventory.json) and
+- [17 November recovery inventory](engineering/branch-inventory.json) and
   [17 November cleanup evidence](engineering/2026-11-17-archivist-audit.md).
 - [Engineering rules](../AGENTS.md) and [coding standards](../CODING_STANDARDS.md).
 - [Main protection and repository security reviews](engineering/repository-security.md)
   and the [health review template](templates/repository-health-review.md).
 - [18 November repository health assessment](engineering/2026-11-18-repository-health-audit.md):
   security findings, CI blockers, evidence limits and assigned next actions.
+- [20 November health review and handoff](engineering/2026-11-20-repository-health-review.md):
+  current main protection, six-branch map, security patch checks and next priorities.
 - [Architecture](../ARCHITECTURE.md): observe the current-source note before using
   historical examples. Actual entry points are mobile `App.tsx`/React Navigation
   and API `services/api/src/server.ts`.
